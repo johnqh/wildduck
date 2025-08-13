@@ -12,6 +12,7 @@ name: release
 jobs:
     release_please:
         permissions:
+            issues: write
             contents: write
             pull-requests: write
             id-token: write
