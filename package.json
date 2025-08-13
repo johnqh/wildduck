@@ -20,8 +20,8 @@
         "mail server"
     ],
     "author": {
-        "name": "Andris Reinman",
-        "email": "andris@kreata.ee"
+        "name": "John Huang",
+        "email": "johnqh@0xfogmail.com"
     },
     "license": "EUPL-1.2",
     "homepage": "https://wildduck.email/",
@@ -110,7 +110,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/zone-eu/wildduck.git"
+        "url": "git://github.com/johnqh/wildduck.git"
     },
     "engines": {
         "node": ">=16.0.0"
