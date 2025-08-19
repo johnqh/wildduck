@@ -11,7 +11,8 @@
       "Bash(timeout 10s npm run printconf)",
       "Bash(NODE_CONFIG_ONLY=true node server.js)",
       "Bash(npm run runtest:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
