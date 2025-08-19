@@ -5,7 +5,13 @@
       "Bash(npm install:*)",
       "Bash(node:*)",
       "Bash(rm:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(sed:*)",
+      "Bash(cp:*)",
+      "Bash(timeout 10s npm run printconf)",
+      "Bash(NODE_CONFIG_ONLY=true node server.js)",
+      "Bash(npm run runtest:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

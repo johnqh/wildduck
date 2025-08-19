@@ -59,10 +59,12 @@ WildDuck is a distributed, stateless email server that stores all data in MongoD
 - `lib/pop3/`: POP3 protocol server and connection handling
 
 **Authentication & Security:**
-- `hashes.js`: Multi-algorithm password hashing (bcrypt, PBKDF2, legacy formats)
+- `blockchain-validator.js`: Validates blockchain addresses and names (EVM, Solana, ENS, SNS)
+- `signature-verifier.js`: Cryptographic signature verification for blockchain authentication
+- `name-resolver.js`: ENS/SNS name resolution to owner addresses
+- `hashes.js`: Multi-algorithm password hashing (bcrypt, PBKDF2, legacy formats) - legacy use only
 - `lib/api/2fa/`: Two-factor authentication (TOTP, WebAuthn, custom)
 - `roles.js`: Access control and permission management
-- `blockchain-validator.js`: Validates blockchain addresses for auto-account creation
 
 ### Configuration System
 
@@ -105,3 +107,66 @@ Uses `wild-config` library with TOML configuration files in `config/`:
 - Complex address lookup supporting aliases, wildcards, catch-alls
 - Auto-creation feature for blockchain addresses (EVM, Solana, ENS, SNS)
 - Case-insensitive domain handling with normalization
+
+## Blockchain Authentication System
+
+WildDuck implements a comprehensive blockchain-based authentication system that eliminates traditional passwords in favor of cryptographic signatures.
+
+### Supported Identity Types
+
+**Direct Addresses:**
+- **EVM Addresses**: Standard Ethereum-compatible addresses (0x...)
+- **Base64 EVM Addresses**: Base64-encoded EVM addresses for compact representation
+- **Solana Addresses**: Base58-encoded Solana public keys
+
+**Blockchain Names:**
+- **ENS Names**: Ethereum Name Service (.eth, .box domains)
+- **SNS Names**: Solana Name Service (.sol domains)
+
+### Authentication Flow
+
+1. **Username Validation**: System validates username format using `blockchain-validator.js`
+2. **Address Resolution**: For ENS/SNS names, resolves to owner address via `name-resolver.js`
+3. **Signature Verification**: Validates cryptographic signatures using `signature-verifier.js`
+4. **Account Creation**: Auto-creates accounts for valid blockchain identifiers (when `options.create` is enabled)
+
+### Authentication Methods
+
+**Sign-in with Ethereum (SIWE):**
+- Used for EVM addresses and ENS names
+- Signature must be from the address owner
+- Message format follows EIP-4361 standard
+- Verified using viem library
+
+**Sign-in with Solana:**
+- Used for Solana addresses and SNS names  
+- Ed25519 signature verification using tweetnacl
+- Signature must be from the address owner
+- Custom message format for Solana ecosystem
+
+### Security Features
+
+- **Nonce-based replay protection**: Prevents signature reuse attacks
+- **Owner verification**: ENS/SNS signatures must come from the domain owner
+- **Multi-chain support**: Supports both Ethereum and Solana ecosystems
+- **No stored passwords**: Eliminates password-related security risks
+
+### Integration Points
+
+**User Creation (`user-handler.js`):**
+- Modified `asyncResolveAddress()` validates blockchain usernames before auto-creation
+- Updated user schema stores blockchain authentication metadata
+- Removed password and temp fields from user accounts
+
+**Authentication (`user-handler.js`):**
+- Completely rewritten `asyncAuthenticate()` method
+- Supports signature-based authentication for all identity types
+- Maintains session management and rate limiting
+
+### Dependencies
+
+**Blockchain Libraries:**
+- `viem`: Ethereum interaction and signature verification
+- `@solana/web3.js`: Solana blockchain integration
+- `tweetnacl`: Ed25519 signature verification for Solana
+- `bs58`: Base58 encoding/decoding for Solana addresses

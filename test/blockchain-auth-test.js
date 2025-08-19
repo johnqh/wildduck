@@ -1,16 +1,10 @@
 'use strict';
 
 const {
-    isValidBlockchainIdentifier,
-    isEVMAddress,
-    isBase64EVMAddress,
-    isSolanaAddress,
-    isENSName,
-    isSNSName
+    isValidBlockchainIdentifier
 } = require('../lib/blockchain-validator');
 
 const {
-    verifySignature,
     verifyEVMSignature,
     verifySolanaSignature,
     createSIWEMessage,

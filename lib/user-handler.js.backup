@@ -24,7 +24,7 @@ const { encrypt, decrypt } = require('./encrypt');
 const { Fido2Lib } = require('fido2-lib');
 const { isValidBlockchainIdentifier } = require('./blockchain-validator');
 const { getAuthenticationAddress } = require('./name-resolver');
-const { verifySignature } = require('./signature-verifier');
+const { verifySignature, generateNonce, createSIWEMessage, createSolanaSignMessage } = require('./signature-verifier');
 
 const {
     publish,
@@ -882,6 +882,175 @@ class UserHandler {
             return [false, false];
         }
     }
+
+            if (!/^[a-z]{16}$/.test(password)) {
+                // does not look like an application specific password
+                meta.result = 'fail';
+                meta.source = 'master';
+                await this.logAuthEvent(userData._id, meta);
+
+                let err = new Error('Invalid Auth');
+                err.responseCode = 403;
+                err.code = 'AuthFail'; // will be returned as failed auth, not an error
+                throw err;
+            }
+
+            let selector = getStringSelector(password);
+
+            let asps;
+            try {
+                asps = await this.users
+                    .collection('asps')
+                    .find({
+                        user: userData._id
+                    })
+                    .maxTimeMS(consts.DB_MAX_TIME_USERS)
+                    .toArray();
+            } catch (err) {
+                err.responseCode = 500;
+                err.code = 'InternalDatabaseError';
+                throw err;
+            }
+
+            if (!asps || !asps.length) {
+                // user does not have app specific passwords set
+                meta.result = 'fail';
+                meta.source = 'master';
+                await this.logAuthEvent(userData._id, meta);
+
+                let err = new Error('Invalid Auth');
+                err.responseCode = 403;
+                err.code = 'AuthFail'; // will be returned as failed auth, not an error
+                throw err;
+            }
+
+            for (let asp of asps) {
+                if (asp.selector && asp.selector !== selector) {
+                    // no need to check, definitely a wrong one
+                    continue;
+                }
+
+                let success;
+                try {
+                    success = await hashes.compare(password, asp.password);
+                } catch (err) {
+                    err.responseCode = 500;
+                    err.code = 'HashError';
+                    throw err;
+                }
+
+                if (!success) {
+                    continue;
+                }
+
+                // Found a matching Application Specific Password
+
+                meta.source = 'asp';
+                meta.asp = asp._id;
+                // store ASP name in case the ASP gets deleted and for faster listing
+                meta.aname = asp.description;
+
+                passwordType = 'asp';
+                passwordId = asp._id.toString();
+
+                // Check if passwords scope matches required scope
+                if (!asp.scopes.includes('*') && !asp.scopes.includes(requiredScope)) {
+                    meta.result = 'fail';
+
+                    await this.logAuthEvent(userData._id, meta);
+
+                    let err = new Error('Authentication failed. Invalid scope');
+                    err.responseCode = 403;
+                    err.code = 'InvalidAuthScope';
+                    err.response = 'NO'; // imap response code
+                    throw err;
+                }
+
+                // Everything checked out
+
+                meta.result = 'success';
+
+                let authEvent;
+                try {
+                    authEvent = await this.logAuthEvent(userData._id, meta);
+                } catch (err) {
+                    // don't really care
+                }
+
+                let aspUpdates = {
+                    used: now,
+                    authEvent,
+                    authIp: meta.ip
+                };
+
+                if (asp.ttl) {
+                    // extend temporary password ttl every time it is used
+                    aspUpdates.expires = new Date(now.getTime() + asp.ttl * 1000);
+                }
+
+                try {
+                    await this.users.collection('asps').updateOne(
+                        {
+                            _id: asp._id
+                        },
+                        {
+                            $set: aspUpdates
+                        },
+                        {
+                            maxTimeMS: consts.DB_MAX_TIME_USERS
+                        }
+                    );
+                } catch (err) {
+                    // ignore
+                }
+
+                return await authSuccess({
+                    user: userData._id,
+                    username: userData.username,
+                    scope: requiredScope,
+                    asp: asp._id.toString(),
+                    require2fa: false // application scope never requires 2FA
+                });
+            }
+
+            // no suitable password found
+            meta.result = 'fail';
+            meta.source = 'master';
+            await this.logAuthEvent(userData._id, meta);
+
+            let err = new Error('Invalid Auth');
+            err.responseCode = 403;
+            err.code = 'AuthFail'; // will be returned as failed auth, not an error
+            throw err;
+        } catch (err) {
+            this.loggelf({
+                short_message: '[AUTHFAIL] ' + username,
+                full_message: err.stack,
+                _error: err.message || 'Authentication failed',
+                _code: err.code,
+                _auth_result: 'fail',
+                _username: username,
+                _domain: userDomain,
+                _user: userData._id,
+                _password_type: passwordType,
+                _password_id: passwordId,
+                _scope: requiredScope,
+                _ip: meta.ip,
+                _sess: meta.sess
+            });
+
+            // increment rate limit counter on failure
+            await this.rateLimit(userData._id, meta, 1);
+
+            if (err.code !== 'AuthFail') {
+                err.user = userData._id;
+                throw err;
+            }
+
+            return [false, userData._id];
+        }
+    }
+
     async preAuth(username, requiredScope) {
         requiredScope = requiredScope || 'master';
 
@@ -1195,7 +1364,7 @@ class UserHandler {
 
             return result.value;
         } catch (error) {
-            log.error('DB', 'Activate Fail user=%s error=%s', userId, error);
+            log.error('DB', 'Activate Fail user=%s error=%s', user, error);
             error.responseCode = 500;
             throw error;
         }
@@ -1235,7 +1404,7 @@ class UserHandler {
         if (existingUserData && existingUserData.temp) {
             const userData = await this.activateTemp(existingUserData._id, data);
             try {
-                await this.logAuthEvent(userData._id, {
+                await this.logAuthEvent(user, {
                     action: 'account activated',
                     result: 'success',
                     sess: data.sess,
