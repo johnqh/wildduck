@@ -91,10 +91,7 @@ const serverOptions = {
                     return callback();
                 }
 
-                if (result.scope === 'master' && result.require2fa) {
-                    // master password not allowed if 2fa is enabled!
-                    return callback();
-                }
+                // Blockchain authentication doesn't require 2FA checks
 
                 callback(null, {
                     user: {
