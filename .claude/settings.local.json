@@ -23,7 +23,9 @@
       "Bash(git log:*)",
       "Bash(curl:*)",
       "Bash(gh run list:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(grunt eslint:*)",
+      "Bash(NODE_ENV=test npm run test:proto)"
     ],
     "deny": [],
     "ask": []
