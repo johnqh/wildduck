@@ -15,7 +15,11 @@
       "Bash(find:*)",
       "Bash(npm test:*)",
       "Bash(npx mocha test:*)",
-      "Bash(./node_modules/.bin/mocha:*)"
+      "Bash(./node_modules/.bin/mocha:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/verify-deployment.sh:*)",
+      "Bash(npm view:*)",
+      "Bash(docker pull:*)"
     ],
     "deny": [],
     "ask": []
