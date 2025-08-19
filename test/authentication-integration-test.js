@@ -362,7 +362,7 @@ describe('Authentication Integration Tests', function () {
 
     describe('Protocol Interface Compatibility', function () {
         
-        it('should handle standard SASL PLAIN format', function () {
+        it('should handle standard SASL PLAIN format', async function () {
             const testUser = await BlockchainTestHelpers.generateEVMTestUser();
             const saslCredentials = BlockchainTestHelpers.createSASLPlainCredentials(
                 testUser.username, 
@@ -379,7 +379,7 @@ describe('Authentication Integration Tests', function () {
             expect(parts[2]).to.equal(testUser.signature); // password field contains signature
         });
 
-        it('should handle enhanced blockchain SASL format', function () {
+        it('should handle enhanced blockchain SASL format', async function () {
             const testUser = await BlockchainTestHelpers.generateEVMTestUser();
             const enhancedCredentials = BlockchainTestHelpers.createEnhancedSASLCredentials(
                 testUser.username,
@@ -400,7 +400,7 @@ describe('Authentication Integration Tests', function () {
             expect(parts[4]).to.equal(testUser.address);
         });
 
-        it('should handle JSON format in password field', function () {
+        it('should handle JSON format in password field', async function () {
             const testUser = await BlockchainTestHelpers.generateEVMTestUser();
             const jsonPassword = JSON.stringify({
                 signature: testUser.signature,

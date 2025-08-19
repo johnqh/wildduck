@@ -42,6 +42,7 @@
         "mailparser": "3.7.1",
         "mocha": "10.8.2",
         "request": "2.88.2",
+        "sinon": "^21.0.0",
         "supertest": "7.0.0"
     },
     "dependencies": {
