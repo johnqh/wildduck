@@ -19,7 +19,11 @@
       "Bash(chmod:*)",
       "Bash(./scripts/verify-deployment.sh:*)",
       "Bash(npm view:*)",
-      "Bash(docker pull:*)"
+      "Bash(docker pull:*)",
+      "Bash(git log:*)",
+      "Bash(curl:*)",
+      "Bash(gh run list:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []
