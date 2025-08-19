@@ -75,9 +75,9 @@ function authenticate(connection, token, requireClientToken, callback) {
         signerAddress = (data[4] || '').toString().trim() || undefined;
         clientToken = requireClientToken ? ((data[5] || '').toString().trim() || false) : false;
     } else {
-        // Legacy password auth (kept for compatibility but discouraged)
-        signature = (data[2] || '').toString().trim(); // password field used as signature for backward compatibility
-        message = ''; // empty message for legacy auth
+        // Standard RFC format - third field contains signature
+        signature = (data[2] || '').toString().trim(); // password field contains signature per RFC
+        message = ''; // empty message for standard auth
         signerAddress = undefined;
         clientToken = requireClientToken ? ((data[3] || '').toString().trim() || false) : false;
     }

@@ -58,9 +58,9 @@ module.exports = {
             message = authData.message; 
             signerAddress = authData.signerAddress;
         } catch (e) {
-            // Fall back to treating the parameter as a legacy password/signature
+            // Fall back to treating the parameter as a blockchain signature
             signature = signatureParam;
-            message = ''; // Empty message for legacy compatibility
+            message = ''; // Empty message for compatibility
             signerAddress = undefined;
         }
 

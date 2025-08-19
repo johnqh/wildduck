@@ -12,7 +12,10 @@
       "Bash(NODE_CONFIG_ONLY=true node server.js)",
       "Bash(npm run runtest:*)",
       "Bash(npm run:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm test:*)",
+      "Bash(npx mocha test:*)",
+      "Bash(./node_modules/.bin/mocha:*)"
     ],
     "deny": [],
     "ask": []
