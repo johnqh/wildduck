@@ -17,20 +17,6 @@ processes = 1
 [dbs]
 # @include "dbs.toml"
 
-[totp]
-# If enabled then encrypt TOTP seed tokens with the secret password. By default TOTP seeds
-# are not encrypted and stored as cleartext. Once set up do not change these values,
-# otherwise decrypting totp seeds is going to fail
-#secret="a secret cat"
-#cipher="aes192" # only for decrypting legacy values (if there are any)
-
-[webauthn]
-rpId = "example.com"             # origin domain
-rpName = "WildDuck Email Server"
-
-challengeSize = 64
-attestation = "none"
-authenticatorUserVerification = "discouraged"
 
 [attachments]
 # @include "attachments.toml"

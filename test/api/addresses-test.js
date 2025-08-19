@@ -24,7 +24,7 @@ describe('API Users', function () {
             .post('/users')
             .send({
                 username: 'addressuser',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 address: 'addressuser.addrtest@example.com',
                 name: 'address user'
             })
@@ -38,7 +38,7 @@ describe('API Users', function () {
             .post('/users')
             .send({
                 username: 'addressuser2',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 address: 'addressuser2.addrtest@example.com',
                 name: 'address user 2'
             })
@@ -122,7 +122,7 @@ describe('API Users', function () {
             .post('/authenticate')
             .send({
                 username: 'addressuser',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 token: true
             })
             .expect(200);

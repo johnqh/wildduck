@@ -43,7 +43,7 @@ describe('Send multiple messages', function () {
             {
                 json: {
                     username: 'user1',
-                    password: 'secretpass',
+                    blockchainAddress: '0x1234567890123456789012345678901234567890',
                     address: 'user1@example.com',
                     name: 'user1'
                 }
@@ -57,7 +57,7 @@ describe('Send multiple messages', function () {
                     {
                         json: {
                             username: 'user2',
-                            password: 'secretpass',
+                            blockchainAddress: '0x1234567890123456789012345678901234567890',
                             address: 'user2@example.com',
                             name: 'user2',
                             pubKey: user2PubKey,
@@ -74,7 +74,7 @@ describe('Send multiple messages', function () {
                             {
                                 json: {
                                     username: 'user3',
-                                    password: 'secretpass',
+                                    blockchainAddress: '0x1234567890123456789012345678901234567890',
                                     address: 'user3@example.com',
                                     name: 'user3',
                                     pubKey: user3PubKey,
@@ -91,7 +91,7 @@ describe('Send multiple messages', function () {
                                     {
                                         json: {
                                             username: 'user4',
-                                            password: 'secretpass',
+                                            blockchainAddress: '0x1234567890123456789012345678901234567890',
                                             address: 'user4@example.com',
                                             name: 'user4',
                                             pubKey: user2PubKey,
@@ -108,7 +108,7 @@ describe('Send multiple messages', function () {
                                             {
                                                 json: {
                                                     username: 'user5',
-                                                    password: 'secretpass',
+                                                    blockchainAddress: '0x1234567890123456789012345678901234567890',
                                                     address: 'user5@example.com',
                                                     name: 'user5'
                                                 }

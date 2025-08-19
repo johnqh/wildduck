@@ -14,7 +14,7 @@ const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
 const ObjectId = require('mongodb').ObjectId;
 
 describe('API tests', function () {
-    let userId, asp, address, inbox;
+    let userId, address, inbox;
 
     this.timeout(10000); // eslint-disable-line no-invalid-this
 
@@ -24,9 +24,10 @@ describe('API tests', function () {
             .post('/users')
             .send({
                 username: 'testuser',
-                password: 'secretpass',
                 address: 'testuser@example.com',
-                name: 'test user'
+                name: 'test user',
+                blockchainAddress: '0x742d35cc6643c500c4c1234567890abcdef123456',
+                publicKey: '0x04123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
             })
             .expect(200);
         expect(response.body.success).to.be.true;
@@ -89,7 +90,9 @@ describe('API tests', function () {
                 .post(`/authenticate`)
                 .send({
                     username: 'testuser@example.com',
-                    password: 'secretpass',
+                    signature: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12',
+                    message: 'Authentication request for testuser@example.com at 2023-01-01T00:00:00Z',
+                    blockchainAddress: '0x742d35cc6643c500c4c1234567890abcdef123456',
                     scope: 'master'
                 })
                 .expect(200);
@@ -101,7 +104,9 @@ describe('API tests', function () {
                 .post(`/authenticate`)
                 .send({
                     username: 'testuser@example.com',
-                    password: 'invalid',
+                    signature: '0xinvalidsignature',
+                    message: 'Invalid authentication request',
+                    blockchainAddress: '0x742d35cc6643c500c4c1234567890abcdef123456',
                     scope: 'master'
                 })
                 .expect(403);
@@ -114,7 +119,9 @@ describe('API tests', function () {
                 .post(`/authenticate`)
                 .send({
                     username: 'testuser@jõgeva.öö',
-                    password: 'secretpass',
+                    signature: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12',
+                    message: 'Authentication request for testuser@jõgeva.öö at 2023-01-01T00:00:00Z',
+                    blockchainAddress: '0x742d35cc6643c500c4c1234567890abcdef123456',
                     scope: 'master'
                 })
                 .expect(200);
@@ -126,7 +133,9 @@ describe('API tests', function () {
                 .post(`/authenticate`)
                 .send({
                     username: 'testuser@jõgeva.öö',
-                    password: 'invalid',
+                    signature: '0xinvalidsignature',
+                    message: 'Invalid authentication request',
+                    blockchainAddress: '0x742d35cc6643c500c4c1234567890abcdef123456',
                     scope: 'master'
                 })
                 .expect(403);
@@ -156,91 +165,6 @@ describe('API tests', function () {
                 })
                 .expect(200);
             expect(response.body.success).to.be.true;
-        });
-    });
-
-    describe('asp', () => {
-        it('should POST /users/:user/asps expect success / to generate ASP', async () => {
-            const response = await server
-                .post(`/users/${userId}/asps`)
-                .send({
-                    description: 'test',
-                    scopes: ['imap', 'smtp'],
-                    generateMobileconfig: true
-                })
-                .expect(200);
-            expect(response.body.error).to.not.exist;
-            expect(response.body.success).to.be.true;
-            expect(response.body.password).to.exist;
-            expect(response.body.mobileconfig).to.exist;
-
-            asp = response.body.password;
-        });
-
-        it('should POST /users/:user/asps expect success / to generate ASP with custom password', async () => {
-            const response = await server
-                .post(`/users/${userId}/asps`)
-                .send({
-                    description: 'test',
-                    scopes: ['imap', 'smtp'],
-                    generateMobileconfig: true,
-                    password: 'a'.repeat(16)
-                })
-                .expect(200);
-            expect(response.body.error).to.not.exist;
-            expect(response.body.success).to.be.true;
-            expect(response.body.password).to.equal('a'.repeat(16));
-            expect(response.body.mobileconfig).to.exist;
-        });
-
-        it('should POST /users/:user/asps expect failure / to generate ASP with custom password', async () => {
-            const response = await server
-                .post(`/users/${userId}/asps`)
-                .send({
-                    description: 'test',
-                    scopes: ['imap', 'smtp'],
-                    generateMobileconfig: true,
-                    password: '0'.repeat(16)
-                })
-                .expect(400);
-            expect(response.body.error).to.exist;
-        });
-
-        it('should POST /authenticate expect success / using ASP and allowed scope', async () => {
-            const response = await server
-                .post(`/authenticate`)
-                .send({
-                    username: 'testuser@jõgeva.öö',
-                    password: asp,
-                    scope: 'imap'
-                })
-                .expect(200);
-            expect(response.body.success).to.be.true;
-        });
-
-        it('should POST /authenticate expect success / using ASP and allowed scope with custom password', async () => {
-            const response = await server
-                .post(`/authenticate`)
-                .send({
-                    username: 'testuser@jõgeva.öö',
-                    password: 'a'.repeat(16),
-                    scope: 'imap'
-                })
-                .expect(200);
-            expect(response.body.success).to.be.true;
-        });
-
-        it('should POST /authenticate expect failure / using ASP and master scope', async () => {
-            const response = await server
-                .post(`/authenticate`)
-                .send({
-                    username: 'testuser@jõgeva.öö',
-                    password: asp,
-                    scope: 'master'
-                })
-                .expect(403);
-            expect(response.body.error).to.exist;
-            expect(response.body.success).to.not.be.true;
         });
     });
 

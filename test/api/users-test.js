@@ -25,8 +25,8 @@ describe('API Users', function () {
                 username: 'myuser2',
                 name: 'John Smith',
                 address: 'john@example.com',
-                password: 'secretvalue',
-                hashedPassword: false,
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
+                ensName: 'john.eth',
                 emptyAddress: false,
                 language: 'et',
                 retention: 0,
@@ -35,7 +35,6 @@ describe('API Users', function () {
                 quota: 1073741824,
                 recipients: 2000,
                 forwards: 2000,
-                requirePasswordChange: false,
                 imapMaxUpload: 5368709120,
                 imapMaxDownload: 21474836480,
                 pop3MaxDownload: 21474836480,
@@ -71,36 +70,19 @@ describe('API Users', function () {
         user = response.body.id;
     });
 
-    it('should POST /authenticate expect success', async () => {
-        const authResponse = await server
-            .post('/authenticate')
+    it('should POST /users expect success / with blockchain authentication', async () => {
+        const response = await server
+            .post('/users')
             .send({
-                username: 'myuser2',
-                password: 'secretvalue'
+                username: 'blockchainuser',
+                name: 'Jane Doe',
+                blockchainAddress: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',
+                ensName: 'jane.eth'
             })
             .expect(200);
 
-        expect(authResponse.body.success).to.be.true;
-        expect(authResponse.body).to.deep.equal({
-            success: true,
-            address: 'john@example.com',
-            id: user,
-            username: 'myuser2',
-            scope: 'master',
-            require2fa: false,
-            requirePasswordChange: false
-        });
-    });
-
-    it('should POST /authenticate expect failure', async () => {
-        const authResponse = await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2',
-                password: 'invalidpass'
-            })
-            .expect(403);
-        expect(authResponse.body.code).to.equal('AuthFailed');
+        expect(response.body.success).to.be.true;
+        user2 = response.body.id;
     });
 
     it('should POST /users expect failure / invalid username', async () => {
@@ -109,62 +91,11 @@ describe('API Users', function () {
             .send({
                 username: 'ömyuser2',
                 name: 'John Smith',
-                password: 'secretvalue'
+                blockchainAddress: '0x1234567890123456789012345678901234567890'
             })
             .expect(400);
 
         expect(response.body.details.username).to.exist;
-    });
-
-    it('should POST /authenticate expect success / request a token', async () => {
-        const authResponse = await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2',
-                password: 'secretvalue',
-                token: true
-            })
-            .expect(200);
-
-        expect(authResponse.body.success).to.be.true;
-        expect(authResponse.body.token).to.exist;
-
-        token = authResponse.body.token;
-    });
-
-    it('should POST /users expect success / with hashed password', async () => {
-        const response = await server
-            .post('/users')
-            .send({
-                username: 'myuser2hash',
-                name: 'John Smith',
-                // password: 'test',
-                password: '$argon2i$v=19$m=16,t=2,p=1$SFpGczI1bWV1RVRpYjNYaw$EBE/WnOGeWint3eQ+SQ7Sg',
-                hashedPassword: true
-            })
-            .expect(200);
-
-        expect(response.body.success).to.be.true;
-        user2 = response.body.id;
-
-        const authResponse = await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2hash',
-                password: 'test'
-            })
-            .expect(200);
-
-        expect(authResponse.body.success).to.be.true;
-        expect(authResponse.body).to.deep.equal({
-            success: true,
-            address: `myuser2hash@${os.hostname().toLowerCase()}`,
-            id: user2,
-            username: 'myuser2hash',
-            scope: 'master',
-            require2fa: false,
-            requirePasswordChange: false
-        });
     });
 
     it('should GET /users/resolve/{username} expect success', async () => {
@@ -194,33 +125,6 @@ describe('API Users', function () {
         expect(response.body.id).to.equal(user);
     });
 
-    it('should GET /users/{user} expect success / using a token', async () => {
-        let response = await server.get(`/users/${user}?accessToken=${token}`).expect(200);
-        expect(response.body.success).to.be.true;
-        expect(response.body.id).to.equal(user);
-    });
-
-    it('should GET /users/:user expect success / try /users/me using a token', async () => {
-        let response = await server.get(`/users/me?accessToken=${token}`).expect(200);
-        expect(response.body.success).to.be.true;
-        expect(response.body.id).to.equal(user);
-    });
-
-    it('should GET /users/{user} expect failure / using a token and fail against other user', async () => {
-        let response = await server.get(`/users/${user2}?accessToken=${token}`);
-        expect(response.body.code).to.equal('MissingPrivileges');
-    });
-
-    it('should DELETE /authenticate expect success', async () => {
-        let response = await server.delete(`/authenticate?accessToken=${token}`).expect(200);
-        expect(response.body.success).to.be.true;
-    });
-
-    it('should DELETE /authenticate expect failure / with false', async () => {
-        // token is not valid anymore
-        await server.delete(`/authenticate?accessToken=${token}`).expect(403);
-    });
-
     it('should PUT /users/{user} expect success', async () => {
         const name = 'John Smith 2';
 
@@ -239,64 +143,6 @@ describe('API Users', function () {
         expect(getResponse.body.success).to.be.true;
         expect(getResponse.body.id).to.equal(user);
         expect(getResponse.body.name).to.equal(name);
-    });
-
-    it('should PUT /users/{user} expect success / and renew a token', async () => {
-        const authResponse1 = await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2',
-                password: 'secretvalue',
-                token: true
-            })
-            .expect(200);
-
-        expect(authResponse1.body.success).to.be.true;
-        expect(authResponse1.body.token).to.exist;
-
-        let token1 = authResponse1.body.token;
-
-        const authResponse2 = await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2',
-                password: 'secretvalue',
-                token: true
-            })
-            .expect(200);
-
-        expect(authResponse2.body.success).to.be.true;
-        expect(authResponse2.body.token).to.exist;
-
-        let token2 = authResponse2.body.token;
-
-        // try out token 1
-        let getResponse1 = await server.get(`/users/me?accessToken=${token1}`).expect(200);
-        expect(getResponse1.body.success).to.be.true;
-        expect(getResponse1.body.id).to.equal(user);
-
-        // try out token 2
-        let getResponse2 = await server.get(`/users/me?accessToken=${token2}`).expect(200);
-        expect(getResponse2.body.success).to.be.true;
-        expect(getResponse2.body.id).to.equal(user);
-
-        // update password using a token
-        const response = await server
-            .put(`/users/me?accessToken=${token1}`)
-            .send({
-                password: 'secretvalue'
-            })
-            .expect(200);
-
-        expect(response.body.success).to.be.true;
-
-        // try out token 1, should have been renewed
-        let getResponse3 = await server.get(`/users/me?accessToken=${token1}`).expect(200);
-        expect(getResponse3.body.success).to.be.true;
-        expect(getResponse3.body.id).to.equal(user);
-
-        // try out token 2, should fail as it was not renewed
-        await server.get(`/users/me?accessToken=${token2}`).expect(403);
     });
 
     it('should PUT /users/{user}/logout expect success', async () => {
@@ -319,81 +165,13 @@ describe('API Users', function () {
         expect(response.body.task).to.exist;
     });
 
-    it('should POST /users/{user}/password/reset expect success', async () => {
-        const response = await server.post(`/users/${user}/password/reset`).send({}).expect(200);
-        expect(response.body.success).to.be.true;
-
-        expect(response.body.password).to.exist;
-
-        const authResponse = await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2',
-                password: response.body.password
-            })
-            .expect(200);
-
-        expect(authResponse.body.success).to.be.true;
-        expect(authResponse.body).to.deep.equal({
-            success: true,
-            address: 'john@example.com',
-            id: user,
-            username: 'myuser2',
-            scope: 'master',
-            require2fa: false,
-            // using a temporary password requires a password change
-            requirePasswordChange: true
-        });
-    });
-
-    it('should POST /users/{user}/password/reset expect success / using a future date', async () => {
-        const response = await server
-            .post(`/users/${user}/password/reset`)
-            .send({
-                validAfter: new Date(Date.now() + 1 * 3600 * 1000).toISOString()
-            })
-            .expect(200);
-        expect(response.body.success).to.be.true;
-
-        expect(response.body.password).to.exist;
-
-        // password not yet valid
-        await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2',
-                password: response.body.password
-            })
-            .expect(403);
-    });
-
     it('should DELETE /users/{user} expect success', async () => {
-        // first set the user password
-        const passwordUpdateResponse = await server
-            .put(`/users/${user}`)
-            .send({
-                password: 'secretvalue',
-                ip: '1.2.3.5'
-            })
-            .expect(200);
-
-        expect(passwordUpdateResponse.body.success).to.be.true;
-
         // Delete user
         const response = await server.delete(`/users/${user}?deleteAfter=${encodeURIComponent(new Date(Date.now() + 3600 * 1000).toISOString())}`).expect(200);
         expect(response.body.success).to.be.true;
 
         expect(response.body.addresses.deleted).to.gte(1);
         expect(response.body.task).to.exist;
-
-        // Try to authenticate, should fail
-        await server
-            .post('/authenticate')
-            .send({
-                username: 'myuser2',
-                password: 'secretvalue'
-            })
-            .expect(403);
     });
 
     it('should GET /users/{user}/restore expect success', async () => {
@@ -412,37 +190,19 @@ describe('API Users', function () {
         expect(response.body.addresses.main).to.equal('john@example.com');
     });
 
-    it('should POST /users expect success / with DES hash', async () => {
+    it('should POST /users expect success / with different blockchain address format', async () => {
         const response = await server
             .post('/users')
             .send({
-                username: 'desuser',
-                name: 'Crypt Des',
-                address: 'des@example.com',
-                password: 'sBk81TlWxyZlc',
-                hashedPassword: true
+                username: 'cryptouser',
+                name: 'Crypto User',
+                address: 'crypto@example.com',
+                blockchainAddress: '0xfedcbafedcbafedcbafedcbafedcbafedcbafedcba',
+                ensName: 'crypto.eth'
             })
             .expect(200);
 
         expect(response.body.success).to.be.true;
         expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
-
-        const authResponseSuccess = await server
-            .post('/authenticate')
-            .send({
-                username: 'desuser',
-                password: '12Mina34Ise56P.'
-            })
-            .expect(200);
-        expect(authResponseSuccess.body.success).to.be.true;
-
-        const authResponseFail = await server
-            .post('/authenticate')
-            .send({
-                username: 'desuser',
-                password: 'wrongpass'
-            })
-            .expect(403);
-        expect(authResponseFail.body.error).to.exist;
     });
 });

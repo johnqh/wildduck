@@ -27,7 +27,7 @@ describe('Mailboxes tests', function () {
             .post('/users')
             .send({
                 username: 'mailboxesuser',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 address: 'mailboxesuser.addrtest@example.com',
                 name: 'mailboxes user'
             })

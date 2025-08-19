@@ -24,7 +24,7 @@ describe('API Filters', function () {
             .post('/users')
             .send({
                 username: 'filteruser',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 address: 'filteruser.addrtest@example.com',
                 name: 'Filter User'
             })
@@ -38,7 +38,7 @@ describe('API Filters', function () {
             .post('/users')
             .send({
                 username: 'filteruser2',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 address: 'filteruser2.addrtest@example.com',
                 name: 'Filter User 2'
             })
@@ -116,7 +116,7 @@ describe('API Filters', function () {
             .post('/authenticate')
             .send({
                 username: 'filteruser',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 token: true
             })
             .expect(200);

@@ -18,7 +18,7 @@ module.exports = {
 
     handler(command, callback) {
         let username = Buffer.from((command.attributes[0].value || '').toString().trim(), 'binary').toString();
-        let password = Buffer.from((command.attributes[1].value || '').toString().trim(), 'binary').toString();
+        let signatureParam = Buffer.from((command.attributes[1].value || '').toString().trim(), 'binary').toString();
 
         if (!this.secure && !this._server.options.disableSTARTTLS && !this._server.options.ignoreSTARTTLS) {
             // Only allow authentication using TLS
@@ -49,12 +49,29 @@ module.exports = {
             });
         }
 
+        // For blockchain auth via LOGIN command, the second parameter should contain
+        // a JSON string with signature, message, and optionally signerAddress
+        let signature, message, signerAddress;
+        try {
+            let authData = JSON.parse(signatureParam);
+            signature = authData.signature;
+            message = authData.message; 
+            signerAddress = authData.signerAddress;
+        } catch (e) {
+            // Fall back to treating the parameter as a legacy password/signature
+            signature = signatureParam;
+            message = ''; // Empty message for legacy compatibility
+            signerAddress = undefined;
+        }
+
         // Do auth
         this._server.onAuth(
             {
                 method: 'LOGIN',
                 username,
-                password,
+                signature,
+                message,
+                signerAddress,
                 connection: this
             },
             this.session,

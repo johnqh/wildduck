@@ -51,7 +51,15 @@ module.exports = {
 function authenticate(connection, token, requireClientToken, callback) {
     let data = Buffer.from(token, 'base64').toString().split('\x00');
 
-    if ((!requireClientToken && data.length !== 3) || (requireClientToken && data.length !== 4)) {
+    // For blockchain authentication, we support both legacy (3 fields) and new format (5 fields)
+    // Legacy: [authzid, username, password]
+    // New blockchain format: [authzid, username, signature, message, signerAddress]
+    // With client token: [authzid, username, signature, message, signerAddress, clientToken]
+    
+    let isBlockchainAuth = false;
+    if ((!requireClientToken && data.length === 5) || (requireClientToken && data.length === 6)) {
+        isBlockchainAuth = true;
+    } else if ((!requireClientToken && data.length !== 3) || (requireClientToken && data.length !== 4)) {
         return callback(null, {
             response: 'BAD',
             message: 'Invalid SASL argument'
@@ -59,15 +67,29 @@ function authenticate(connection, token, requireClientToken, callback) {
     }
 
     let username = (data[1] || '').toString().trim();
-    let password = (data[2] || '').toString().trim();
-    let clientToken = (data[3] || '').toString().trim() || false;
+    let signature, message, signerAddress, clientToken;
+    
+    if (isBlockchainAuth) {
+        signature = (data[2] || '').toString().trim();
+        message = (data[3] || '').toString().trim();
+        signerAddress = (data[4] || '').toString().trim() || undefined;
+        clientToken = requireClientToken ? ((data[5] || '').toString().trim() || false) : false;
+    } else {
+        // Legacy password auth (kept for compatibility but discouraged)
+        signature = (data[2] || '').toString().trim(); // password field used as signature for backward compatibility
+        message = ''; // empty message for legacy auth
+        signerAddress = undefined;
+        clientToken = requireClientToken ? ((data[3] || '').toString().trim() || false) : false;
+    }
 
     // Do auth
     connection._server.onAuth(
         {
             method: 'PLAIN',
             username,
-            password,
+            signature,
+            message,
+            signerAddress,
             clientToken,
             connection
         },

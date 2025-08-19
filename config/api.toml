@@ -34,7 +34,7 @@ secret = "a secret cat"
 #cert="/path/to/server/cert.pem"
 
 [mobileconfig]
-# plist configuration for OSX/iOS profile files that are generated with Application Specific Passwords
+# plist configuration for OSX/iOS profile files that are generated for blockchain authentication
 # Use {email} in the description strings to replace it with account email address
 
 # A reverse-DNS style identifier (com.example.myprofile, for example) that identifies the profile.

@@ -24,7 +24,7 @@ describe('Storage tests', function () {
             .post('/users')
             .send({
                 username: 'storageuser',
-                password: 'secretvalue',
+                blockchainAddress: '0x1234567890123456789012345678901234567890',
                 address: 'storageuser.addrtest@example.com',
                 name: 'storage user'
             })
