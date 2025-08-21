@@ -74,6 +74,13 @@ Uses `wild-config` library with TOML configuration files in `config/`:
 - `imap.toml`, `pop3.toml`, `lmtp.toml`, `api.toml`: Protocol-specific settings
 - Environment-specific configs override defaults
 
+### Environment Variables
+
+**Rate Limiting Control:**
+- `ENABLE_RATE_LIMITING=true`: Enable authentication rate limiting (disabled by default)
+- When disabled, all authentication attempts bypass rate limiting checks
+- Useful for development, testing, and troubleshooting authentication issues
+
 ### External Integration
 
 **MTA Integration:**
