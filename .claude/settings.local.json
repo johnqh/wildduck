@@ -40,7 +40,10 @@
       "Bash(echo:*)",
       "Bash(timeout 10s NODE_ENV=test npx grunt mochaTest:api --force)",
       "Bash(NODE_ENV=test npx grunt mochaTest:api --force)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(NODE_ENV=test npx grunt mochaTest:authentication --force)",
+      "Bash(NODE_ENV=test npx grunt testonly --force)",
+      "Bash(npx grunt eslint:*)"
     ],
     "deny": [],
     "ask": []
