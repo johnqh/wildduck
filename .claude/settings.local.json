@@ -28,7 +28,18 @@
       "Bash(NODE_ENV=test npm run test:proto)",
       "Bash(npm start)",
       "Bash(brew services start:*)",
-      "Bash(mongod:*)"
+      "Bash(mongod:*)",
+      "Bash(redis-cli:*)",
+      "Bash(NODE_ENV=test npx mocha test/api/auth-rate-limit-test.js --timeout 10000)",
+      "Bash(NODE_ENV=test npx mocha test/api/enhanced-error-messages-test.js --timeout 10000)",
+      "Bash(npx eslint:*)",
+      "Bash(NODE_ENV=test grunt --force)",
+      "Bash(NODE_ENV=test npx grunt --force)",
+      "Bash(pkill:*)",
+      "Bash(NODE_ENV=test npx mocha test/api/users-test.js --timeout 30000)",
+      "Bash(echo:*)",
+      "Bash(timeout 10s NODE_ENV=test npx grunt mochaTest:api --force)",
+      "Bash(NODE_ENV=test npx grunt mochaTest:api --force)"
     ],
     "deny": [],
     "ask": []
