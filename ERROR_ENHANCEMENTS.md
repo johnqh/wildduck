@@ -133,14 +133,124 @@ Failed to acquire write lock for mailbox operation (timeout: 60000ms)
 
 ---
 
+---
+
+### 8. Enhanced Authentication Error Context (`lib/api/auth.js`)
+
+**Enhancement**: Include detailed credential information in authentication failure responses.
+
+**Before**:
+```json
+{
+  "error": "Authentication failed",
+  "code": "AuthFailed"
+}
+```
+
+**After**:
+```json
+{
+  "error": "Authentication failed for username \"0x123...\" with signature \"0xabc...\" and nonce \"test-nonce-123\"",
+  "code": "AuthFailed",
+  "details": "Authentication failed. Please verify your signature and credentials.",
+  "username": "0x123456789",
+  "signature": "0xabcdef123456...",
+  "nonce": "test-nonce-123",
+  "signerAddress": "0x987654321",
+  "protocol": "API",
+  "scope": "master"
+}
+```
+
+**Impact**: Developers can immediately see which credentials failed and debug authentication issues.
+
+---
+
+### 9. Blockchain Signature Verification Errors (`lib/user-handler.js`)
+
+**Enhancement**: Specific error codes and details for different signature verification failures.
+
+**Signature Mismatch**:
+```json
+{
+  "error": "Signature verification failed: signature does not match for user \"0x123...\"",
+  "code": "SignatureMismatch",
+  "username": "0x123456789",
+  "signature": "0xabcdef123456...",
+  "nonce": "test-nonce-123",
+  "message_signed": "Sign in to WildDuck\nNonce: test-nonce-123",
+  "expected_address": "0x987654321",
+  "verification_result": "FAILED"
+}
+```
+
+**Nonce Reuse**:
+```json
+{
+  "error": "Nonce \"test-nonce-123\" already used for user \"0x123...\"",
+  "code": "NonceReused",
+  "username": "0x123456789",
+  "nonce": "test-nonce-123",
+  "lastUsedNonce": "test-nonce-123"
+}
+```
+
+**Invalid Blockchain Identifier**:
+```json
+{
+  "error": "Invalid blockchain identifier format: \"invalid-address\" is not a valid EVM address...",
+  "code": "InvalidBlockchainIdentifier",
+  "provided_username": "invalid-address",
+  "expected_formats": ["EVM address (0x...)", "Base64 EVM address", "Solana address", "ENS name (.eth)", "SNS name (.sol)"]
+}
+```
+
+**Impact**: Precise error identification for blockchain authentication failures.
+
+---
+
+### 10. Database Error Context (`lib/api/users.js`)
+
+**Enhancement**: Include operation context and query details in database errors.
+
+**Before**:
+```json
+{
+  "error": "MongoDB Error: connection failed",
+  "code": "InternalDatabaseError"
+}
+```
+
+**After**:
+```json
+{
+  "error": "Database query failed while fetching user list: connection failed",
+  "code": "InternalDatabaseError",
+  "query_operation": "user_listing_pagination",
+  "database_error": "connection failed",
+  "attempted_action": "Fetching user list with pagination",
+  "query_options": {
+    "limit": 20,
+    "sort": "ascending",
+    "fields": ["username", "address", "created"]
+  }
+}
+```
+
+**Impact**: Database administrators can quickly identify problematic queries and operations.
+
+---
+
 ## Benefits
 
-1. **Better Developer Experience**: API consumers get clear, actionable error messages
-2. **Easier Debugging**: Actual values are shown in validation errors
+1. **Better Developer Experience**: API consumers get clear, actionable error messages with credential details
+2. **Easier Debugging**: Actual values, signatures, nonces, and blockchain data are shown in errors
 3. **Reduced Support Load**: Users can understand and fix issues without contacting support
 4. **Standards Compliance**: Proper HTTP status codes for different error types
 5. **Consistency**: Uniform error message patterns across all API endpoints
+6. **Security Awareness**: Sensitive data is truncated while providing enough info for debugging
+7. **Blockchain-Specific Errors**: Detailed feedback for blockchain authentication failures
 
 ## Testing
 
-All enhancements maintain backward compatibility while improving error message quality. The changes have been tested to ensure they don't break existing functionality while providing significantly better user experience.
+All enhancements maintain backward compatibility while improving error message quality. The changes have been tested to ensure they don't break existing functionality while providing significantly better user experience for both traditional and blockchain authentication.
