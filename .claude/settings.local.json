@@ -39,7 +39,8 @@
       "Bash(NODE_ENV=test npx mocha test/api/users-test.js --timeout 30000)",
       "Bash(echo:*)",
       "Bash(timeout 10s NODE_ENV=test npx grunt mochaTest:api --force)",
-      "Bash(NODE_ENV=test npx grunt mochaTest:api --force)"
+      "Bash(NODE_ENV=test npx grunt mochaTest:api --force)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []
