@@ -251,6 +251,37 @@ Failed to acquire write lock for mailbox operation (timeout: 60000ms)
 6. **Security Awareness**: Sensitive data is truncated while providing enough info for debugging
 7. **Blockchain-Specific Errors**: Detailed feedback for blockchain authentication failures
 
+## Frontend Integration
+
+With the simplified signature verification (v0.3.7), frontend applications need minimal updates:
+
+1. **Remove specific message requirements**: Any valid signature from the wallet address is accepted
+2. **Simplified API calls**: No need for exact message format matching
+3. **Optional signerAddress**: Only required for ENS/SNS names, not direct wallet addresses
+
+**Key improvements:**
+- **No signerAddress parameter**: Removed completely - WildDuck resolves ENS/SNS names internally
+- **Universal authentication**: Same API call works for direct addresses, ENS names, and SNS names
+- **Simplified frontend**: No need to detect address types or resolve names client-side
+
+**Example frontend update:**
+```javascript
+// Old approach (still works)
+const message = `Sign in to WildDuck\nNonce: ${nonce}`;
+const signature = await signMessage(message);
+await api.authenticate(username, signature, nonce, signerAddress);
+
+// New simplified approach (recommended)
+const message = `Authenticate with MyApp\nNonce: ${nonce}`;
+const signature = await signMessage(message);
+await api.authenticate(username, signature, nonce); // No signerAddress needed
+
+// Works for all username types:
+// - Direct addresses: '0x1234...', 'ABC123...' (Solana)
+// - ENS names: 'vitalik.eth', 'example.box' 
+// - SNS names: 'example.sol'
+```
+
 ## Testing
 
 All enhancements maintain backward compatibility while improving error message quality. The changes have been tested to ensure they don't break existing functionality while providing significantly better user experience for both traditional and blockchain authentication.
