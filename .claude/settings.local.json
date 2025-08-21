@@ -25,7 +25,10 @@
       "Bash(gh run list:*)",
       "Bash(mv:*)",
       "Bash(grunt eslint:*)",
-      "Bash(NODE_ENV=test npm run test:proto)"
+      "Bash(NODE_ENV=test npm run test:proto)",
+      "Bash(npm start)",
+      "Bash(brew services start:*)",
+      "Bash(mongod:*)"
     ],
     "deny": [],
     "ask": []

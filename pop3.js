@@ -73,14 +73,22 @@ const serverOptions = {
     },
 
     onAuth(auth, session, callback) {
+        // For POP3, password field contains the signature
+        let username = (auth.username || '').toString().trim();
+        let signature = (auth.password || '').toString();
+        
+        // Generate nonce for POP3 authentication
+        let nonce = Date.now().toString();
+        
         userHandler.authenticate(
-            auth.username,
-            auth.password,
+            username,
+            signature,
             'pop3',
             {
                 protocol: 'POP3',
                 sess: session.id,
-                ip: session.remoteAddress
+                ip: session.remoteAddress,
+                nonce: nonce
             },
             (err, result) => {
                 if (err) {
