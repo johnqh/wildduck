@@ -1,6 +1,6 @@
 {
     "name": "@johnqh/wildduck",
-    "version": "6.1.0",
+    "version": "6.2.0",
     "description": "IMAP/POP3 server built with Node.js and MongoDB",
     "main": "server.js",
     "scripts": {
@@ -51,6 +51,7 @@
         "supertest": "7.0.0"
     },
     "dependencies": {
+        "@ensdomains/ensjs": "^4.0.2",
         "@fidm/x509": "1.2.1",
         "@opensearch-project/opensearch": "2.12.0",
         "@postalsys/vmc": "1.1.0",

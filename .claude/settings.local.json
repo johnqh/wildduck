@@ -43,7 +43,9 @@
       "Bash(lsof:*)",
       "Bash(NODE_ENV=test npx grunt mochaTest:authentication --force)",
       "Bash(NODE_ENV=test npx grunt testonly --force)",
-      "Bash(npx grunt eslint:*)"
+      "Bash(npx grunt eslint:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.ens.domains)"
     ],
     "deny": [],
     "ask": []
