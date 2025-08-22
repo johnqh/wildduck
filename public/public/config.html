@@ -345,6 +345,42 @@
                     <li>Size: <code>XXGB XXMB XXkB XXB</code></li>
                 </ul>
             </div>
+
+            <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e1e1e1; text-align: center; color: #999;">
+                <div id="version-info">
+                    <div><small id="api-version">Loading API version...</small></div>
+                    <div><small id="frontend-version">Loading Frontend version...</small></div>
+                </div>
+            </footer>
         </div>
+
+        <script>
+            // Load version information
+            document.addEventListener('DOMContentLoaded', () => {
+                fetch('/health')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.api && data.api.version) {
+                            document.getElementById('api-version').textContent = `API: ${data.api.name} v${data.api.version}`;
+                        } else {
+                            document.getElementById('api-version').textContent = 'API version unavailable';
+                        }
+
+                        if (data.frontend && data.frontend.version) {
+                            let frontendText = `Frontend: ${data.frontend.name} v${data.frontend.version}`;
+                            if (data.frontend.build) {
+                                frontendText += ` (${data.frontend.build})`;
+                            }
+                            document.getElementById('frontend-version').textContent = frontendText;
+                        } else {
+                            document.getElementById('frontend-version').textContent = 'Frontend version unavailable';
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('api-version').textContent = 'API version unavailable';
+                        document.getElementById('frontend-version').textContent = 'Frontend version unavailable';
+                    });
+            });
+        </script>
     </body>
 </html>

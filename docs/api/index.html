@@ -16,5 +16,37 @@
   <body>
     <redoc spec-url="openapidocs.json" expand-responses="200,201" path-in-middle-panel="true"></redoc>
     <script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0-rc.46/bundles/redoc.standalone.js"></script>
+    
+    <footer style="position: fixed; bottom: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 8px 12px; border-radius: 5px; font-size: 11px; color: #666; z-index: 1000; line-height: 1.3; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div id="api-version-info">Loading...</div>
+        <div id="frontend-version-info" style="margin-top: 2px;">Loading...</div>
+    </footer>
+
+    <script>
+        // Load version information for API docs
+        fetch('/health')
+            .then(res => res.json())
+            .then(data => {
+                if (data.api && data.api.version) {
+                    document.getElementById('api-version-info').textContent = `API: v${data.api.version}`;
+                } else {
+                    document.getElementById('api-version-info').textContent = 'API: unknown';
+                }
+
+                if (data.frontend && data.frontend.version) {
+                    let frontendText = `Frontend: v${data.frontend.version}`;
+                    if (data.frontend.build) {
+                        frontendText += ` (${data.frontend.build})`;
+                    }
+                    document.getElementById('frontend-version-info').textContent = frontendText;
+                } else {
+                    document.getElementById('frontend-version-info').textContent = 'Frontend: unknown';
+                }
+            })
+            .catch(() => {
+                document.getElementById('api-version-info').textContent = 'API: error';
+                document.getElementById('frontend-version-info').textContent = 'Frontend: error';
+            });
+    </script>
   </body>
 </html>
