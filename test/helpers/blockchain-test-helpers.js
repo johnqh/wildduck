@@ -5,11 +5,44 @@ const { Keypair } = require('@solana/web3.js');
 const nacl = require('tweetnacl');
 const bs58 = require('bs58').default || require('bs58');
 
-const {
-    createSIWEMessage,
-    createSolanaSignMessage,
-    generateNonce
-} = require('../../lib/signature-verifier');
+// Note: createSIWEMessage, createSolanaSignMessage, and generateNonce
+// are no longer available as they've been moved to mail_box_indexer service
+// This test helper now implements local versions for testing only
+
+/**
+ * Local test implementations of helper functions
+ */
+function generateNonce() {
+    return Math.random().toString(36).substring(2, 15) + 
+           Math.random().toString(36).substring(2, 15);
+}
+
+function createSIWEMessage(domain, address, nonce, issuedAt = new Date()) {
+    const uri = `https://${domain}`;
+    const version = '1';
+    const chainId = 1; // Ethereum mainnet
+    
+    return `${domain} wants you to sign in with your Ethereum account:
+${address}
+
+Sign in to ${domain}
+
+URI: ${uri}
+Version: ${version}
+Chain ID: ${chainId}
+Nonce: ${nonce}
+Issued At: ${issuedAt.toISOString()}`;
+}
+
+function createSolanaSignMessage(domain, address, nonce, issuedAt = new Date()) {
+    return `${domain} wants you to sign in with your Solana account:
+${address}
+
+Sign in to ${domain}
+
+Nonce: ${nonce}
+Issued At: ${issuedAt.toISOString()}`;
+}
 
 /**
  * Test data generator for blockchain authentication

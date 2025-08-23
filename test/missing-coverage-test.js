@@ -14,12 +14,7 @@ const bs58 = require('bs58').default || require('bs58');
 
 // Import modules to test
 const {
-    verifySignature,
-    verifyEVMSignature,
-    verifySolanaSignature,
-    createSIWEMessage,
-    createSolanaSignMessage,
-    generateNonce
+    verifySignature
 } = require('../lib/signature-verifier');
 
 const {

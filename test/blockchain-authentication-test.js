@@ -22,11 +22,7 @@ const {
 } = require('../lib/blockchain-validator');
 
 const {
-    verifyEVMSignature,
-    verifySolanaSignature,
-    createSIWEMessage,
-    createSolanaSignMessage,
-    generateNonce
+    verifySignature
 } = require('../lib/signature-verifier');
 
 const {
