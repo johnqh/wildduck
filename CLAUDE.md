@@ -177,3 +177,149 @@ WildDuck implements a comprehensive blockchain-based authentication system that 
 - `@solana/web3.js`: Solana blockchain integration
 - `tweetnacl`: Ed25519 signature verification for Solana
 - `bs58`: Base58 encoding/decoding for Solana addresses
+
+## File Organization & AI Context
+
+### Core Module Patterns
+
+**Handler Classes (`lib/*-handler.js`):**
+- All handlers follow a similar constructor pattern with `options` parameter
+- Use async/await for database operations with callback fallbacks
+- Database operations typically use `this.database` or `this.users` collections
+- Error handling follows consistent patterns with custom error codes
+
+**API Endpoints (`lib/api/*.js`):**
+- Export functions that register routes with `server.get/post/put/delete`
+- Use Joi validation schemas for request/response validation
+- Follow RESTful patterns with consistent response structures
+- Authentication handled via `roles` middleware
+
+**Database Collections:**
+- `users`: User accounts, settings, quotas, authentication data
+- `addresses`: Email addresses, aliases, forwarding rules
+- `mailboxes`: IMAP folders, special use flags, retention policies
+- `messages`: Email messages, headers, attachments, flags
+- `journal`: Audit logs, user actions, system events
+- `authlog`: Authentication attempts, rate limiting data
+
+### Key Design Patterns
+
+**Async/Callback Dual Interface:**
+```javascript
+// Most handlers support both patterns
+handler.method(params, callback);           // Legacy callback style
+await handler.methodAsync(params);          // Modern async/await
+```
+
+**Error Handling:**
+```javascript
+const err = new Error('Description');
+err.code = 'CUSTOM_CODE';                  // Machine-readable code
+err.responseCode = 400;                     // HTTP status code
+throw err;
+```
+
+**Database Queries:**
+```javascript
+// Standard projection patterns
+{ projection: { password: false, tempPasswd: false } }  // Hide sensitive data
+{ projection: { _id: true, username: true } }           // Minimal data
+```
+
+**Configuration Access:**
+```javascript
+const config = require('wild-config');
+const value = config.section.subsection.key;           // Nested config access
+```
+
+### Common Operations
+
+**User Lookup:**
+```javascript
+// By ID
+const user = await db.users.collection('users').findOne({ _id: userId });
+
+// By address
+const addressData = await userHandler.asyncResolveAddress(address, options);
+```
+
+**Message Operations:**
+```javascript
+// Store message
+const result = await messageHandler.addMessage(user, mailbox, messageData);
+
+// Fetch messages
+const messages = await messageHandler.getMessages(user, mailbox, query);
+```
+
+**Authentication:**
+```javascript
+// Blockchain signature verification
+const authResult = await userHandler.asyncAuthenticate(username, signature, options);
+
+// Traditional session validation
+const session = await userHandler.checkAuthToken(token);
+```
+
+### Security Considerations
+
+**Input Validation:**
+- All API inputs validated with Joi schemas
+- Email addresses validated with `isemail` library
+- Blockchain addresses validated with custom validators
+
+**Access Control:**
+- Role-based permissions via `roles.js`
+- Session tokens for API authentication
+- IP-based rate limiting via Redis
+
+**Data Sanitization:**
+- HTML content sanitized before storage
+- File uploads scanned and validated
+- SQL injection prevented by MongoDB's BSON
+
+### Testing Patterns
+
+**Test Structure:**
+```javascript
+describe('Component', () => {
+    beforeEach(async () => {
+        // Reset test database
+        await db.database.collection('users').deleteMany({});
+    });
+    
+    it('should handle operation', async () => {
+        // Test implementation
+    });
+});
+```
+
+**Common Test Utilities:**
+- `test/helpers/auth-test-utils.js`: Authentication helpers
+- `test/helpers/blockchain-test-helpers.js`: Blockchain testing
+- `test/fixtures/`: Test data and certificates
+
+### Environment Variables
+
+**Development:**
+- `NODE_ENV=test`: Enables test database usage
+- `NODE_CONFIG_ONLY=true`: Print config without starting server
+- `ENABLE_RATE_LIMITING=true`: Enable auth rate limiting
+
+**Production:**
+- `UV_THREADPOOL_SIZE=16`: Optimize for I/O operations
+- Database connection strings in environment or config files
+- SSL certificate paths configured per protocol
+
+### API Documentation
+
+**OpenAPI Integration:**
+- API schemas defined inline with route definitions
+- Automatic documentation generation via `restifyapigenerate`
+- Response schemas in `lib/schemas/response/`
+- Request schemas in `lib/schemas/request/`
+
+**Error Codes:**
+- Standardized error responses across all endpoints
+- Machine-readable error codes for client handling
+- HTTP status codes follow REST conventions
