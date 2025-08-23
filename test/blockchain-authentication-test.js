@@ -25,6 +25,47 @@ const {
     verifySignature
 } = require('../lib/signature-verifier');
 
+// Local test implementations since these functions were moved to mail_box_indexer service
+function generateNonce() {
+    return Math.random().toString(36).substring(2, 15) + 
+           Math.random().toString(36).substring(2, 15);
+}
+
+function createSIWEMessage(domain, address, nonce, issuedAt = new Date()) {
+    const uri = `https://${domain}`;
+    const version = '1';
+    const chainId = 1; // Ethereum mainnet
+    
+    return `${domain} wants you to sign in with your Ethereum account:
+${address}
+
+Sign in to ${domain}
+
+URI: ${uri}
+Version: ${version}
+Chain ID: ${chainId}
+Nonce: ${nonce}
+Issued At: ${issuedAt.toISOString()}`;
+}
+
+function createSolanaSignMessage(domain, address, nonce, issuedAt = new Date()) {
+    return `${domain} wants you to sign in with your Solana account:
+${address}
+
+Sign in to ${domain}
+
+Nonce: ${nonce}
+Issued At: ${issuedAt.toISOString()}`;
+}
+
+async function verifyEVMSignature(address, signature, message) {
+    return verifySignature(address, signature, message);
+}
+
+function verifySolanaSignature(address, signature, message) {
+    return verifySignature(address, signature, message);
+}
+
 const {
     getAuthenticationAddress
 } = require('../lib/name-resolver');
