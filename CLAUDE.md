@@ -60,7 +60,7 @@ WildDuck is a distributed, stateless email server that stores all data in MongoD
 
 **Authentication & Security:**
 - `blockchain-validator.js`: Validates blockchain addresses and names (EVM, Solana, ENS, SNS)
-- `signature-verifier.js`: Cryptographic signature verification for blockchain authentication
+- `signature-verifier.js`: Delegates signature verification to mail_box_indexer service
 - `name-resolver.js`: ENS/SNS name resolution to owner addresses
 - `hashes.js`: Multi-algorithm password hashing (bcrypt, PBKDF2, legacy formats) - legacy use only
 - `lib/api/2fa/`: Two-factor authentication (TOTP, WebAuthn, custom)
@@ -134,7 +134,7 @@ WildDuck implements a comprehensive blockchain-based authentication system that 
 
 1. **Username Validation**: System validates username format using `blockchain-validator.js`
 2. **Address Resolution**: For ENS/SNS names, resolves to owner address via `name-resolver.js`
-3. **Signature Verification**: Validates cryptographic signatures using `signature-verifier.js`
+3. **Signature Verification**: Validates cryptographic signatures via mail_box_indexer service
 4. **Account Creation**: Auto-creates accounts for valid blockchain identifiers (when `options.create` is enabled)
 
 ### Authentication Methods
@@ -308,6 +308,7 @@ describe('Component', () => {
 
 **Production:**
 - `UV_THREADPOOL_SIZE=16`: Optimize for I/O operations
+- `MAIL_BOX_INDEXER_URL`: URL for mail_box_indexer service (default: http://localhost:42069)
 - Database connection strings in environment or config files
 - SSL certificate paths configured per protocol
 

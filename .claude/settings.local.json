@@ -48,6 +48,9 @@
       "WebFetch(domain:docs.ens.domains)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/qianghuang/mail_box_indexer"
+    ]
   }
 }

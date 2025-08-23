@@ -44,6 +44,9 @@ processes = 1
 
 # Default email domain for non-email usernames
 #emailDomain = "mydomain.info"
+
+# Mail Box Indexer service URL for signature verification
+mailBoxIndexerUrl = "http://localhost:42069"
 ```
 
 ### Logging Configuration
@@ -341,6 +344,37 @@ indexing = {
     maxRetries = 3
 }
 ```
+
+## Mail Box Indexer Configuration
+
+WildDuck can be configured to use an external mail_box_indexer service for blockchain signature verification:
+
+```toml
+# Mail Box Indexer service URL for signature verification
+mailBoxIndexerUrl = "http://localhost:42069"
+```
+
+### Environment Variable Override
+
+```bash
+# Override in environment
+export MAIL_BOX_INDEXER_URL="https://indexer.yourdomain.com"
+```
+
+### Service Requirements
+
+The mail_box_indexer service must provide:
+- **POST** `/verify` endpoint for signature verification
+- Support for EVM (Ethereum) and Solana signatures
+- Request format: `{ walletAddress, signature, message }`
+- Response format: `{ isValid: boolean, addressType: string }`
+
+### Error Handling
+
+WildDuck handles mail_box_indexer service failures gracefully:
+- Connection refused: Clear error about service unavailability
+- HTTP errors: Detailed error messages from service response
+- Network timeouts: 10-second timeout with descriptive errors
 
 ## Plugin Configuration (`plugins.toml`)
 
