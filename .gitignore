@@ -8,3 +8,7 @@ certs/test-*
 zmta-milter
 zmta-milter.toml
 api-tests-overview.md
+
+# Environment files
+.env.local
+.env.*.local

@@ -76,10 +76,30 @@ Uses `wild-config` library with TOML configuration files in `config/`:
 
 ### Environment Variables
 
-**Rate Limiting Control:**
+WildDuck supports a flexible environment variable system with fallback support:
+
+**Loading Priority:**
+1. `process.env` (highest priority)
+2. `.env` file (main configuration)
+3. `.env.local` file (local overrides, git-ignored)
+
+**Usage:**
+```javascript
+const env = require('./lib/env-loader');
+const value = env.get('VARIABLE_NAME', 'default_value');
+```
+
+**Key Variables:**
 - `ENABLE_RATE_LIMITING=true`: Enable authentication rate limiting (disabled by default)
-- When disabled, all authentication attempts bypass rate limiting checks
-- Useful for development, testing, and troubleshooting authentication issues
+- `MAIL_BOX_INDEXER_URL`: URL for signature verification service (default: http://localhost:42069)
+- `NODE_ENV`: Runtime environment (development/production/test)
+- `UV_THREADPOOL_SIZE`: Node.js threadpool size for I/O operations (default: 16)
+
+**Configuration Files:**
+- `.env.example`: Template with all available variables and documentation
+- `.env`: Main environment file (tracked by git, no sensitive values)
+- `.env.local`: Local overrides (git-ignored, for sensitive/local values)
+- `.env.local.example`: Template for local development setup
 
 ### External Integration
 
