@@ -1,0 +1,91 @@
+{
+  "project": "WildDuck Email Server",
+  "description": "Distributed, stateless email server with blockchain authentication",
+  "version": "6.7.0",
+  "ai_optimization_level": "enhanced",
+  
+  "quick_commands": {
+    "test_all": "npm test",
+    "test_api": "NODE_ENV=test grunt mochaTest:api",
+    "test_blockchain": "NODE_ENV=test npx mocha test --grep 'signature' --timeout 10000",
+    "lint": "grunt eslint",
+    "start_dev": "npm start",
+    "config_check": "npm run printconf"
+  },
+  
+  "core_files": {
+    "entry_points": ["server.js", "worker.js"],
+    "protocols": ["imap.js", "pop3.js", "lmtp.js", "api.js", "acme.js"],
+    "handlers": [
+      "lib/user-handler.js",
+      "lib/message-handler.js", 
+      "lib/mailbox-handler.js",
+      "lib/signature-verifier.js"
+    ],
+    "configuration": "config/*.toml",
+    "documentation": "CLAUDE.md"
+  },
+  
+  "architecture": {
+    "storage": {
+      "primary": "MongoDB",
+      "caching": "Redis", 
+      "attachments": "GridFS",
+      "search": "Elasticsearch (optional)"
+    },
+    "authentication": {
+      "blockchain_service": "mail_box_indexer (localhost:42069)",
+      "supported_chains": ["EVM", "Solana", "ENS", "SNS"],
+      "signature_verification": "lib/signature-verifier.js"
+    },
+    "scaling": "horizontal (stateless servers)"
+  },
+  
+  "development_patterns": {
+    "handlers": "Constructor with database/redis options",
+    "api_endpoints": "Restify with Joi validation",
+    "database": "MongoDB with async/await + callback fallback",
+    "errors": "Custom error objects with codes and HTTP status",
+    "authentication": "Blockchain signatures via mail_box_indexer"
+  },
+  
+  "testing": {
+    "framework": "Mocha + Chai",
+    "requirements": ["MongoDB", "Redis"],
+    "database_reset": "Automatic in test environment",
+    "fixtures": "test/fixtures/",
+    "helpers": "test/helpers/"
+  },
+  
+  "ai_guidelines": {
+    "read_before_modify": true,
+    "follow_existing_patterns": true,
+    "test_after_changes": true,
+    "prefer_editing_over_creation": true,
+    "check_dependencies_first": true
+  },
+  
+  "common_tasks": {
+    "add_api_endpoint": "Follow lib/api/*.js patterns with Joi schemas",
+    "modify_authentication": "Work with lib/user-handler.js and signature-verifier.js",
+    "database_operations": "Use handler classes with proper error handling",
+    "add_configuration": "Add to config/*.toml with environment fallbacks",
+    "blockchain_integration": "Leverage existing mail_box_indexer integration"
+  },
+  
+  "troubleshooting": {
+    "steps": [
+      "Check MongoDB connection",
+      "Verify Redis connection", 
+      "Test mail_box_indexer service",
+      "Run npm run printconf",
+      "Check test database state"
+    ],
+    "common_issues": {
+      "auth_failed": "Check mail_box_indexer service at localhost:42069",
+      "db_connection": "Verify MongoDB running and accessible",
+      "test_failures": "Ensure test database is clean",
+      "config_errors": "Use npm run printconf to validate"
+    }
+  }
+}

@@ -344,3 +344,79 @@ describe('Component', () => {
 - Standardized error responses across all endpoints
 - Machine-readable error codes for client handling
 - HTTP status codes follow REST conventions
+
+## AI Development Guidelines
+
+### Quick Start Commands
+```bash
+# Test the current state
+npm test
+
+# Check code quality
+grunt eslint
+
+# Start development server
+npm start
+
+# Check configuration
+npm run printconf
+
+# Run specific blockchain tests
+NODE_ENV=test npx mocha test --grep "signature" --timeout 10000
+```
+
+### File Modification Patterns
+- **Handler Classes**: Follow constructor patterns in `lib/*-handler.js`
+- **API Endpoints**: Use patterns from `lib/api/*.js` with Joi validation
+- **Database Schemas**: Reference existing collections in MongoDB
+- **Authentication**: Leverage blockchain auth patterns from recent commits
+
+### Common Debugging Steps
+1. Check MongoDB connection and collections
+2. Verify Redis connection for caching/sessions
+3. Test blockchain signature verification endpoints
+4. Validate configuration loading with `npm run printconf`
+5. Run specific test suites: `NODE_ENV=test grunt mochaTest:api`
+
+### Integration Points
+- **mail_box_indexer**: Signature verification service at localhost:42069
+- **MongoDB**: Primary data store with GridFS for attachments
+- **Redis**: Caching, rate limiting, and pub/sub
+- **Elasticsearch**: Optional full-text search (see configuration)
+
+### Architecture Quick Reference
+- **Entry Points**: `server.js` (master), `worker.js` (protocols)
+- **Protocols**: `imap.js`, `pop3.js`, `lmtp.js`, `api.js`, `acme.js`
+- **Core Logic**: `lib/user-handler.js`, `lib/message-handler.js`, `lib/mailbox-handler.js`
+- **Authentication**: `lib/signature-verifier.js` → mail_box_indexer service
+- **Configuration**: `config/*.toml` files with environment variable overrides
+
+### AI-Friendly Development Patterns
+
+#### Code Analysis Workflow
+1. **Read Context**: Always examine related files before making changes
+2. **Pattern Recognition**: Follow existing code patterns and naming conventions
+3. **Dependency Check**: Verify required dependencies are available before using libraries
+4. **Error Handling**: Follow established error handling patterns in the codebase
+5. **Testing**: Run appropriate test suites after changes
+
+#### Common AI Tasks
+- **Feature Addition**: Follow existing handler patterns in `lib/` directory
+- **API Development**: Use established Joi schemas and error response patterns
+- **Database Operations**: Follow MongoDB patterns with proper error handling
+- **Authentication**: Leverage blockchain-based auth system for new features
+- **Configuration**: Use wild-config patterns and environment variable fallbacks
+
+#### AI Optimization Tools
+- **Development Helper**: `node scripts/ai-dev-helper.js` - Comprehensive diagnostics
+- **Context File**: `.ai-context.json` - Quick project overview for AI systems
+- **Quick Commands**: Pre-configured npm scripts for common development tasks
+- **Architecture Maps**: Clear component relationships and data flow documentation
+
+#### Development Workflow Best Practices
+- **Before Changes**: Read relevant files and understand existing patterns
+- **During Development**: Follow established conventions and error handling
+- **After Changes**: Run tests and lint code
+- **Documentation**: Update comments and documentation as needed
+- **Version Control**: Commit with descriptive messages following project patterns
+- **AI Diagnostics**: Use `node scripts/ai-dev-helper.js` to verify system state
