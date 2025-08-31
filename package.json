@@ -1,5 +1,5 @@
 {
-    "name": "@0xmail/wildduck",
+    "name": "@johnqh/wildduck",
     "version": "6.8.0",
     "description": "IMAP/POP3 server built with Node.js and MongoDB",
     "main": "server.js",

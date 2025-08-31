@@ -52,7 +52,11 @@
       "Bash(npm whoami:*)",
       "Bash(mongosh:*)",
       "Bash(NODE_ENV=test grunt testonly --force)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npx ncu:*)",
+      "Bash(npx npm-check-updates:*)",
+      "Bash(npm audit:*)",
+      "Bash(NODE_ENV=test npx mocha test --grep \"Blockchain Authentication\" --timeout 10000)"
     ],
     "deny": [],
     "ask": [],
