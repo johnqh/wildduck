@@ -45,7 +45,11 @@
       "Bash(NODE_ENV=test npx grunt testonly --force)",
       "Bash(npx grunt eslint:*)",
       "WebSearch",
-      "WebFetch(domain:docs.ens.domains)"
+      "WebFetch(domain:docs.ens.domains)",
+      "Bash(NODE_ENV=test npx mocha test --grep \"signature\" --timeout 10000)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm whoami:*)"
     ],
     "deny": [],
     "ask": [],
