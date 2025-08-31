@@ -49,7 +49,10 @@
       "Bash(NODE_ENV=test npx mocha test --grep \"signature\" --timeout 10000)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(npm whoami:*)"
+      "Bash(npm whoami:*)",
+      "Bash(mongosh:*)",
+      "Bash(NODE_ENV=test grunt testonly --force)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": [],
