@@ -91,8 +91,8 @@ describe('Missing Coverage Tests', function () {
             const nonce = generateNonce();
             const message = createSIWEMessage(domain, address, nonce);
             const signature = await signMessage({
-                message: message,
-                privateKey: privateKey
+                message,
+                privateKey
             });
             
             // Test verification with ENS name
@@ -175,8 +175,8 @@ describe('Missing Coverage Tests', function () {
             const nonce = generateNonce();
             const message = createSIWEMessage(domain, address, nonce);
             const signature = await signMessage({
-                message: message,
-                privateKey: privateKey
+                message,
+                privateKey
             });
             
             const isValid = await verifySignature(paddedAddress, signature, message);
@@ -449,8 +449,8 @@ describe('Missing Coverage Tests', function () {
                 const address = privateKeyToAddress(privateKey);
                 const message = `Test message ${i}`;
                 const signature = await signMessage({
-                    message: message,
-                    privateKey: privateKey
+                    message,
+                    privateKey
                 });
                 
                 testData.push({ address, signature, message });
@@ -474,8 +474,8 @@ describe('Missing Coverage Tests', function () {
             const address = privateKeyToAddress(privateKey);
             const message = 'Test message';
             const validSignature = await signMessage({
-                message: message,
-                privateKey: privateKey
+                message,
+                privateKey
             });
             
             const verifications = [

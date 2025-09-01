@@ -58,8 +58,8 @@ class BlockchainTestHelpers {
         const nonce = generateNonce();
         const message = createSIWEMessage(domain, address, nonce);
         const signature = await signMessage({
-            message: message,
-            privateKey: privateKey
+            message,
+            privateKey
         });
 
         return {

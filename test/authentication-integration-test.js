@@ -25,8 +25,8 @@ describe('Authentication Integration Tests', function () {
         users = database;
 
         userHandler = new UserHandler({
-            database: database,
-            users: users,
+            database,
+            users,
             redis: false, // Skip Redis for testing
             log: {
                 info: () => {},

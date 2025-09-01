@@ -29,18 +29,18 @@ describe('SMTP Protocol Authentication Tests', function () {
     const LMTP_PORT = 2424; // WildDuck LMTP port (closest to SMTP)
     const SMTP_HOST = 'localhost';
     
-    before(function (done) {
+    before((done) => {
         // Server should be running
         done();
     });
     
-    after(function (done) {
+    after((done) => {
         done();
     });
     
-    describe('SMTP EHLO and AUTH Commands (RFC 4954)', function () {
-        describe('SMTP Capability Discovery', function () {
-            it('should respond to EHLO with capabilities', function (done) {
+    describe('SMTP EHLO and AUTH Commands (RFC 4954)', () => {
+        describe('SMTP Capability Discovery', () => {
+            it('should respond to EHLO with capabilities', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -77,7 +77,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should advertise LMTP capabilities (closest to SMTP)', function (done) {
+            it('should advertise LMTP capabilities (closest to SMTP)', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let capabilities = [];
@@ -116,11 +116,11 @@ describe('SMTP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('SMTP-Style Authentication Simulation', function () {
+        describe('SMTP-Style Authentication Simulation', () => {
             // Since WildDuck doesn't have built-in SMTP AUTH, we'll simulate
             // how it might work if implemented
             
-            it('should simulate SMTP AUTH PLAIN for EVM addresses', async function () {
+            it('should simulate SMTP AUTH PLAIN for EVM addresses', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // SMTP AUTH PLAIN format: \0username\0password
@@ -138,7 +138,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 expect(parts[2]).to.equal(authData.signature);
             });
             
-            it('should simulate SMTP AUTH LOGIN for Solana addresses', async function () {
+            it('should simulate SMTP AUTH LOGIN for Solana addresses', async () => {
                 const authData = await createAPIAuthData('solana');
                 
                 // SMTP AUTH LOGIN format: base64 encoded username and password separately
@@ -154,7 +154,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 expect(Buffer.from(passwordB64, 'base64').toString()).to.equal(authData.signature);
             });
             
-            it('should construct proper SMTP AUTH commands for ENS names', async function () {
+            it('should construct proper SMTP AUTH commands for ENS names', async () => {
                 const authData = await createAPIAuthData('ens');
                 
                 // Simulate SMTP AUTH sequence
@@ -172,8 +172,8 @@ describe('SMTP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('SMTP Protocol Compliance', function () {
-            it('should handle MAIL FROM command after EHLO', function (done) {
+        describe('SMTP Protocol Compliance', () => {
+            it('should handle MAIL FROM command after EHLO', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -213,7 +213,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should handle RCPT TO command with valid recipient', function (done) {
+            it('should handle RCPT TO command with valid recipient', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -256,8 +256,8 @@ describe('SMTP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('SMTP Error Handling', function () {
-            it('should reject invalid commands before EHLO', function (done) {
+        describe('SMTP Error Handling', () => {
+            it('should reject invalid commands before EHLO', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -291,7 +291,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should handle malformed MAIL FROM syntax', function (done) {
+            it('should handle malformed MAIL FROM syntax', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -329,7 +329,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should handle unknown commands gracefully', function (done) {
+            it('should handle unknown commands gracefully', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -364,8 +364,8 @@ describe('SMTP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('STARTTLS Support (SMTP Security)', function () {
-            it('should check if STARTTLS is advertised in capabilities', function (done) {
+        describe('STARTTLS Support (SMTP Security)', () => {
+            it('should check if STARTTLS is advertised in capabilities', (done) => {
                 const client = net.createConnection(LMTP_PORT, SMTP_HOST, () => {
                     let buffer = '';
                     let capabilities = [];
@@ -417,8 +417,8 @@ describe('SMTP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('SMTP Integration with Blockchain Auth', function () {
-            it('should validate blockchain authentication data format for SMTP', async function () {
+        describe('SMTP Integration with Blockchain Auth', () => {
+            it('should validate blockchain authentication data format for SMTP', async () => {
                 const evmAuth = await createAPIAuthData('evm');
                 const solanaAuth = await createAPIAuthData('solana');
                 const ensAuth = await createAPIAuthData('ens');
@@ -435,7 +435,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 expect(ensAuth.signerAddress).to.equal(TEST_WALLETS.ens.ownerAddress);
             });
             
-            it('should construct SMTP-compatible authentication for all wallet types', async function () {
+            it('should construct SMTP-compatible authentication for all wallet types', async () => {
                 const walletTypes = ['evm', 'solana', 'ens', 'sns'];
                 
                 for (const type of walletTypes) {
@@ -454,7 +454,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 }
             });
             
-            it('should simulate SMTP submission with blockchain authentication', async function () {
+            it('should simulate SMTP submission with blockchain authentication', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // Simulate an SMTP submission sequence
@@ -481,8 +481,8 @@ describe('SMTP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('Future SMTP Authentication Support', function () {
-            it('should prepare for SMTP AUTH PLAIN implementation', async function () {
+        describe('Future SMTP Authentication Support', () => {
+            it('should prepare for SMTP AUTH PLAIN implementation', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // This test demonstrates how SMTP AUTH PLAIN would work
@@ -503,7 +503,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                 // This demonstrates the complete flow for future SMTP implementation
             });
             
-            it('should handle scope-based SMTP authentication', async function () {
+            it('should handle scope-based SMTP authentication', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // Different scopes for different SMTP operations
@@ -515,7 +515,7 @@ describe('SMTP Protocol Authentication Tests', function () {
                         username: authData.username,
                         signature: authData.signature,
                         nonce: authData.nonce,
-                        scope: scope
+                        scope
                     };
                     
                     expect(scopedAuth.scope).to.equal(scope);

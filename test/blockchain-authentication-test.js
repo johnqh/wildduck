@@ -428,7 +428,7 @@ describe('Blockchain Authentication', function () {
             
             // Step 3: Sign message
             const signature = await signMessage({
-                message: message,
+                message,
                 privateKey: testWallet
             });
             

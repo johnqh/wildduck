@@ -26,18 +26,18 @@ describe('IMAP Protocol Authentication Tests', function () {
     const IMAP_PORT = 9993; // Default WildDuck IMAP port
     const IMAP_HOST = 'localhost';
     
-    before(function (done) {
+    before((done) => {
         // Server should be running
         done();
     });
     
-    after(function (done) {
+    after((done) => {
         done();
     });
     
-    describe('IMAP LOGIN Command (RFC 3501)', function () {
-        describe('EVM Wallet Authentication', function () {
-            it('should authenticate with LOGIN command using EVM address', async function () {
+    describe('IMAP LOGIN Command (RFC 3501)', () => {
+        describe('EVM Wallet Authentication', () => {
+            it('should authenticate with LOGIN command using EVM address', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // IMAP protocol test using raw socket
@@ -93,7 +93,7 @@ describe('IMAP Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should reject invalid EVM signature', async function () {
+            it('should reject invalid EVM signature', async () => {
                 const username = TEST_WALLETS.evm.address;
                 const invalidSignature = 'aW52YWxpZF9zaWduYXR1cmU='; // Invalid base64 signature
                 
@@ -139,8 +139,8 @@ describe('IMAP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('Solana Wallet Authentication', function () {
-            it('should authenticate with LOGIN command using Solana address', async function () {
+        describe('Solana Wallet Authentication', () => {
+            it('should authenticate with LOGIN command using Solana address', async () => {
                 const authData = await createAPIAuthData('solana');
                 
                 const testIMAPAuth = (callback) => {
@@ -191,8 +191,8 @@ describe('IMAP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('ENS Name Authentication', function () {
-            it('should authenticate with LOGIN command using ENS name', async function () {
+        describe('ENS Name Authentication', () => {
+            it('should authenticate with LOGIN command using ENS name', async () => {
                 const authData = await createAPIAuthData('ens');
                 
                 const testIMAPAuth = (callback) => {
@@ -242,8 +242,8 @@ describe('IMAP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('IMAP CAPABILITY', function () {
-            it('should advertise LOGIN capability', function (done) {
+        describe('IMAP CAPABILITY', () => {
+            it('should advertise LOGIN capability', (done) => {
                 const client = net.createConnection(IMAP_PORT, IMAP_HOST, () => {
                     let buffer = '';
                     let commandTag = 1;
@@ -280,8 +280,8 @@ describe('IMAP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('IMAP STARTTLS', function () {
-            it('should support STARTTLS for secure authentication', function (done) {
+        describe('IMAP STARTTLS', () => {
+            it('should support STARTTLS for secure authentication', (done) => {
                 const client = net.createConnection(IMAP_PORT, IMAP_HOST, () => {
                     let buffer = '';
                     let commandTag = 1;
@@ -344,8 +344,8 @@ describe('IMAP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('IMAP Session Management', function () {
-            it('should maintain session state after authentication', async function () {
+        describe('IMAP Session Management', () => {
+            it('should maintain session state after authentication', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 const testSession = (callback) => {
@@ -402,7 +402,7 @@ describe('IMAP Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should reject commands before authentication', function (done) {
+            it('should reject commands before authentication', (done) => {
                 const client = net.createConnection(IMAP_PORT, IMAP_HOST, () => {
                     let buffer = '';
                     let commandTag = 1;
@@ -438,8 +438,8 @@ describe('IMAP Protocol Authentication Tests', function () {
             });
         });
         
-        describe('IMAP Error Handling', function () {
-            it('should handle malformed LOGIN commands', function (done) {
+        describe('IMAP Error Handling', () => {
+            it('should handle malformed LOGIN commands', (done) => {
                 const client = net.createConnection(IMAP_PORT, IMAP_HOST, () => {
                     let buffer = '';
                     let commandTag = 1;
@@ -469,7 +469,7 @@ describe('IMAP Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should handle special characters in credentials', async function () {
+            it('should handle special characters in credentials', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // Test with literal syntax for special characters

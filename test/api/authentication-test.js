@@ -1,9 +1,9 @@
 'use strict';
 
+/* global describe, it, before, after */
+
 const chai = require('chai');
 const expect = chai.expect;
-const request = require('supertest');
-const crypto = require('crypto');
 
 const {
     TEST_WALLETS,
@@ -18,23 +18,19 @@ chai.config.includeStack = true;
 describe('API Authentication Tests', function () {
     this.timeout(10000);
     
-    let apiServer;
-    let db;
-    let userHandler;
-    
-    before(async function () {
+    before(async () => {
         // Initialize test server and database
         // This would be replaced with actual server initialization
         // For now, we'll mock the responses
     });
     
-    after(async function () {
+    after(async () => {
         // Cleanup
     });
     
-    describe('POST /authenticate', function () {
-        describe('EVM Wallet Authentication', function () {
-            it('should authenticate with valid EVM address and signature', async function () {
+    describe('POST /authenticate', () => {
+        describe('EVM Wallet Authentication', () => {
+            it('should authenticate with valid EVM address and signature', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // Mock the expected request
@@ -57,7 +53,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedBody).to.have.property('scope');
             });
             
-            it('should auto-create user on first authentication', async function () {
+            it('should auto-create user on first authentication', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // First auth should create user
@@ -71,7 +67,7 @@ describe('API Authentication Tests', function () {
                 expect(createdUser.blockchainAuth.address).to.equal(TEST_WALLETS.evm.address);
             });
             
-            it('should reject invalid EVM signature', async function () {
+            it('should reject invalid EVM signature', async () => {
                 const authData = await createInvalidAuthData('invalid-signature');
                 
                 // Should return 403 with AuthFailed code
@@ -82,7 +78,7 @@ describe('API Authentication Tests', function () {
                 expect(mockError.code).to.equal('AuthFailed');
             });
             
-            it('should handle base64-encoded EVM signatures', async function () {
+            it('should handle base64-encoded EVM signatures', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // Signature should be base64
@@ -93,8 +89,8 @@ describe('API Authentication Tests', function () {
             });
         });
         
-        describe('Solana Wallet Authentication', function () {
-            it('should authenticate with valid Solana address and signature', async function () {
+        describe('Solana Wallet Authentication', () => {
+            it('should authenticate with valid Solana address and signature', async () => {
                 const authData = await createAPIAuthData('solana');
                 
                 const expectedBody = {
@@ -112,7 +108,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedBody.signature.length).to.be.greaterThan(0);
             });
             
-            it('should auto-create Solana user on first authentication', async function () {
+            it('should auto-create Solana user on first authentication', async () => {
                 const authData = await createAPIAuthData('solana');
                 
                 const createdUser = createMockUserData('solana', true);
@@ -120,7 +116,7 @@ describe('API Authentication Tests', function () {
                 expect(createdUser.blockchainAuth.address).to.equal(TEST_WALLETS.solana.address);
             });
             
-            it('should reject invalid Solana signature', async function () {
+            it('should reject invalid Solana signature', async () => {
                 const authData = await createInvalidAuthData('invalid-signature');
                 authData.username = TEST_WALLETS.solana.address;
                 
@@ -132,8 +128,8 @@ describe('API Authentication Tests', function () {
             });
         });
         
-        describe('ENS Name Authentication', function () {
-            it('should authenticate with ENS name and owner signature', async function () {
+        describe('ENS Name Authentication', () => {
+            it('should authenticate with ENS name and owner signature', async () => {
                 const authData = await createAPIAuthData('ens');
                 
                 const expectedBody = {
@@ -154,7 +150,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedBody.signature).to.match(/^[A-Za-z0-9+/]+=*$/);
             });
             
-            it('should reject ENS name without signerAddress', async function () {
+            it('should reject ENS name without signerAddress', async () => {
                 const authData = await createInvalidAuthData('missing-signer');
                 
                 const expectedError = {
@@ -165,7 +161,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedError.code).to.be.oneOf(['BlockchainAddressNotFound', 'AuthFailed']);
             });
             
-            it('should auto-create user with resolved ENS owner', async function () {
+            it('should auto-create user with resolved ENS owner', async () => {
                 const authData = await createAPIAuthData('ens');
                 
                 const createdUser = createMockUserData('ens', true);
@@ -175,8 +171,8 @@ describe('API Authentication Tests', function () {
             });
         });
         
-        describe('SNS Name Authentication', function () {
-            it('should authenticate with SNS name and owner signature', async function () {
+        describe('SNS Name Authentication', () => {
+            it('should authenticate with SNS name and owner signature', async () => {
                 const authData = await createAPIAuthData('sns');
                 
                 const expectedBody = {
@@ -197,7 +193,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedBody.signature).to.match(/^[1-9A-HJ-NP-Za-km-z]+$/);
             });
             
-            it('should auto-create user with resolved SNS owner', async function () {
+            it('should auto-create user with resolved SNS owner', async () => {
                 const authData = await createAPIAuthData('sns');
                 
                 const createdUser = createMockUserData('sns', true);
@@ -207,8 +203,8 @@ describe('API Authentication Tests', function () {
             });
         });
         
-        describe('Nonce Management', function () {
-            it('should reject reused nonce', async function () {
+        describe('Nonce Management', () => {
+            it('should reject reused nonce', async () => {
                 const nonce = generateNonce();
                 const authData1 = await createAPIAuthData('evm', nonce);
                 const authData2 = await createAPIAuthData('evm', nonce);
@@ -222,7 +218,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedError.code).to.equal('NonceReused');
             });
             
-            it('should accept new nonce after successful auth', async function () {
+            it('should accept new nonce after successful auth', async () => {
                 const nonce1 = generateNonce();
                 const nonce2 = generateNonce();
                 
@@ -237,7 +233,7 @@ describe('API Authentication Tests', function () {
                 expect(authData2).to.have.property('signature');
             });
             
-            it('should require nonce parameter', async function () {
+            it('should require nonce parameter', async () => {
                 const authData = await createAPIAuthData('evm');
                 delete authData.nonce;
                 
@@ -250,8 +246,8 @@ describe('API Authentication Tests', function () {
             });
         });
         
-        describe('Scope Management', function () {
-            it('should accept master scope', async function () {
+        describe('Scope Management', () => {
+            it('should accept master scope', async () => {
                 const authData = await createAPIAuthData('evm');
                 const requestBody = {
                     ...authData,
@@ -261,7 +257,7 @@ describe('API Authentication Tests', function () {
                 expect(requestBody.scope).to.equal('master');
             });
             
-            it('should accept imap scope', async function () {
+            it('should accept imap scope', async () => {
                 const authData = await createAPIAuthData('evm');
                 const requestBody = {
                     ...authData,
@@ -271,7 +267,7 @@ describe('API Authentication Tests', function () {
                 expect(requestBody.scope).to.equal('imap');
             });
             
-            it('should accept pop3 scope', async function () {
+            it('should accept pop3 scope', async () => {
                 const authData = await createAPIAuthData('evm');
                 const requestBody = {
                     ...authData,
@@ -281,7 +277,7 @@ describe('API Authentication Tests', function () {
                 expect(requestBody.scope).to.equal('pop3');
             });
             
-            it('should accept smtp scope', async function () {
+            it('should accept smtp scope', async () => {
                 const authData = await createAPIAuthData('evm');
                 const requestBody = {
                     ...authData,
@@ -291,7 +287,7 @@ describe('API Authentication Tests', function () {
                 expect(requestBody.scope).to.equal('smtp');
             });
             
-            it('should only generate token with master scope', async function () {
+            it('should only generate token with master scope', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // Token with master scope
@@ -316,8 +312,8 @@ describe('API Authentication Tests', function () {
             });
         });
         
-        describe('Error Responses', function () {
-            it('should return detailed error for invalid username', async function () {
+        describe('Error Responses', () => {
+            it('should return detailed error for invalid username', async () => {
                 const authData = await createInvalidAuthData('invalid-username');
                 
                 const expectedError = {
@@ -328,7 +324,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedError.code).to.equal('InvalidBlockchainIdentifier');
             });
             
-            it('should return 400 for validation errors', async function () {
+            it('should return 400 for validation errors', async () => {
                 const authData = await createInvalidAuthData('invalid-username');
                 
                 // Expected status code for validation error
@@ -336,7 +332,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedStatus).to.equal(400);
             });
             
-            it('should return 403 for authentication failures', async function () {
+            it('should return 403 for authentication failures', async () => {
                 const authData = await createInvalidAuthData('invalid-signature');
                 
                 // Expected status code for auth failure
@@ -344,7 +340,7 @@ describe('API Authentication Tests', function () {
                 expect(expectedStatus).to.equal(403);
             });
             
-            it('should return 429 for rate limiting', async function () {
+            it('should return 429 for rate limiting', async () => {
                 // Simulate multiple failed attempts
                 const expectedError = {
                     code: 'RateLimited'
@@ -357,8 +353,8 @@ describe('API Authentication Tests', function () {
         });
     });
     
-    describe('POST /preauth', function () {
-        it('should check if user exists', async function () {
+    describe('POST /preauth', () => {
+        it('should check if user exists', async () => {
             const authData = await createAPIAuthData('evm');
             
             const requestBody = {
@@ -378,7 +374,7 @@ describe('API Authentication Tests', function () {
             expect(requestBody).to.have.property('scope');
         });
         
-        it('should work with ENS names', async function () {
+        it('should work with ENS names', async () => {
             const requestBody = {
                 username: TEST_WALLETS.ens.name,
                 scope: 'master'
@@ -387,7 +383,7 @@ describe('API Authentication Tests', function () {
             expect(requestBody.username).to.match(/\.eth$/);
         });
         
-        it('should work with SNS names', async function () {
+        it('should work with SNS names', async () => {
             const requestBody = {
                 username: TEST_WALLETS.sns.name,
                 scope: 'master'

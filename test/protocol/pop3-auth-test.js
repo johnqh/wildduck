@@ -25,18 +25,18 @@ describe('POP3 Protocol Authentication Tests', function () {
     const POP3_PORT = 9995; // Default WildDuck POP3 port (secure)
     const POP3_HOST = 'localhost';
     
-    before(function (done) {
+    before((done) => {
         // Server should be running
         done();
     });
     
-    after(function (done) {
+    after((done) => {
         done();
     });
     
-    describe('POP3 USER/PASS Commands (RFC 1939)', function () {
-        describe('EVM Wallet Authentication', function () {
-            it('should authenticate with USER/PASS commands using EVM address', async function () {
+    describe('POP3 USER/PASS Commands (RFC 1939)', () => {
+        describe('EVM Wallet Authentication', () => {
+            it('should authenticate with USER/PASS commands using EVM address', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // POP3 protocol test using raw socket
@@ -98,7 +98,7 @@ describe('POP3 Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should reject invalid EVM signature', async function () {
+            it('should reject invalid EVM signature', async () => {
                 const username = TEST_WALLETS.evm.address;
                 const invalidSignature = 'aW52YWxpZF9zaWduYXR1cmU='; // Invalid base64 signature
                 
@@ -148,8 +148,8 @@ describe('POP3 Protocol Authentication Tests', function () {
             });
         });
         
-        describe('Solana Wallet Authentication', function () {
-            it('should authenticate with USER/PASS commands using Solana address', async function () {
+        describe('Solana Wallet Authentication', () => {
+            it('should authenticate with USER/PASS commands using Solana address', async () => {
                 const authData = await createAPIAuthData('solana');
                 
                 const testPOP3Auth = (callback) => {
@@ -199,8 +199,8 @@ describe('POP3 Protocol Authentication Tests', function () {
             });
         });
         
-        describe('ENS Name Authentication', function () {
-            it('should authenticate with USER/PASS commands using ENS name', async function () {
+        describe('ENS Name Authentication', () => {
+            it('should authenticate with USER/PASS commands using ENS name', async () => {
                 const authData = await createAPIAuthData('ens');
                 
                 const testPOP3Auth = (callback) => {
@@ -251,8 +251,8 @@ describe('POP3 Protocol Authentication Tests', function () {
             });
         });
         
-        describe('POP3 CAPA Command', function () {
-            it('should advertise capabilities', function (done) {
+        describe('POP3 CAPA Command', () => {
+            it('should advertise capabilities', (done) => {
                 const client = net.createConnection(POP3_PORT, POP3_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -295,8 +295,8 @@ describe('POP3 Protocol Authentication Tests', function () {
             });
         });
         
-        describe('POP3 STLS Command', function () {
-            it('should support STLS for secure authentication', function (done) {
+        describe('POP3 STLS Command', () => {
+            it('should support STLS for secure authentication', (done) => {
                 const client = net.createConnection(POP3_PORT, POP3_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -363,8 +363,8 @@ describe('POP3 Protocol Authentication Tests', function () {
             });
         });
         
-        describe('POP3 Session Management', function () {
-            it('should maintain session state after authentication', async function () {
+        describe('POP3 Session Management', () => {
+            it('should maintain session state after authentication', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 const testSession = (callback) => {
@@ -425,7 +425,7 @@ describe('POP3 Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should reject commands before authentication', function (done) {
+            it('should reject commands before authentication', (done) => {
                 const client = net.createConnection(POP3_PORT, POP3_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -460,7 +460,7 @@ describe('POP3 Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should handle LIST command after authentication', async function () {
+            it('should handle LIST command after authentication', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 const testList = (callback) => {
@@ -519,8 +519,8 @@ describe('POP3 Protocol Authentication Tests', function () {
             });
         });
         
-        describe('POP3 Error Handling', function () {
-            it('should handle malformed USER command', function (done) {
+        describe('POP3 Error Handling', () => {
+            it('should handle malformed USER command', (done) => {
                 const client = net.createConnection(POP3_PORT, POP3_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -550,7 +550,7 @@ describe('POP3 Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should handle PASS without USER', function (done) {
+            it('should handle PASS without USER', (done) => {
                 const client = net.createConnection(POP3_PORT, POP3_HOST, () => {
                     let buffer = '';
                     let state = 'GREETING';
@@ -580,7 +580,7 @@ describe('POP3 Protocol Authentication Tests', function () {
                 });
             });
             
-            it('should handle special characters in credentials', async function () {
+            it('should handle special characters in credentials', async () => {
                 const authData = await createAPIAuthData('evm');
                 
                 // Test with credentials containing special characters
