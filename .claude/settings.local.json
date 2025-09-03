@@ -56,7 +56,8 @@
       "Bash(npx ncu:*)",
       "Bash(npx npm-check-updates:*)",
       "Bash(npm audit:*)",
-      "Bash(NODE_ENV=test npx mocha test --grep \"Blockchain Authentication\" --timeout 10000)"
+      "Bash(NODE_ENV=test npx mocha test --grep \"Blockchain Authentication\" --timeout 10000)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": [],
