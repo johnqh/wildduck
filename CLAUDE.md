@@ -391,32 +391,175 @@ NODE_ENV=test npx mocha test --grep "signature" --timeout 10000
 - **Authentication**: `lib/signature-verifier.js` → mail_box_indexer service
 - **Configuration**: `config/*.toml` files with environment variable overrides
 
-### AI-Friendly Development Patterns
+### AI-Assisted Development Guide
 
-#### Code Analysis Workflow
-1. **Read Context**: Always examine related files before making changes
-2. **Pattern Recognition**: Follow existing code patterns and naming conventions
-3. **Dependency Check**: Verify required dependencies are available before using libraries
-4. **Error Handling**: Follow established error handling patterns in the codebase
-5. **Testing**: Run appropriate test suites after changes
+#### Pre-Development Analysis
+1. **Project Context**: Run `node scripts/ai-assistant.js` for current state
+2. **Service Health**: Run `node scripts/ai-dev-helper.js` for diagnostics
+3. **Recent Changes**: Check `.ai-current-context.json` for latest updates
+4. **Code Patterns**: Review `.ai-project-context.md` for architectural guidance
 
-#### Common AI Tasks
-- **Feature Addition**: Follow existing handler patterns in `lib/` directory
-- **API Development**: Use established Joi schemas and error response patterns
-- **Database Operations**: Follow MongoDB patterns with proper error handling
-- **Authentication**: Leverage blockchain-based auth system for new features
-- **Configuration**: Use wild-config patterns and environment variable fallbacks
+#### AI Development Workflow
+```bash
+# 1. Get current project state
+node scripts/ai-assistant.js
 
-#### AI Optimization Tools
-- **Development Helper**: `node scripts/ai-dev-helper.js` - Comprehensive diagnostics
-- **Context File**: `.ai-context.json` - Quick project overview for AI systems
-- **Quick Commands**: Pre-configured npm scripts for common development tasks
-- **Architecture Maps**: Clear component relationships and data flow documentation
+# 2. Understand existing patterns
+cat .ai-project-context.md
 
-#### Development Workflow Best Practices
-- **Before Changes**: Read relevant files and understand existing patterns
-- **During Development**: Follow established conventions and error handling
-- **After Changes**: Run tests and lint code
-- **Documentation**: Update comments and documentation as needed
-- **Version Control**: Commit with descriptive messages following project patterns
-- **AI Diagnostics**: Use `node scripts/ai-dev-helper.js` to verify system state
+# 3. Check service health
+node scripts/ai-dev-helper.js
+
+# 4. Make changes following established patterns
+# 5. Test changes
+npm run runtest
+
+# 6. Validate code quality
+npx grunt eslint
+
+# 7. Update context if significant changes
+node scripts/ai-assistant.js
+```
+
+#### AI-Optimized File Structure
+```
+.ai-project-context.md     # Comprehensive AI context
+.ai-current-context.json   # Dynamic project state
+scripts/ai-assistant.js    # Interactive AI helper
+scripts/ai-dev-helper.js   # Service diagnostics
+CLAUDE.md                  # This file - AI guidelines
+```
+
+#### Common AI Development Patterns
+
+**Handler Class Creation:**
+```javascript
+// Follow this pattern for new handlers
+class NewHandler {
+    constructor(options) {
+        this.database = options.database;
+        this.redis = options.redis;
+        this.logger = options.logger || console;
+    }
+    
+    async processRequest(params, callback) {
+        try {
+            // Validate inputs
+            if (!params || !params.required) {
+                throw new Error('Missing required parameters');
+            }
+            
+            // Business logic
+            const result = await this.performOperation(params);
+            
+            // Return success
+            return callback ? callback(null, result) : result;
+        } catch (err) {
+            // Standard error handling
+            err.code = err.code || 'OperationFailed';
+            err.responseCode = err.responseCode || 500;
+            
+            this.logger.error('NewHandler', 'Operation failed: %s', err.message);
+            
+            if (callback) return callback(err);
+            throw err;
+        }
+    }
+}
+```
+
+**API Endpoint Creation:**
+```javascript
+// Standard API endpoint pattern
+server.post({
+    path: '/api/resource',
+    summary: 'Create Resource',
+    tags: ['Resources'],
+    validationObjs: {
+        requestBody: {
+            name: Joi.string().required(),
+            data: Joi.object().optional()
+        },
+        pathParams: {
+            user: userId
+        },
+        response: {
+            200: {
+                description: 'Success',
+                model: Joi.object({
+                    success: successRes,
+                    id: Joi.string().required()
+                })
+            }
+        }
+    }
+}, tools.responseWrapper(async (req, res) => {
+    // Permissions
+    req.validate(roles.can(req.role).createAny('resource'));
+    
+    // Business logic
+    const result = await handler.createResource(req.params);
+    
+    // Response
+    return res.json({
+        success: true,
+        id: result.id
+    });
+}));
+```
+
+**Blockchain Authentication Integration:**
+```javascript
+// Use existing blockchain auth patterns
+const authResult = await userHandler.asyncAuthenticate(
+    username,        // blockchain address/ENS/SNS
+    signature,       // cryptographic signature
+    {
+        create: true,  // auto-create user if valid
+        scope: 'master' // authentication scope
+    }
+);
+
+if (authResult.success) {
+    // User authenticated successfully
+    const userData = authResult.user;
+    const authToken = authResult.token;
+}
+```
+
+#### AI Development Best Practices
+1. **Context First**: Always run AI assistant before major changes
+2. **Pattern Following**: Use established patterns rather than creating new ones
+3. **Incremental Changes**: Make small, testable changes
+4. **Error Consistency**: Follow established error handling patterns
+5. **Documentation Updates**: Update AI context files after significant changes
+6. **Service Dependencies**: Verify external services (MongoDB, Redis, Indexer) availability
+7. **Test Coverage**: Run appropriate test suites for changed functionality
+
+#### AI Debugging Helpers
+- `node scripts/ai-assistant.js` - Get current project state and recommendations
+- `node scripts/ai-dev-helper.js` - Check service health and configuration
+- `npm run printconf` - Validate configuration without starting server
+- `NODE_ENV=test npm run runtest` - Run tests in test environment
+- `npx grunt eslint` - Check code quality and style
+
+#### Integration Testing for AI Changes
+```bash
+# Test blockchain authentication
+NODE_ENV=test npx mocha test --grep "signature" --timeout 10000
+
+# Test API endpoints
+NODE_ENV=test npx grunt mochaTest:api --force
+
+# Test specific functionality
+NODE_ENV=test npx mocha test/specific-test.js
+```
+
+#### AI Context Maintenance
+The AI optimization includes several auto-updating context files:
+- **Static Context**: `.ai-project-context.md` (manual updates)
+- **Dynamic Context**: `.ai-current-context.json` (auto-generated)
+- **Service Health**: Updated by `ai-dev-helper.js`
+- **Project Guidelines**: This CLAUDE.md file
+
+Run `node scripts/ai-assistant.js` after significant changes to update context.

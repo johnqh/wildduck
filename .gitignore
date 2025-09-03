@@ -12,3 +12,6 @@ api-tests-overview.md
 # Environment files
 .env.local
 .env.*.local
+
+# AI-generated dynamic context (regenerated each run)
+.ai-current-context.json
