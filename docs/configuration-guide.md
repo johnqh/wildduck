@@ -364,7 +364,8 @@ export MAIL_BOX_INDEXER_URL="https://indexer.yourdomain.com"
 ### Service Requirements
 
 The mail_box_indexer service must provide:
-- **POST** `/verify` endpoint for signature verification
+- **POST** `/api/signature/verify` endpoint for signature verification
+- **GET** `/api/addresses/validate/:address` endpoint for address validation
 - Support for EVM (Ethereum) and Solana signatures
 - Request format: `{ walletAddress, signature, message }`
 - Response format: `{ isValid: boolean, addressType: string }`
