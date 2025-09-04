@@ -232,6 +232,7 @@ describe('Component', () => {
             'Use wild-config for configuration management with environment fallbacks',
             'Leverage existing handler classes for database operations',
             'Maintain blockchain authentication patterns for new features',
+            'Use helper methods in message-handler.js for complex operations',
             'Update documentation when adding significant functionality'
         ];
     }
