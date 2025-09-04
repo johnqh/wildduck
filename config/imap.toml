@@ -55,7 +55,7 @@ ignoredHosts = []
 #ignoreSTARTTLS=true
 
 # Apple push notifications
-# TODO: missing actual implementation for Apple Push Service
+# Apple Push Service requires implementation - see lib/handlers/on-xapplepushservice.js and GitHub issue #711
 [aps]
 enabled = false
 
