@@ -12,8 +12,7 @@ echo "Creating user"
 USERRESPONSE=`curl --silent -XPOST http://127.0.0.1:8080/users \
 -H 'Content-type: application/json' \
 -d '{
-  "username": "testuser",
-  "password": "pass",
+  "username": "0x742D35Cc6634C0532925A3B844bC9e7595f0bEB7",
   "name": "Test User"
 }'`
 echo "UR: $USERRESPONSE"

@@ -58,7 +58,13 @@
       "Bash(npm audit:*)",
       "Bash(NODE_ENV=test npx mocha test --grep \"Blockchain Authentication\" --timeout 10000)",
       "Bash(timeout:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(brew list:*)",
+      "Bash(brew install:*)",
+      "Bash(brew tap:*)",
+      "Bash(NODE_ENV=test timeout 5s npm start)",
+      "Bash(NODE_ENV=test node server.js)",
+      "Bash(NODE_ENV=test npm run dev:quick-test)"
     ],
     "deny": [],
     "ask": [],
