@@ -1,0 +1,18 @@
+info App  --------------------------------------------------------------
+info App 
+info App   █     █░ ██▓ ██▓    ▓█████▄ ▓█████▄  █    ██  ▄████▄   ██ ▄█▀
+info App  ▓█░ █ ░█░▓██▒▓██▒    ▒██▀ ██▌▒██▀ ██▌ ██  ▓██▒▒██▀ ▀█   ██▄█▒
+info App  ▒█░ █ ░█ ▒██▒▒██░    ░██   █▌░██   █▌▓██  ▒██░▒▓█    ▄ ▓███▄░
+info App  ░█░ █ ░█ ░██░▒██░    ░▓█▄   ▌░▓█▄   ▌▓▓█  ░██░▒▓▓▄ ▄██▒▓██ █▄
+info App  ░░██▒██▓ ░██░░██████▒░▒████▓ ░▒████▓ ▒▒█████▓ ▒ ▓███▀ ░▒██▒ █▄
+info App  ░ ▓░▒ ▒  ░▓  ░ ▒░▓  ░ ▒▒▓  ▒  ▒▒▓  ▒ ░▒▓▒ ▒ ▒ ░ ░▒ ▒  ░▒ ▒▒ ▓▒
+info App   ▒ ░ ░   ▒ ░░ ░ ▒  ░ ░ ▒  ▒  ░ ▒  ▒ ░░▒░ ░ ░   ░  ▒   ░ ░▒ ▒░
+info App   ░   ░   ▒ ░  ░ ░    ░ ░  ░  ░ ░  ░  ░░░ ░ ░ ░        ░ ░░ ░
+info App     ░     ░      ░  ░   ░       ░       ░     ░ ░      ░  ░
+info App                       ░       ░               ░
+info App 
+info App  ------------------- @johnqh/wildduck@6.11.3 ------------------
+info App 
+(node:6571) [DEP0111] DeprecationWarning: Access to process.binding('http_parser') is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:6571) [DEP0111] DeprecationWarning: Access to process.binding('http_parser') is deprecated.

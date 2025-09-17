@@ -1,0 +1,69 @@
+info App  --------------------------------------------------------------
+info App 
+info App   █     █░ ██▓ ██▓    ▓█████▄ ▓█████▄  █    ██  ▄████▄   ██ ▄█▀
+info App  ▓█░ █ ░█░▓██▒▓██▒    ▒██▀ ██▌▒██▀ ██▌ ██  ▓██▒▒██▀ ▀█   ██▄█▒
+info App  ▒█░ █ ░█ ▒██▒▒██░    ░██   █▌░██   █▌▓██  ▒██░▒▓█    ▄ ▓███▄░
+info App  ░█░ █ ░█ ░██░▒██░    ░▓█▄   ▌░▓█▄   ▌▓▓█  ░██░▒▓▓▄ ▄██▒▓██ █▄
+info App  ░░██▒██▓ ░██░░██████▒░▒████▓ ░▒████▓ ▒▒█████▓ ▒ ▓███▀ ░▒██▒ █▄
+info App  ░ ▓░▒ ▒  ░▓  ░ ▒░▓  ░ ▒▒▓  ▒  ▒▒▓  ▒ ░▒▓▒ ▒ ▒ ░ ░▒ ▒  ░▒ ▒▒ ▓▒
+info App   ▒ ░ ░   ▒ ░░ ░ ▒  ░ ░ ▒  ▒  ░ ▒  ▒ ░░▒░ ░ ░   ░  ▒   ░ ░▒ ▒░
+info App   ░   ░   ▒ ░  ░ ░    ░ ░  ░  ░ ░  ░  ░░░ ░ ░ ░        ░ ░░ ░
+info App     ░     ░      ░  ░   ░       ░       ░     ░ ░      ░  ░
+info App                       ░       ░               ░
+info App 
+info App  ------------------- @johnqh/wildduck@6.11.3 ------------------
+info App 
+(node:88538) [DEP0111] DeprecationWarning: Access to process.binding('http_parser') is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:88538) [DEP0111] DeprecationWarning: Access to process.binding('http_parser') is deprecated.
+info IMAP IMAP Server listening on 127.0.0.1:9993
+info POP3 Secure POP3 Server listening on 0.0.0.0:9995
+info LMTP LMTP Server listening on 127.0.0.1:2424
+info API Server listening on 127.0.0.1:8080
+verb Plugins Plugins loaded
+info App All servers started, ready to process some mail
+info IMAP [wl655z4jw65pqjiq] Connection from [127.0.0.1] to Qiangs-MacBook-Pro.local 127.0.0.1:9993
+sill IMAP [wl655z4jw65pqjiq] S: * OK WildDuck IMAP Server ready for requests from 127.0.0.1 wl655z4jw65pqjiq
+info IMAP [wl655z4jw65pqjiq] Closing connection due to ECONNRESET
+info IMAP [wl655z4jw65pqjiq] Connection closed to [127.0.0.1]
+info IMAP [laxu6pkrugd5oq3l] Connection from [127.0.0.1] to Qiangs-MacBook-Pro.local 127.0.0.1:9993
+sill IMAP [laxu6pkrugd5oq3l] S: * OK WildDuck IMAP Server ready for requests from 127.0.0.1 laxu6pkrugd5oq3l
+info IMAP [laxu6pkrugd5oq3l] Connection closed to [127.0.0.1]
+info USER Username validation bypassed for 0x742d35cc6634c0532925a3b844bc9e7595f0beb7 (INDEXER_BASE_URL not set)
+ERR! DB UPDATEUSER id=68cb0807f39fd0f71f4798f2 error=this.messageHandler.updateUser is not a function
+info Gelf {"short_message":"WILDDUCK HTTP [POST /users] OK","_remote_ip":"127.0.0.1","_http_route":"/users","_http_method":"POST","_user":"root","_role":"root","_api_response":"success","_size":58,"_req_username":"0x742D35Cc6634C0532925A3B844bC9e7595f0bEB7","_req_name":"Test User","_res_id":"new ObjectId('68cb0807f39fd0f71f4798f2')","facility":"wildduck","host":"Qiangs-MacBook-Pro.local","timestamp":1758136327.421,"_component":"wildduck"}
+http API 127.0.0.1 root [-/-] POST /users 200 266ms
+info Gelf {"short_message":"WILDDUCK HTTP [GET /users/:user/mailboxes] OK","_remote_ip":"127.0.0.1","_http_route":"/users/:user/mailboxes","_http_method":"GET","_user":"root","_role":"root","_api_response":"success","_size":1220,"_req_user":"68cb0807f39fd0f71f4798f2","facility":"wildduck","host":"Qiangs-MacBook-Pro.local","timestamp":1758136327.484,"_component":"wildduck"}
+http API 127.0.0.1 root [-/-] GET /users/68cb0807f39fd0f71f4798f2/mailboxes 200 28ms
+verb Tasks Starting task poll loop
+verb Tasks type=acme-update id=acme-update-id data={}
+http API 127.0.0.1 root [-/-] PUT /users/68cb0807f39fd0f71f4798f2/mailboxes/68cb0807f39fd0f71f4798f7 - 33832ms
+info IMAP [q6qi23zlidq3iori] Connection from [127.0.0.1] to Qiangs-MacBook-Pro.local 127.0.0.1:9993
+sill IMAP [q6qi23zlidq3iori] S: * OK WildDuck IMAP Server ready for requests from 127.0.0.1 q6qi23zlidq3iori
+info IMAP [q6qi23zlidq3iori] Connection closed to [127.0.0.1]
+info USER Username validation bypassed for 0x742d35cc6634c0532925a3b844bc9e7595f0beb7 (INDEXER_BASE_URL not set)
+ERR! DB UPDATEUSER id=68cb0854f39fd0f71f4798f9 error=this.messageHandler.updateUser is not a function
+info Gelf {"short_message":"WILDDUCK HTTP [POST /users] OK","_remote_ip":"127.0.0.1","_http_route":"/users","_http_method":"POST","_user":"root","_role":"root","_api_response":"success","_size":58,"_req_username":"0x742D35Cc6634C0532925A3B844bC9e7595f0bEB7","_req_name":"Test User","_res_id":"new ObjectId('68cb0854f39fd0f71f4798f9')","facility":"wildduck","host":"Qiangs-MacBook-Pro.local","timestamp":1758136404.129,"_component":"wildduck"}
+http API 127.0.0.1 root [-/-] POST /users 200 17ms
+info Gelf {"short_message":"WILDDUCK HTTP [GET /users/:user/mailboxes] OK","_remote_ip":"127.0.0.1","_http_route":"/users/:user/mailboxes","_http_method":"GET","_user":"root","_role":"root","_api_response":"success","_size":1220,"_req_user":"68cb0854f39fd0f71f4798f9","facility":"wildduck","host":"Qiangs-MacBook-Pro.local","timestamp":1758136404.177,"_component":"wildduck"}
+http API 127.0.0.1 root [-/-] GET /users/68cb0854f39fd0f71f4798f9/mailboxes 200 36ms
+http API 127.0.0.1 root [-/-] PUT /users/68cb0854f39fd0f71f4798f9/mailboxes/68cb0854f39fd0f71f4798fe - 76984ms
+sill IMAP [d4734lsin6f6d74w] C: A001 CAPABILITY
+sill IMAP [d4734lsin6f6d74w] S: * CAPABILITY IMAP4rev1 AUTH=PLAIN AUTH=PLAIN-CLIENTTOKEN CHILDREN ENABLE ID IDLE NAMESPACE QUOTA SASL-IR UNSELECT XLIST
+sill IMAP [d4734lsin6f6d74w] S: A001 OK CAPABILITY completed
+sill IMAP [d4734lsin6f6d74w] C: A002 LOGOUT
+sill IMAP [d4734lsin6f6d74w] S: * BYE Logout requested
+sill IMAP [d4734lsin6f6d74w] S: A002 OK Melissa, I have to go, they got into my toilet paper! Melissa, I have to go!
+info IMAP [d4734lsin6f6d74w] Connection from [127.0.0.1] to Qiangs-MacBook-Pro.local 127.0.0.1:9993
+sill IMAP [d4734lsin6f6d74w] S: * OK WildDuck IMAP Server ready for requests from 127.0.0.1 d4734lsin6f6d74w
+info IMAP [d4734lsin6f6d74w] Connection closed to [127.0.0.1]
+info IMAP [4xhga7prcufcox4s] Connection from [127.0.0.1] to Qiangs-MacBook-Pro.local 127.0.0.1:9993
+sill IMAP [4xhga7prcufcox4s] S: * OK WildDuck IMAP Server ready for requests from 127.0.0.1 4xhga7prcufcox4s
+sill IMAP [4xhga7prcufcox4s] C: T1 CAPABILITY
+sill IMAP [4xhga7prcufcox4s] S: * CAPABILITY IMAP4rev1 AUTH=PLAIN AUTH=PLAIN-CLIENTTOKEN CHILDREN ENABLE ID IDLE NAMESPACE QUOTA SASL-IR UNSELECT XLIST
+sill IMAP [4xhga7prcufcox4s] S: T1 OK CAPABILITY completed
+sill IMAP [4xhga7prcufcox4s] C: T2 LOGOUT
+sill IMAP [4xhga7prcufcox4s] S: * BYE Logout requested
+sill IMAP [4xhga7prcufcox4s] S: T2 OK Bad biscuits make the baker broke, bro.
+info IMAP [4xhga7prcufcox4s] Connection closed to [127.0.0.1]
+verb Tasks type=acme-update id=acme-update-id data={}
