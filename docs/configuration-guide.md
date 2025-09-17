@@ -358,24 +358,26 @@ mailBoxIndexerUrl = "http://localhost:42069"
 
 ```bash
 # Override in environment
-export MAIL_BOX_INDEXER_URL="https://indexer.yourdomain.com"
+export INDEXER_BASE_URL="https://indexer.yourdomain.com"
 ```
 
 ### Service Requirements
 
 The mail_box_indexer service must provide:
-- **POST** `/api/signature/verify` endpoint for signature verification
-- **GET** `/api/addresses/validate/:address` endpoint for address validation
-- Support for EVM (Ethereum) and Solana signatures
-- Request format: `{ walletAddress, signature, message }`
-- Response format: `{ isValid: boolean, addressType: string }`
+
+-   **POST** `/api/signature/verify` endpoint for signature verification
+-   **GET** `/api/addresses/validate/:address` endpoint for address validation
+-   Support for EVM (Ethereum) and Solana signatures
+-   Request format: `{ walletAddress, signature, message }`
+-   Response format: `{ isValid: boolean, addressType: string }`
 
 ### Error Handling
 
 WildDuck handles mail_box_indexer service failures gracefully:
-- Connection refused: Clear error about service unavailability
-- HTTP errors: Detailed error messages from service response
-- Network timeouts: 10-second timeout with descriptive errors
+
+-   Connection refused: Clear error about service unavailability
+-   HTTP errors: Detailed error messages from service response
+-   Network timeouts: 10-second timeout with descriptive errors
 
 ## Plugin Configuration (`plugins.toml`)
 
@@ -416,21 +418,12 @@ settings = { key = "value" }
         {
             "role": "user",
             "description": "User account management",
-            "permissions": [
-                "users:read",
-                "users:update:own",
-                "messages:read:own",
-                "mailboxes:read:own"
-            ]
+            "permissions": ["users:read", "users:update:own", "messages:read:own", "mailboxes:read:own"]
         },
         {
             "role": "api",
             "description": "API access only",
-            "permissions": [
-                "users:read",
-                "users:create",
-                "messages:create"
-            ]
+            "permissions": ["users:read", "users:create", "messages:create"]
         }
     ],
     "resources": {
@@ -519,11 +512,11 @@ metrics = { enabled = true, path = "/metrics" }
 
 WildDuck validates configuration on startup. Common validation rules:
 
-- **Port conflicts**: No two services can use the same port
-- **Database connectivity**: All database URLs must be accessible
-- **TLS certificates**: Certificate files must exist and be valid
-- **Plugin dependencies**: Plugin modules must be available
-- **Access control**: Role permissions must reference valid resources
+-   **Port conflicts**: No two services can use the same port
+-   **Database connectivity**: All database URLs must be accessible
+-   **TLS certificates**: Certificate files must exist and be valid
+-   **Plugin dependencies**: Plugin modules must be available
+-   **Access control**: Role permissions must reference valid resources
 
 ## Configuration Helpers
 
@@ -571,25 +564,28 @@ console.log('Configuration validation passed');
 ## Best Practices
 
 1. **Security**:
-   - Always use TLS in production
-   - Set strong passwords for Redis/MongoDB
-   - Limit connection counts per IP
-   - Enable rate limiting for API
+
+    - Always use TLS in production
+    - Set strong passwords for Redis/MongoDB
+    - Limit connection counts per IP
+    - Enable rate limiting for API
 
 2. **Performance**:
-   - Use multiple processes in production
-   - Configure appropriate connection pools
-   - Enable compression for high-traffic IMAP
-   - Use Redis clustering for scale
+
+    - Use multiple processes in production
+    - Configure appropriate connection pools
+    - Enable compression for high-traffic IMAP
+    - Use Redis clustering for scale
 
 3. **Monitoring**:
-   - Enable GELF logging for centralized logs
-   - Set up health check endpoints
-   - Monitor database performance
-   - Track authentication failures
+
+    - Enable GELF logging for centralized logs
+    - Set up health check endpoints
+    - Monitor database performance
+    - Track authentication failures
 
 4. **Backup**:
-   - Regular MongoDB backups
-   - Export DKIM keys securely
-   - Document configuration changes
-   - Test disaster recovery procedures
+    - Regular MongoDB backups
+    - Export DKIM keys securely
+    - Document configuration changes
+    - Test disaster recovery procedures

@@ -21,7 +21,7 @@ class WildDuckAIAssistant {
         const packageJson = this.readJSONFile('package.json');
         const gitLog = this.executeCommand('git log --oneline -10');
         const gitStatus = this.executeCommand('git status --porcelain');
-        
+
         return {
             version: packageJson?.version || 'unknown',
             recentCommits: gitLog?.split('\n').slice(0, 5) || [],
@@ -52,13 +52,7 @@ class WildDuckAIAssistant {
      */
     getBlockchainContext() {
         return {
-            supportedIdentities: [
-                'EVM Addresses (0x...)',
-                'Base64 EVM Addresses',
-                'Solana Addresses (Base58)',
-                'ENS Names (.eth, .box)',
-                'SNS Names (.sol)'
-            ],
+            supportedIdentities: ['EVM Addresses (0x...)', 'Base64 EVM Addresses', 'Solana Addresses (Base58)', 'ENS Names (.eth, .box)', 'SNS Names (.sol)'],
             authenticationFlow: [
                 'Username validation via indexer',
                 'Address resolution for ENS/SNS',
@@ -69,11 +63,7 @@ class WildDuckAIAssistant {
                 validation: 'GET /api/addresses/validate/:address',
                 verification: 'POST /api/signature/verify'
             },
-            disabledEndpoints: [
-                'POST /users/:user/addresses',
-                'PUT /users/:user/addresses/:id',
-                'DELETE /users/:user/addresses/:address'
-            ]
+            disabledEndpoints: ['POST /users/:user/addresses', 'PUT /users/:user/addresses/:id', 'DELETE /users/:user/addresses/:address']
         };
     }
 
@@ -160,7 +150,7 @@ describe('Component', () => {
      */
     getIssueResolutions() {
         const issues = [];
-        
+
         // Check for common configuration issues
         try {
             if (!config.dbs?.mongo) {
@@ -171,11 +161,11 @@ describe('Component', () => {
                 });
             }
 
-            if (!config.mailBoxIndexerUrl && !process.env.MAIL_BOX_INDEXER_URL) {
+            if (!config.mailBoxIndexerUrl && !process.env.INDEXER_BASE_URL) {
                 issues.push({
                     type: 'config',
                     issue: 'Indexer service URL not configured',
-                    solution: 'Set MAIL_BOX_INDEXER_URL environment variable or configure mailBoxIndexerUrl'
+                    solution: 'Set INDEXER_BASE_URL environment variable or configure mailBoxIndexerUrl'
                 });
             }
         } catch (err) {
@@ -271,9 +261,10 @@ describe('Component', () => {
     scanDirectory(dir, filter = () => true) {
         const fullPath = path.join(this.projectRoot, dir);
         if (!fs.existsSync(fullPath)) return [];
-        
+
         try {
-            return fs.readdirSync(fullPath)
+            return fs
+                .readdirSync(fullPath)
                 .filter(filter)
                 .map(file => ({
                     name: file,
@@ -287,40 +278,37 @@ describe('Component', () => {
     }
 
     getLastModified() {
-        const importantFiles = [
-            'lib/user-handler.js',
-            'lib/api/addresses.js',
-            'lib/signature-verifier.js',
-            'package.json',
-            'CLAUDE.md'
-        ];
+        const importantFiles = ['lib/user-handler.js', 'lib/api/addresses.js', 'lib/signature-verifier.js', 'package.json', 'CLAUDE.md'];
 
-        return importantFiles.map(file => {
-            const fullPath = path.join(this.projectRoot, file);
-            if (fs.existsSync(fullPath)) {
-                return {
-                    file,
-                    lastModified: fs.statSync(fullPath).mtime
-                };
-            }
-            return null;
-        }).filter(Boolean).sort((a, b) => b.lastModified - a.lastModified);
+        return importantFiles
+            .map(file => {
+                const fullPath = path.join(this.projectRoot, file);
+                if (fs.existsSync(fullPath)) {
+                    return {
+                        file,
+                        lastModified: fs.statSync(fullPath).mtime
+                    };
+                }
+                return null;
+            })
+            .filter(Boolean)
+            .sort((a, b) => b.lastModified - a.lastModified);
     }
 
     getActiveFeatures() {
         const features = [];
-        
+
         // Check for blockchain features
         if (fs.existsSync(path.join(this.projectRoot, 'lib/signature-verifier.js'))) {
             features.push('Blockchain Authentication');
         }
-        
+
         // Check for disabled endpoints
         const addressesApi = fs.readFileSync(path.join(this.projectRoot, 'lib/api/addresses.js'), 'utf8');
         if (addressesApi.includes('EndpointDisabled')) {
             features.push('Disabled Address Management');
         }
-        
+
         return features;
     }
 
@@ -363,10 +351,7 @@ describe('Component', () => {
         console.log('   • scripts/ai-dev-helper.js - Service diagnostics');
 
         // Save context to file for AI reference
-        fs.writeFileSync(
-            path.join(this.projectRoot, '.ai-current-context.json'),
-            JSON.stringify(context, null, 2)
-        );
+        fs.writeFileSync(path.join(this.projectRoot, '.ai-current-context.json'), JSON.stringify(context, null, 2));
         console.log('\n💾 Current context saved to .ai-current-context.json');
     }
 }

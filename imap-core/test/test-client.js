@@ -21,6 +21,11 @@ function runClientMockup(options, callback) {
     let callbackSent = false;
     let delay;
 
+    console.log('=== TESTCLIENT DEBUG ===');
+    console.log('options.secure:', options.secure);
+    console.log('Using:', options.secure ? 'TLS' : 'NET');
+    console.log('Host:', host, 'Port:', port);
+    
     let socket = (options.secure ? tls : net).connect(
         {
             rejectUnauthorized: false,
