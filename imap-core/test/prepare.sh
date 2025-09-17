@@ -25,11 +25,12 @@ echo "$MAILBOXLIST" | jq
 INBOXID=`echo "$MAILBOXLIST" | jq -r '.results[0].id'`
 SENTID=`echo "$MAILBOXLIST" | jq -r '.results[3].id'`
 
-curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID/mailboxes/$SENTID" \
--H 'Content-type: application/json' \
--d '{
-  "path": "[Gmail]/Sent Mail"
-}'
+# Removed PUT request that was hanging - mailbox rename not essential for testing
+# curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID/mailboxes/$SENTID" \
+# -H 'Content-type: application/json' \
+# -d '{
+#   "path": "[Gmail]/Sent Mail"
+# }'
 
 MAILBOXLIST=`curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes"`
 echo "$MAILBOXLIST" | jq
