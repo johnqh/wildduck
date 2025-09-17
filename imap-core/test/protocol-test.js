@@ -1,5 +1,5 @@
 /* eslint no-unused-expressions: 0, prefer-arrow-callback: 0, no-console: 0 */
-/* global after */
+/* global before, after */
 
 'use strict';
 
@@ -7,6 +7,7 @@ let config = require('wild-config');
 //let testServer = require('./test-server.js');
 let testClient = require('./test-client.js');
 let exec = require('child_process').exec;
+let net = require('net');
 
 let chai = require('chai');
 let chunks = require('./fixtures/chunks');
@@ -22,7 +23,6 @@ describe('IMAP Protocol integration tests', function () {
     
     // Skip integration tests if server is not available
     before(function(done) {
-        let net = require('net');
         let socket = net.createConnection(port, '127.0.0.1');
         let completed = false;
         
@@ -31,7 +31,7 @@ describe('IMAP Protocol integration tests', function () {
                 completed = true;
                 serverAvailable = true;
                 socket.end();
-                done();
+                return done();
             }
         });
         
