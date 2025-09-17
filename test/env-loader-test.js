@@ -59,15 +59,15 @@ describe('Environment Loader', () => {
     });
 
     it('should prioritize process.env over .env files', () => {
-        process.env.MAIL_BOX_INDEXER_URL = 'from_process_env';
-        const value = env.get('MAIL_BOX_INDEXER_URL');
+        process.env.INDEXER_BASE_URL = 'from_process_env';
+        const value = env.get('INDEXER_BASE_URL');
         assert.strictEqual(value, 'from_process_env');
-        delete process.env.MAIL_BOX_INDEXER_URL;
+        delete process.env.INDEXER_BASE_URL;
     });
 
     it('should load from .env file when process.env not set', () => {
         // This will load from the actual .env file if it exists
-        const value = env.get('MAIL_BOX_INDEXER_URL');
+        const value = env.get('INDEXER_BASE_URL');
         if (value !== undefined) {
             assert.ok(typeof value === 'string');
         }

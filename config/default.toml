@@ -12,7 +12,7 @@ ident = "wildduck"
 processes = 1
 
 # If usernames are not email addresses then use this domain as default hostname part
-#emailDomain="mydomain.info"
+emailDomain="example.com"
 
 # Mail Box Indexer service URL for signature verification
 mailBoxIndexerUrl = "http://localhost:42069"

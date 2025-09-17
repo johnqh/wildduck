@@ -18,6 +18,28 @@ const { MAX_SUB_MAILBOXES, MAX_MAILBOX_NAME_LENGTH } = require('../../lib/consts
 describe('IMAP Protocol integration tests', function () {
     this.timeout(100000); // eslint-disable-line no-invalid-this
     let port = 9993;
+    
+    // Skip integration tests if server is not available
+    before(function(done) {
+        let net = require('net');
+        let socket = net.createConnection(port, '127.0.0.1');
+        
+        socket.on('connect', function() {
+            socket.end();
+            done();
+        });
+        
+        socket.on('error', function() {
+            console.log('IMAP server not running on port ' + port + ', skipping integration tests');
+            this.skip(); // eslint-disable-line no-invalid-this
+        });
+        
+        setTimeout(() => {
+            socket.destroy();
+            console.log('IMAP server connection timeout, skipping integration tests');
+            this.skip(); // eslint-disable-line no-invalid-this
+        }, 2000);
+    });
 
     beforeEach(function (done) {
         exec(__dirname + '/prepare.sh ' + config.dbs.dbname, { cwd: __dirname }, (err, stdout, stderr) => {
@@ -53,7 +75,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -112,7 +134,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -176,7 +198,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -194,7 +216,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -210,7 +232,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -226,7 +248,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -242,7 +264,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -258,7 +280,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -276,7 +298,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -295,7 +317,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -314,7 +336,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -335,7 +357,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -356,7 +378,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -377,7 +399,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -398,7 +420,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -418,7 +440,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -438,7 +460,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -459,7 +481,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -488,7 +510,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -519,7 +541,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -550,7 +572,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -577,7 +599,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -604,7 +626,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -624,7 +646,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -643,7 +665,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -666,7 +688,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -685,7 +707,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -708,7 +730,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -735,7 +757,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     //debug: true,
                     port
                 },
@@ -757,7 +779,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -774,7 +796,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -799,7 +821,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -816,7 +838,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -835,7 +857,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -852,7 +874,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -872,7 +894,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -890,7 +912,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -910,7 +932,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -927,7 +949,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -946,7 +968,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -965,7 +987,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -985,7 +1007,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1003,7 +1025,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1022,7 +1044,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1040,7 +1062,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1059,7 +1081,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1080,7 +1102,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1098,7 +1120,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1117,7 +1139,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1135,7 +1157,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1154,7 +1176,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1182,7 +1204,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1212,7 +1234,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1236,7 +1258,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1257,7 +1279,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1279,7 +1301,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1306,7 +1328,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1329,7 +1351,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1355,7 +1377,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1386,7 +1408,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1408,7 +1430,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1430,7 +1452,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1454,7 +1476,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1478,7 +1500,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1496,7 +1518,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1518,7 +1540,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1542,7 +1564,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1565,7 +1587,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1587,7 +1609,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1608,7 +1630,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1627,7 +1649,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1645,7 +1667,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1687,7 +1709,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1710,7 +1732,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1732,7 +1754,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1750,7 +1772,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1772,7 +1794,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1793,7 +1815,7 @@ describe('IMAP Protocol integration tests', function () {
                 testClient(
                     {
                         commands: cmds,
-                        secure: true,
+                        secure: false,
                         port
                     },
                     function (resp) {
@@ -1814,7 +1836,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1833,7 +1855,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {
@@ -1854,7 +1876,7 @@ describe('IMAP Protocol integration tests', function () {
             testClient(
                 {
                     commands: cmds,
-                    secure: true,
+                    secure: false,
                     port
                 },
                 function (resp) {

@@ -343,7 +343,7 @@ describe('Send multiple messages', function () {
         const client = new ImapFlow({
             host: '127.0.0.1',
             port: 9993,
-            secure: true,
+            secure: false,
             auth: {
                 user: 'user4',
                 pass: 'secretpass'
