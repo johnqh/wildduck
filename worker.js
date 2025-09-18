@@ -17,34 +17,13 @@ const errors = require('./lib/errors');
 // preload certificate files
 require('./lib/certs');
 
-// Database connection retry logic
-const connectWithRetry = (retryCount = 0, maxRetries = 5) => {
-    const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 10000); // Exponential backoff, max 10s
-    
-    log.info('App', 'Starting WildDuck worker process. PID=%s', process.pid);
-    log.info('App', 'Initializing database connections... (attempt %d/%d)', retryCount + 1, maxRetries + 1);
-
-    db.connect(err => {
-        if (err) {
-            log.error('Db', 'Failed to setup database connection. Error: %s', err.message);
-            log.error('Db', 'Error details: %s', err.code || 'UNKNOWN_ERROR');
-            log.error('Db', 'Error stack: %s', err.stack);
-            
-            if (retryCount < maxRetries) {
-                log.warn('Db', 'Retrying database connection in %dms... (attempt %d/%d)', retryDelay, retryCount + 2, maxRetries + 1);
-                return setTimeout(() => connectWithRetry(retryCount + 1, maxRetries), retryDelay);
-            } else {
-                log.error('Db', 'Maximum retry attempts (%d) reached. Giving up.', maxRetries + 1);
-                log.error('Db', 'Will exit in 3 seconds...');
-                errors.notify(err);
-                return setTimeout(() => {
-                    log.error('App', 'Exiting worker process due to database connection failure after %d attempts', maxRetries + 1);
-                    process.exit(1);
-                }, 3000);
-            }
-        }
-        
-        log.info('Db', 'Database connections established successfully on attempt %d', retryCount + 1);
+// Initialize database connection
+db.connect(err => {
+    if (err) {
+        log.error('Db', 'Failed to setup database connection');
+        errors.notify(err);
+        return setTimeout(() => process.exit(1), 3000);
+    }
 
     tasks.start(err => {
         if (err) {
@@ -142,8 +121,4 @@ const connectWithRetry = (retryCount = 0, maxRetries = 5) => {
             });
         });
     });
-    }); // End of db.connect callback
-}; // End of connectWithRetry function
-
-// Start the connection process
-connectWithRetry();
+});
