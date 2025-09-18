@@ -54,7 +54,12 @@
       "Bash(NODE_ENV=test npx mocha /Users/qianghuang/wildduck/imap-core/test/imap-parser-test.js)",
       "Bash(NODE_ENV=test npx mocha /Users/qianghuang/wildduck/imap-core/test/tools-test.js)",
       "Bash(NODE_ENV=test npx mocha /Users/qianghuang/wildduck/imap-core/test/parse-mime-tree-test.js)",
-      "Bash(NODE_ENV=test npx mocha /Users/qianghuang/wildduck/imap-core/test/imap-indexer-test.js)"
+      "Bash(NODE_ENV=test npx mocha /Users/qianghuang/wildduck/imap-core/test/imap-indexer-test.js)",
+      "Bash(grunt eslint:*)",
+      "Bash(npm run:*)",
+      "Bash(npm start)",
+      "Bash(redis-cli:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": [],
