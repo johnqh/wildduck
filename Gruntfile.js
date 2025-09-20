@@ -29,14 +29,14 @@ module.exports = function (grunt) {
         wait: {
             server: {
                 options: {
-                    delay: 12 * 1000
+                    delay: 30 * 1000
                 }
             }
         },
 
         shell: {
             server: {
-                command: 'node server.js',
+                command: 'node test-server.js',
                 options: {
                     async: true
                 }

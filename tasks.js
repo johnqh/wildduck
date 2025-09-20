@@ -42,9 +42,12 @@ let gcLock;
 let loggelf;
 
 module.exports.start = callback => {
+    console.log('Tasks: Starting tasks module, enabled:', config.tasks.enabled);
     if (!config.tasks.enabled) {
+        console.log('Tasks: Tasks disabled, returning immediately');
         return setImmediate(() => callback(null, false));
     }
+    console.log('Tasks: Tasks enabled, proceeding with initialization');
 
     const component = config.log.gelf.component || 'wildduck';
     const hostname = config.log.gelf.hostname || os.hostname();
