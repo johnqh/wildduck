@@ -17,7 +17,7 @@
         },
 
         "userlisting": {
-            "read:any": ["*"]
+            "read:any": ["*", "username", "name", "address"]
         },
 
         "users": {
@@ -136,7 +136,7 @@
         },
 
         "userlisting": {
-            "read:any": ["*"]
+            "read:any": ["*", "username", "name", "address"]
         },
 
         "users": {

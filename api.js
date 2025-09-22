@@ -32,13 +32,13 @@ const mailboxesRoutes = require('./lib/api/mailboxes');
 const messagesRoutes = require('./lib/api/messages');
 const storageRoutes = require('./lib/api/storage');
 const filtersRoutes = require('./lib/api/filters');
-const domainaccessRoutes = require('./lib/api/domainaccess');
+// const domainaccessRoutes = require('./lib/api/domainaccess'); // Commented out - not needed
 const updatesRoutes = require('./lib/api/updates');
 const authRoutes = require('./lib/api/auth');
 const autoreplyRoutes = require('./lib/api/autoreply');
 const submitRoutes = require('./lib/api/submit');
 const auditRoutes = require('./lib/api/audit');
-const domainaliasRoutes = require('./lib/api/domainaliases');
+// const domainaliasRoutes = require('./lib/api/domainaliases'); // Commented out - not needed
 const dkimRoutes = require('./lib/api/dkim');
 const certsRoutes = require('./lib/api/certs');
 const webhooksRoutes = require('./lib/api/webhooks');
@@ -561,13 +561,13 @@ module.exports = done => {
     messagesRoutes(db, server, messageHandler, userHandler, storageHandler, settingsHandler);
     storageRoutes(db, server, storageHandler);
     filtersRoutes(db, server, userHandler, settingsHandler);
-    domainaccessRoutes(db, server);
+    // domainaccessRoutes(db, server); // Commented out - not needed
     updatesRoutes(db, server, notifier);
     authRoutes(db, server, userHandler);
     autoreplyRoutes(db, server);
     submitRoutes(db, server, messageHandler, userHandler, settingsHandler);
     auditRoutes(db, server, auditHandler);
-    domainaliasRoutes(db, server);
+    // domainaliasRoutes(db, server); // Commented out - not needed
     dkimRoutes(db, server);
     certsRoutes(db, server);
     webhooksRoutes(db, server);

@@ -1,25 +1,42 @@
-const testClient = require('./imap-core/test/test-client.js');
+// Simple IMAP capability test without API dependency
+const { ImapFlow } = require('imapflow');
 
-console.log('Testing CAPABILITY without prepare.sh...');
+async function testCapability() {
+    console.log('Testing IMAP server capability...');
 
-// Simple CAPABILITY test without any setup
-testClient(
-    {
-        commands: ['T1 CAPABILITY', 'T2 LOGOUT'],
-        secure: false,
+    const client = new ImapFlow({
+        host: '127.0.0.1',
         port: 9993,
-        debug: true
-    },
-    function (resp) {
-        console.log('=== RESPONSE ===');
-        console.log(resp.toString());
-        console.log('=== SUCCESS ===');
-        process.exit(0);
-    }
-);
+        secure: false,
+        auth: {
+            user: 'testuser',
+            pass: 'testpass'
+        },
+        logger: false
+    });
 
-// Add timeout 
-setTimeout(() => {
-    console.log('Test timed out');
-    process.exit(1);
-}, 5000);
+    try {
+        console.log('Connecting to IMAP server...');
+        await client.connect();
+        console.log('✓ IMAP server connection successful');
+
+        const capabilities = await client.capability();
+        console.log('✓ CAPABILITY command successful');
+        console.log('Server capabilities:', capabilities);
+
+        await client.logout();
+        console.log('✓ Test completed successfully');
+
+        return true;
+    } catch (err) {
+        console.log('✗ Test failed:', err.message);
+        return false;
+    }
+}
+
+testCapability()
+    .then(success => process.exit(success ? 0 : 1))
+    .catch(err => {
+        console.error('Test error:', err);
+        process.exit(1);
+    });

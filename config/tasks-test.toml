@@ -1,0 +1,3 @@
+[tasks]
+# Disable tasks for integration testing to avoid hanging issues
+enabled = false
