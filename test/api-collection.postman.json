@@ -1,0 +1,747 @@
+{
+    "info": {
+        "name": "WildDuck API Testing Collection",
+        "description": "Comprehensive API testing collection for WildDuck email server",
+        "version": "1.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "userId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "mailboxId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "messageId",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "accessToken",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health & System",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["health"]
+                        },
+                        "description": "Check system health and status"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Health check returns 200', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has required fields', () => {",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success');",
+                                    "    pm.expect(response).to.have.property('version');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "User Management",
+            "item": [
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"testuser{{$randomInt}}\",\n  \"password\": \"testpass123\",\n  \"address\": \"test{{$randomInt}}@example.com\",\n  \"name\": \"Test User\",\n  \"quota\": 1073741824,\n  \"tags\": [\"testing\"],\n  \"metadata\": {\n    \"source\": \"api-test\"\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users"]
+                        },
+                        "description": "Create a new user account"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('User created successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('id');",
+                                    "    ",
+                                    "    // Store user ID for subsequent tests",
+                                    "    pm.collectionVariables.set('userId', response.id);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get User",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}"]
+                        },
+                        "description": "Retrieve user information"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('User retrieved successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response.data).to.have.property('username');",
+                                    "    pm.expect(response.data).to.have.property('quota');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users?limit=10&tags=testing",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users"],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "tags",
+                                    "value": "testing"
+                                }
+                            ]
+                        },
+                        "description": "List users with filtering"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Users listed successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('results');",
+                                    "    pm.expect(response.results).to.be.an('array');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Update User Quota",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"quota\": 2147483648\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}"]
+                        },
+                        "description": "Update user quota"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('User updated successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Mailbox Management",
+            "item": [
+                {
+                    "name": "List Mailboxes",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/mailboxes",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "mailboxes"]
+                        },
+                        "description": "List user mailboxes"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Mailboxes listed successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('results');",
+                                    "    ",
+                                    "    // Find INBOX and store ID",
+                                    "    const inbox = response.results.find(mb => mb.path === 'INBOX');",
+                                    "    if (inbox) {",
+                                    "        pm.collectionVariables.set('mailboxId', inbox.id);",
+                                    "    }",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create Mailbox",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"path\": \"TestFolder\",\n  \"hidden\": false,\n  \"retention\": 0\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/mailboxes",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "mailboxes"]
+                        },
+                        "description": "Create a new mailbox"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Mailbox created successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('id');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Mailbox",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/mailboxes/{{mailboxId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "mailboxes", "{{mailboxId}}"]
+                        },
+                        "description": "Get mailbox details"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Mailbox retrieved successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response.data).to.have.property('path');",
+                                    "    pm.expect(response.data).to.have.property('uidNext');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Message Management",
+            "item": [
+                {
+                    "name": "Submit Message",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"envelope\": {\n    \"from\": {\n      \"address\": \"test@example.com\",\n      \"name\": \"Test Sender\"\n    },\n    \"to\": [\n      {\n        \"address\": \"recipient@example.com\",\n        \"name\": \"Test Recipient\"\n      }\n    ]\n  },\n  \"subject\": \"Test Message\",\n  \"text\": \"This is a test message sent via API.\",\n  \"html\": \"<p>This is a <strong>test message</strong> sent via API.</p>\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/submit",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "submit"]
+                        },
+                        "description": "Submit a message for delivery"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Message submitted successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('message');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List Messages",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/mailboxes/{{mailboxId}}/messages?limit=10",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "mailboxes", "{{mailboxId}}", "messages"],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "List messages in a mailbox"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Messages listed successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('results');",
+                                    "    ",
+                                    "    // Store first message ID if available",
+                                    "    if (response.results.length > 0) {",
+                                    "        pm.collectionVariables.set('messageId', response.results[0].id);",
+                                    "    }",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Message",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/mailboxes/{{mailboxId}}/messages/{{messageId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "mailboxes", "{{mailboxId}}", "messages", "{{messageId}}"]
+                        },
+                        "description": "Get message details"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Message retrieved successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response.data).to.have.property('id');",
+                                    "    pm.expect(response.data).to.have.property('subject');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Search Messages",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/search?q=test&limit=10",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "search"],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "test"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "Search messages across all mailboxes"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Search completed successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('results');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Update Message Flags",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"add\": [\"\\\\Seen\", \"\\\\Flagged\"],\n  \"remove\": []\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/mailboxes/{{mailboxId}}/messages/{{messageId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "mailboxes", "{{mailboxId}}", "messages", "{{messageId}}"]
+                        },
+                        "description": "Update message flags"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Message flags updated successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Authentication & Security",
+            "item": [
+                {
+                    "name": "List ASPs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/asps",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "asps"]
+                        },
+                        "description": "List Application Specific Passwords"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('ASPs listed successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('results');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create ASP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"description\": \"Mobile App Access\",\n  \"scopes\": [\"imap\", \"pop3\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/asps",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "asps"]
+                        },
+                        "description": "Create Application Specific Password"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('ASP created successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('password');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Filters & Rules",
+            "item": [
+                {
+                    "name": "List Filters",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/filters",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "filters"]
+                        },
+                        "description": "List user message filters"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Filters listed successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('results');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Create Filter",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Spam Filter\",\n  \"query\": {\n    \"from\": \"spam@*\"\n  },\n  \"action\": {\n    \"moveTo\": \"Junk\",\n    \"flags\": {\n      \"add\": [\"\\\\Seen\"]\n    }\n  },\n  \"active\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}/filters",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}", "filters"]
+                        },
+                        "description": "Create message filter"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Filter created successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "    pm.expect(response).to.have.property('id');",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Cleanup",
+            "item": [
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/{{userId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["users", "{{userId}}"]
+                        },
+                        "description": "Delete test user and cleanup"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('User deleted successfully', () => {",
+                                    "    pm.response.to.have.status(200);",
+                                    "    const response = pm.response.json();",
+                                    "    pm.expect(response).to.have.property('success', true);",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Set common headers and authentication if needed",
+                    "// pm.request.headers.add({key: 'X-Access-Token', value: pm.collectionVariables.get('accessToken')});"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global test for all requests",
+                    "pm.test('Response time is less than 5000ms', () => {",
+                    "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                    "});",
+                    "",
+                    "pm.test('Response has JSON content-type', () => {",
+                    "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                    "});"
+                ]
+            }
+        }
+    ]
+}

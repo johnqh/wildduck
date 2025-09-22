@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(npm test)",
+      "Bash(npx eslint:*)",
+      "Bash(npm install)",
+      "Bash(node:*)",
+      "Bash(./scripts/dev-helpers.sh:*)",
+      "Bash(make:*)",
+      "Bash(npm run runtest)",
+      "Bash(NODE_ENV=test node -e \"console.log(''DB name:'', require(''wild-config'').dbs.dbname || require(''wild-config'').dbs.mongo)\")",
+      "Bash(npm ls:*)",
+      "Bash(npm view:*)",
+      "Bash(n --version)",
+      "Bash(nvm:*)",
+      "Bash(n 18.20.4)",
+      "Bash(./prepare.sh:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(awk:*)",
+      "Bash(redis-cli:*)",
+      "Bash(NODE_ENV=test npx grunt mochaTest:imap)",
+      "Bash(NODE_ENV=test npx grunt testonly)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
