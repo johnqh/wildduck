@@ -37,8 +37,26 @@ describe('IMAP Protocol integration tests', function () {
     });
 
     after(function (done) {
-        //mongosh "$DBNAME" --eval "db.getCollectionNames().forEach(function(key){db[key].deleteMany({});})" > /dev/null
-        exec('mongosh ' + config.dbs.dbname + ' --eval "db.getCollectionNames().forEach(function(key){db[key].deleteMany({});})"', err => {
+        // Use Node.js script instead of mongosh to avoid compatibility issues
+        exec('node -e "' +
+            'const { MongoClient } = require(\'mongodb\'); ' +
+            'const uri = \'mongodb://127.0.0.1:27017\'; ' +
+            'const dbName = \'' + config.dbs.dbname + '\'; ' +
+            'async function cleanup() { ' +
+            '  const client = new MongoClient(uri); ' +
+            '  try { ' +
+            '    await client.connect(); ' +
+            '    const db = client.db(dbName); ' +
+            '    const collections = await db.listCollections().toArray(); ' +
+            '    for (const col of collections) { ' +
+            '      await db.collection(col.name).deleteMany({}); ' +
+            '    } ' +
+            '  } finally { ' +
+            '    await client.close(); ' +
+            '  } ' +
+            '} ' +
+            'cleanup().catch(console.error);' +
+            '"', err => {
             if (err) {
                 return done(err);
             }

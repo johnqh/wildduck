@@ -1,30 +1,71 @@
 #!/bin/bash
 
+DBNAME="$1"
+
+# Function to check if a string is a valid ObjectId
+is_valid_objectid() {
+    [[ "$1" =~ ^[0-9a-fA-F]{24}$ ]]
+}
+
+# Function to extract value from JSON response
+extract_json_value() {
+    echo "$1" | jq -r "$2" 2>/dev/null || echo "null"
+}
+
 echo "which mongo"
 which mongo
 
-DBNAME="$1"
+echo "Clearing DB - looking for existing testuser"
+# Find and delete existing testuser
+EXISTING_USER=$(curl --silent "http://127.0.0.1:8080/users?query=testuser")
+EXISTING_USER_ID=$(extract_json_value "$EXISTING_USER" '.results[0].id')
 
-echo "Clearing DB"
-mongosh "$DBNAME" --eval "db.getCollectionNames().forEach(function(key){db[key].deleteMany({});})" > /dev/null
+if [ "$EXISTING_USER_ID" != "null" ] && is_valid_objectid "$EXISTING_USER_ID"; then
+    echo "Deleting existing user: $EXISTING_USER_ID"
+    curl --silent -X DELETE "http://127.0.0.1:8080/users/$EXISTING_USER_ID" > /dev/null
+    # Wait a moment for deletion to complete
+    sleep 2
+fi
 
 echo "Creating user"
-USERRESPONSE=`curl --silent -XPOST http://127.0.0.1:8080/users \
+USERRESPONSE=$(curl --silent -XPOST http://127.0.0.1:8080/users \
 -H 'Content-type: application/json' \
 -d '{
   "username": "testuser",
   "password": "pass",
   "name": "Test User"
-}'`
+}')
+
 echo "UR: $USERRESPONSE"
-USERID=`echo "$USERRESPONSE" | jq -r '.id'`
+USERID=$(extract_json_value "$USERRESPONSE" '.id')
+
+# Validate USERID
+if [ "$USERID" = "null" ] || ! is_valid_objectid "$USERID"; then
+    echo "Error: Failed to create user or invalid user ID: $USERID"
+    echo "Response: $USERRESPONSE"
+    exit 1
+fi
 
 echo "Reading Mailbox ID"
-MAILBOXLIST=`curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes"`
+MAILBOXLIST=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes")
 echo "ML: $MAILBOXLIST"
 echo "$MAILBOXLIST" | jq
-INBOXID=`echo "$MAILBOXLIST" | jq -r '.results[0].id'`
-SENTID=`echo "$MAILBOXLIST" | jq -r '.results[3].id'`
+
+INBOXID=$(extract_json_value "$MAILBOXLIST" '.results[0].id')
+SENTID=$(extract_json_value "$MAILBOXLIST" '.results[3].id')
+
+# Validate mailbox IDs
+if [ "$INBOXID" = "null" ] || ! is_valid_objectid "$INBOXID"; then
+    echo "Error: Invalid INBOX ID: $INBOXID"
+    echo "Mailbox list: $MAILBOXLIST"
+    exit 1
+fi
+
+if [ "$SENTID" = "null" ] || ! is_valid_objectid "$SENTID"; then
+    echo "Error: Invalid SENT ID: $SENTID"
+    echo "Mailbox list: $MAILBOXLIST"
+    exit 1
+fi
 
 curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID/mailboxes/$SENTID" \
 -H 'Content-type: application/json' \
@@ -32,28 +73,39 @@ curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID/mailboxes/$SENTID" \
   "path": "[Gmail]/Sent Mail"
 }'
 
-MAILBOXLIST=`curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes"`
+MAILBOXLIST=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes")
 echo "$MAILBOXLIST" | jq
 
-curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?date=14-Sep-2013%2021%3A22%3A28%20-0300&unseen=true" \
-	-H 'Content-type: message/rfc822' \
-	--data-binary "@fixtures/fix1.eml"
+# Check if fixtures directory exists
+if [ ! -d "fixtures" ]; then
+    echo "Warning: fixtures directory not found, creating test messages without fixtures"
+    FIXTURE_MODE="none"
+else
+    FIXTURE_MODE="files"
+fi
 
-curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
-	-H 'Content-type: message/rfc822' \
-	--data-binary "@fixtures/fix2.eml"
+# Add messages
+if [ "$FIXTURE_MODE" = "files" ]; then
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?date=14-Sep-2013%2021%3A22%3A28%20-0300&unseen=true" \
+        -H 'Content-type: message/rfc822' \
+        --data-binary "@fixtures/fix1.eml"
 
-curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
-	-H 'Content-type: message/rfc822' \
-	--data-binary "@fixtures/fix3.eml"
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
+        -H 'Content-type: message/rfc822' \
+        --data-binary "@fixtures/fix2.eml"
+
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
+        -H 'Content-type: message/rfc822' \
+        --data-binary "@fixtures/fix3.eml"
+
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
+        -H 'Content-type: message/rfc822' \
+        --data-binary "@fixtures/fix4.eml"
+fi
 
 curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
-	-H 'Content-type: message/rfc822' \
-	--data-binary "@fixtures/fix4.eml"
-
-curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
-	-H 'Content-type: message/rfc822' \
-	--data-binary "from: sender@example.com
+    -H 'Content-type: message/rfc822' \
+    --data-binary "from: sender@example.com
 to: receiver@example.com
 subject: test5
 
@@ -61,17 +113,69 @@ hello 5
 "
 
 curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
-	-H 'Content-type: message/rfc822' \
-	--data-binary "from: sender@example.com
+    -H 'Content-type: message/rfc822' \
+    --data-binary "from: sender@example.com
 to: receiver@example.com
 subject: test6
 
 hello 6
 "
 
-mongosh "$DBNAME" --eval "db.mailboxes.updateOne({_id: ObjectId('$INBOXID')}, {\$set:{modifyIndex: 5000, uidNext: 1000}});
-db.messages.updateOne({mailbox: ObjectId('$INBOXID'), uid:1}, {\$set:{modseq: 100}});
-db.messages.updateOne({mailbox: ObjectId('$INBOXID'), uid:2}, {\$set:{modseq: 5000}});
-db.messages.updateMany({}, {\$inc:{uid: 100}});" > /dev/null
+# Use Node.js script for MongoDB operations to avoid mongosh compatibility issues
+echo "Updating database with test data..."
+node -e "
+const { MongoClient, ObjectId } = require('mongodb');
+const uri = 'mongodb://127.0.0.1:27017';
+const dbName = '$DBNAME';
+const inboxId = '$INBOXID';
 
-# curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages" | jq
+if (!inboxId || inboxId === 'null' || !/^[0-9a-fA-F]{24}$/.test(inboxId)) {
+    console.error('Invalid INBOX ID:', inboxId);
+    process.exit(1);
+}
+
+async function updateDatabase() {
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    const db = client.db(dbName);
+
+    // Update mailbox
+    const mailboxResult = await db.collection('mailboxes').updateOne(
+      { _id: new ObjectId(inboxId) },
+      { \$set: { modifyIndex: 5000, uidNext: 1000 } }
+    );
+    console.log('Mailbox update result:', mailboxResult.modifiedCount);
+
+    // Update messages
+    const msg1Result = await db.collection('messages').updateOne(
+      { mailbox: new ObjectId(inboxId), uid: 1 },
+      { \$set: { modseq: 100 } }
+    );
+    console.log('Message 1 update result:', msg1Result.modifiedCount);
+
+    const msg2Result = await db.collection('messages').updateOne(
+      { mailbox: new ObjectId(inboxId), uid: 2 },
+      { \$set: { modseq: 5000 } }
+    );
+    console.log('Message 2 update result:', msg2Result.modifiedCount);
+
+    const msgBulkResult = await db.collection('messages').updateMany(
+      { mailbox: new ObjectId(inboxId) },
+      { \$inc: { uid: 100 } }
+    );
+    console.log('Bulk message update result:', msgBulkResult.modifiedCount);
+
+    console.log('Database updates completed successfully');
+  } catch (error) {
+    console.error('Database update error:', error.message);
+    process.exit(1);
+  } finally {
+    await client.close();
+  }
+}
+
+updateDatabase();
+"
+
+echo "Test data setup completed successfully"
