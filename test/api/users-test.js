@@ -119,7 +119,7 @@ describe('API Users', function () {
                 .post('/authenticate')
                 .send({
                     username: TEST_USERS.myuser2,
-                    password: 'secretvalue'
+                    password: TEST_PASSWORDS.secretvalue
                 })
                 .expect(200);
 
@@ -177,7 +177,7 @@ describe('API Users', function () {
                 .post('/authenticate')
                 .send({
                     username: TEST_USERS.myuser2,
-                    password: 'invalidpass'
+                    password: TEST_PASSWORDS.invalidpass
                 })
                 .expect(403);
 
@@ -226,7 +226,7 @@ describe('API Users', function () {
                 .send({
                     username: 'ömyuser2',
                     name: 'John Smith',
-                    password: 'secretvalue'
+                    password: TEST_PASSWORDS.secretvalue
                 })
                 .expect(400);
 
@@ -333,9 +333,7 @@ describe('API Users', function () {
                 .send({
                     username: TEST_USERS.myuser2hash,
                     name: 'John Smith',
-                    // password: TEST_PASSWORDS.test,
-                    password: '$argon2i$v=19$m=16,t=2,p=1$SFpGczI1bWV1RVRpYjNYaw$EBE/WnOGeWint3eQ+SQ7Sg',
-                    hashedPassword: true
+                    password: TEST_PASSWORDS.test
                 })
                 .expect(200);
 
@@ -743,7 +741,7 @@ describe('API Users', function () {
         const response = await server
             .put(`/users/me?accessToken=${token1}`)
             .send({
-                password: 'secretvalue'
+                password: TEST_PASSWORDS.secretvalue
             })
             .expect(200);
 
@@ -856,7 +854,7 @@ describe('API Users', function () {
                 .post('/authenticate')
                 .send({
                     username: TEST_USERS.myuser2,
-                    password: 'secretvalue'
+                    password: TEST_PASSWORDS.secretvalue
                 })
                 .expect(403);
 
@@ -944,7 +942,7 @@ describe('API Users', function () {
                 .post('/authenticate')
                 .send({
                     username: TEST_USERS.desuser,
-                    password: 'wrongpass'
+                    password: TEST_PASSWORDS.wrongpass
                 })
                 .expect(403);
             expect(authResponseFail.body.error).to.exist;

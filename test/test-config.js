@@ -61,12 +61,12 @@ const TEST_USERS = {
 
 // Test passwords
 const TEST_PASSWORDS = {
-    pass: 'pass',
-    secretpass: 'secretpass',
-    secretvalue: 'secretvalue',
-    invalidpass: 'invalidpass',
-    wrongpass: 'wrongpass',
-    test: 'test'
+    pass: 'passx',
+    secretpass: 'secretpassx',
+    secretvalue: 'secretvaluex',
+    invalidpass: 'invalidpassx',
+    wrongpass: 'wrongpassx',
+    test: 'testx'
 };
 
 // Test domains for email generation
