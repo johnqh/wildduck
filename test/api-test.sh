@@ -17,6 +17,14 @@ BASE_URL=${WILDDUCK_API_URL:-"http://localhost:8080"}
 TEST_USER_PREFIX="apitest$(date +%s)"
 CREATED_USER_ID=""
 
+# Get test configuration from centralized config
+get_test_config() {
+    node -e "const config = require('./test-config'); console.log(JSON.stringify({domains: config.TEST_DOMAINS}));"
+}
+
+TEST_CONFIG=$(get_test_config)
+TEST_DOMAIN=$(echo "$TEST_CONFIG" | jq -r '.domains.example')
+
 # Helper functions
 print_test() { echo -e "${BLUE}Testing: $1${NC}"; }
 print_pass() { echo -e "${GREEN}✓ PASS: $1${NC}"; }
@@ -80,7 +88,7 @@ test_create_user() {
     local user_data='{
         "username": "'$TEST_USER_PREFIX'",
         "password": "TestPassword123!",
-        "address": "'$TEST_USER_PREFIX'@example.com",
+        "address": "'$TEST_USER_PREFIX'@'$TEST_DOMAIN'",
         "name": "Test User",
         "quota": 1073741824,
         "tags": ["api-test"],
@@ -211,7 +219,7 @@ test_create_filter() {
     local filter_data='{
         "name": "Test Spam Filter",
         "query": {
-            "from": "spam@example.com"
+            "from": "spam@'$TEST_DOMAIN'"
         },
         "action": {
             "moveTo": "Junk",
