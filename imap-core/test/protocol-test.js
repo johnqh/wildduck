@@ -1,5 +1,5 @@
-/* eslint no-unused-expressions: 0, prefer-arrow-callback: 0, no-console: 0 */
-/* global after */
+/* eslint no-unused-expressions: 0, prefer-arrow-callback: 0, no-console: 0, global-require: 0 */
+/* global after, before */
 
 'use strict';
 
@@ -33,45 +33,64 @@ const { MAX_SUB_MAILBOXES, MAX_MAILBOX_NAME_LENGTH } = require('../../lib/consts
 let serverProcess = null;
 
 // Start server before all tests (mimics grunt shell:server + wait:server)
+// Only start server if running standalone (not as part of full test suite)
 before(function (done) {
     this.timeout(20000); // eslint-disable-line no-invalid-this
 
-    console.log('Starting WildDuck server for standalone test...');
+    // Check if we're running as part of the full test suite by checking for grunt process
+    const isStandalone = !process.env.GRUNT_STARTED && process.argv.some(arg => arg.includes('protocol-test.js'));
 
-    // Start server from the main wildduck directory
-    serverProcess = spawn('node', ['server.js'], {
-        cwd: require('path').resolve(__dirname, '../..'),
-        env: { ...process.env, NODE_ENV: 'test' },
-        stdio: ['ignore', 'pipe', 'pipe']
-    });
+    if (isStandalone) {
+        console.log('Starting WildDuck server for standalone test...');
 
-    serverProcess.stdout.on('data', (data) => {
-        if (process.env.DEBUG_CONSOLE) {
-            console.log('Server:', data.toString().trim());
-        }
-    });
+        // Start server from the main wildduck directory
+        serverProcess = spawn('node', ['server.js'], {
+            cwd: require('path').resolve(__dirname, '../..'),
+            env: { ...process.env, NODE_ENV: 'test' },
+            stdio: ['ignore', 'pipe', 'pipe']
+        });
 
-    serverProcess.stderr.on('data', (data) => {
-        if (process.env.DEBUG_CONSOLE) {
-            console.error('Server error:', data.toString().trim());
-        }
-    });
+        serverProcess.stdout.on('data', (data) => {
+            if (process.env.DEBUG_CONSOLE) {
+                console.log('Server:', data.toString().trim());
+            }
+        });
 
-    // Wait 12 seconds for server to be ready (same as grunt wait:server)
-    setTimeout(() => {
-        console.log('Server should be ready, proceeding with tests...');
-        done();
-    }, 12000);
+        serverProcess.stderr.on('data', (data) => {
+            if (process.env.DEBUG_CONSOLE) {
+                console.error('Server error:', data.toString().trim());
+            }
+        });
+
+        // Wait 12 seconds for server to be ready (same as grunt wait:server)
+        setTimeout(() => {
+            console.log('Server should be ready, proceeding with tests...');
+            done();
+        }, 12000);
+    } else {
+        // Running as part of full test suite - server already started by grunt
+        return done();
+    }
 });
 
 // Kill server after all tests (mimics grunt shell:server:kill)
 after(function (done) {
     if (serverProcess) {
         console.log('Stopping WildDuck server...');
-        serverProcess.kill();
-        serverProcess = null;
+        serverProcess.kill('SIGTERM');
+
+        // Wait for process to exit gracefully, then force kill if needed
+        setTimeout(() => {
+            if (serverProcess && !serverProcess.killed) {
+                console.log('Force killing server...');
+                serverProcess.kill('SIGKILL');
+            }
+            serverProcess = null;
+            return done();
+        }, 3000);
+    } else {
+        return done();
     }
-    done();
 });
 
 describe('IMAP Protocol integration tests', function () {
@@ -1556,7 +1575,7 @@ describe('IMAP Protocol integration tests', function () {
                             resp
                                 .slice(/\n/)
                                 .indexOf(
-                                    '* 1 FETCH (UID 101 BODYSTRUCTURE ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 6 1 NIL NIL NIL NIL) ENVELOPE (NIL "test" ((NIL NIL "senderx" "example.com")) ((NIL NIL "senderx" "example.com")) ((NIL NIL "senderx" "example.com")) ((NIL NIL "tox" "example.com")) ((NIL NIL "ccx" "example.com")) NIL NIL NIL))'
+                                    `* 1 FETCH (UID 101 BODYSTRUCTURE ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 6 1 NIL NIL NIL NIL) ENVELOPE (NIL "test" ((NIL NIL "${TEST_USERS.sender}" "example.com")) ((NIL NIL "${TEST_USERS.sender}" "example.com")) ((NIL NIL "${TEST_USERS.sender}" "example.com")) ((NIL NIL "${TEST_USERS.to}" "example.com")) ((NIL NIL "${TEST_USERS.cc}" "example.com")) NIL NIL NIL))`
                                 ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1585,18 +1604,15 @@ describe('IMAP Protocol integration tests', function () {
                     function (resp) {
                         resp = resp.toString();
                         console.log('RESP 1 ', resp);
+                        const headerContent = 'MIME-Version: 1.0\r\n' +
+                            'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
+                            'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                            '\r\n';
+                        const headerLength = Buffer.byteLength(headerContent, 'utf8');
+
                         expect(
                             resp.indexOf(
-                                '\n* 3 FETCH (BODY[2.HEADER] {73}\r\n' +
-                                    'MIME-Version: 1.0\r\n' +
-                                    'From: ' +
-                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
-                                    '\r\n' +
-                                    'To: ' +
-                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
-                                    '\r\n' +
-                                    '\r\n' +
-                                    ' FLAGS (\\Seen))\r\n'
+                                `\n* 3 FETCH (BODY[2.HEADER] {${headerLength}}\r\n${headerContent} FLAGS (\\Seen))\r\n`
                             ) >= 0
                         ).to.be.true;
 
@@ -1663,9 +1679,16 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
+                        // Calculate dynamic message sizes for BODYSTRUCTURE
+                        const message1Content = `MIME-Version: 1.0\r\nFrom: ${getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata)}\r\nTo: ${getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink)}\r\nIn-Reply-To: <test1>\r\n\r\nHello world 1!`;
+                        const message1Size = Buffer.byteLength(message1Content, 'utf8');
+
+                        const message2Content = `MIME-Version: 1.0\r\nFrom: ${getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata)}\r\nTo: ${getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink)}\r\n\r\nHello world 2!`;
+                        const message2Size = Buffer.byteLength(message2Content, 'utf8');
+
                         expect(
                             resp.indexOf(
-                                '\n* 3 FETCH (BODYSTRUCTURE (("MESSAGE" "RFC822" NIL NIL NIL "7BIT" 109 (NIL "" ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "pangalink.net")) NIL NIL "<test1>" NIL) ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 14 0 NIL NIL NIL NIL) 5 NIL NIL NIL NIL)("MESSAGE" "RFC822" NIL NIL NIL "7BIT" 87 (NIL "" ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "pangalink.net")) NIL NIL NIL NIL) ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 14 0 NIL NIL NIL NIL) 4 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 21 0 NIL NIL NIL NIL) "MIXED" ("BOUNDARY" "----mailcomposer-?=_1-1328088797399") NIL NIL NIL))\r\n'
+                                `\n* 3 FETCH (BODYSTRUCTURE (("MESSAGE" "RFC822" NIL NIL NIL "7BIT" ${message1Size} (NIL "" ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.pangalink}")) NIL NIL "<test1>" NIL) ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 14 0 NIL NIL NIL NIL) 5 NIL NIL NIL NIL)("MESSAGE" "RFC822" NIL NIL NIL "7BIT" ${message2Size} (NIL "" ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.pangalink}")) NIL NIL NIL NIL) ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 14 0 NIL NIL NIL NIL) 4 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 21 0 NIL NIL NIL NIL) "MIXED" ("BOUNDARY" "----mailcomposer-?=_1-1328088797399") NIL NIL NIL))\r\n`
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1689,7 +1712,7 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\n* 3 FETCH (ENVELOPE (NIL "" ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "kreata.ee")) ((NIL NIL "andrisx" "tr.ee")) NIL NIL NIL "<testmessage-for-bug>;"))\r\n'
+                                `\n* 3 FETCH (ENVELOPE (NIL "" ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.kreata}")) ((NIL NIL "${TEST_USERS.andris}" "${TEST_DOMAINS.tr}")) NIL NIL NIL "<testmessage-for-bug>;"))\r\n`
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1729,15 +1752,18 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
+                        const bodyContent = 'from: ' +
+                            getTestEmail(TEST_USERS.sender) +
+                            '\r\nto: ' +
+                            getTestEmail(TEST_USERS.to) +
+                            '\r\ncc: ' +
+                            getTestEmail(TEST_USERS.cc) +
+                            '\r\nsubject: test\r\n\r\nHello World!\r\n';
+                        const bodyLength = Buffer.byteLength(bodyContent, 'utf8');
+
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (BODY[] {100}\r\nfrom: ' +
-                                    getTestEmail(TEST_USERS.sender) +
-                                    '\r\nto: ' +
-                                    getTestEmail(TEST_USERS.to) +
-                                    '\r\ncc: ' +
-                                    getTestEmail(TEST_USERS.cc) +
-                                    '\r\nsubject: test\r\n\r\nHello World!\r\n)\r\n'
+                                `\r\n* 4 FETCH (BODY[] {${bodyLength}}\r\n${bodyContent})\r\n`
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1769,7 +1795,10 @@ describe('IMAP Protocol integration tests', function () {
                         const partialContent = `: ${senderEmail}\r\nto: ${toEmail}\r\ncc: ${ccEmail}\r\nsubject: test\r\n\r\nHello World!\r\n`;
                         const partialLength = Buffer.byteLength(partialContent, 'utf8');
 
-                        expect(resp.indexOf('\n* 4 FETCH (BODY[]<4> {5}\r\n: sen)\r\n') >= 0).to.be.true;
+                        const shortContent = ': sen';
+                        const shortLength = Buffer.byteLength(shortContent, 'utf8');
+
+                        expect(resp.indexOf(`\n* 4 FETCH (BODY[]<4> {${shortLength}}\r\n${shortContent})\r\n`) >= 0).to.be.true;
                         expect(
                             resp.indexOf(
                                 `\n* 4 FETCH (BODY[]<4> {${partialLength}}\r\n${partialContent})\r\n`
@@ -1793,11 +1822,13 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
+                        const andrisEmail = getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata);
+                        const bodyContent = `MIME-Version: 1.0\r\nFrom: ${andrisEmail}\r\nTo: ${getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink)}\r\nIn-Reply-To: <test1>\r\n\r\nHello world 1!`;
+                        const bodyLength = Buffer.byteLength(bodyContent, 'utf8');
+
                         expect(
                             resp.indexOf(
-                                '\r\n* 3 FETCH (BODY[1] {109}\r\nMIME-Version: 1.0\r\nFrom: ' +
-                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
-                                    '\r\nTo: andrisx@pangalink.net\r\nIn-Reply-To: <test1>\r\n\r\nHello world 1!)\r\n'
+                                `\r\n* 3 FETCH (BODY[1] {${bodyLength}}\r\n${bodyContent})\r\n`
                             ) >= 0
                         ).to.be.true;
 
@@ -1818,15 +1849,18 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
+                        const headerContent = 'from: ' +
+                            getTestEmail(TEST_USERS.sender) +
+                            '\r\nto: ' +
+                            getTestEmail(TEST_USERS.to) +
+                            '\r\ncc: ' +
+                            getTestEmail(TEST_USERS.cc) +
+                            '\r\nsubject: test\r\n\r\n';
+                        const headerLength = Buffer.byteLength(headerContent, 'utf8');
+
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (BODY[HEADER] {86}\r\nfrom: ' +
-                                    getTestEmail(TEST_USERS.sender) +
-                                    '\r\nto: ' +
-                                    getTestEmail(TEST_USERS.to) +
-                                    '\r\ncc: ' +
-                                    getTestEmail(TEST_USERS.cc) +
-                                    '\r\nsubject: test\r\n\r\n)\r\n'
+                                `\r\n* 4 FETCH (BODY[HEADER] {${headerLength}}\r\n${headerContent})\r\n`
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1905,7 +1939,10 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
-                        expect(resp.indexOf('\r\n* 4 FETCH (BODY[TEXT] {14}\r\nHello World!\r\n)\r\n') >= 0).to.be.true;
+                        const textContent = 'Hello World!\r\n';
+                        const textLength = Buffer.byteLength(textContent, 'utf8');
+
+                        expect(resp.indexOf(`\r\n* 4 FETCH (BODY[TEXT] {${textLength}}\r\n${textContent})\r\n`) >= 0).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
                         done();
                     }
@@ -1930,34 +1967,28 @@ describe('IMAP Protocol integration tests', function () {
                     function (resp) {
                         resp = resp.toString();
 
-                        expect(
-                            resp.indexOf(
-                                '\n* 3 FETCH (BODY[1.HEADER] {95}\r\n' +
-                                    'MIME-Version: 1.0\r\n' +
-                                    'From: ' +
-                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
-                                    '\r\n' +
-                                    'To: ' +
-                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
-                                    '\r\n' +
-                                    'In-Reply-To: <test1>\r\n' +
-                                    '\r\n' +
-                                    ')\r\n'
-                            ) >= 0
-                        ).to.be.true;
+                        const headerContent = 'MIME-Version: 1.0\r\n' +
+                            'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
+                            'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                            'In-Reply-To: <test1>\r\n' +
+                            '\r\n';
+                        const headerLength = Buffer.byteLength(headerContent, 'utf8');
 
                         expect(
                             resp.indexOf(
-                                '\n* 3 FETCH (BODY[2.HEADER] {73}\r\n' +
-                                    'MIME-Version: 1.0\r\n' +
-                                    'From: ' +
-                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
-                                    '\r\n' +
-                                    'To: ' +
-                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
-                                    '\r\n' +
-                                    '\r\n' +
-                                    ')\r\n'
+                                `\n* 3 FETCH (BODY[1.HEADER] {${headerLength}}\r\n${headerContent})\r\n`
+                            ) >= 0
+                        ).to.be.true;
+
+                        const headerContent2 = 'MIME-Version: 1.0\r\n' +
+                            'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
+                            'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                            '\r\n';
+                        const headerLength2 = Buffer.byteLength(headerContent2, 'utf8');
+
+                        expect(
+                            resp.indexOf(
+                                `\n* 3 FETCH (BODY[2.HEADER] {${headerLength2}}\r\n${headerContent2})\r\n`
                             ) >= 0
                         ).to.be.true;
 
@@ -1979,9 +2010,11 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
+                        const mimeContent = 'Content-Type: message/rfc822\r\nContent-Transfer-Encoding: 7bit\r\n\r\n';
+                        const mimeLength = Buffer.byteLength(mimeContent, 'utf8');
+
                         expect(
-                            resp.indexOf('\r\n* 3 FETCH (BODY[1.MIME] {65}\r\nContent-Type: message/rfc822\r\nContent-Transfer-Encoding: 7bit\r\n\r\n)\r\n') >=
-                                0
+                            resp.indexOf(`\r\n* 3 FETCH (BODY[1.MIME] {${mimeLength}}\r\n${mimeContent})\r\n`) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
                         done();
@@ -2002,15 +2035,18 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
+                        const rfc822Content = 'from: ' +
+                            getTestEmail(TEST_USERS.sender) +
+                            '\r\nto: ' +
+                            getTestEmail(TEST_USERS.to) +
+                            '\r\ncc: ' +
+                            getTestEmail(TEST_USERS.cc) +
+                            '\r\nsubject: test\r\n\r\nHello World!\r\n';
+                        const rfc822Length = Buffer.byteLength(rfc822Content, 'utf8');
+
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (RFC822 {100}\r\nfrom: ' +
-                                    getTestEmail(TEST_USERS.sender) +
-                                    '\r\nto: ' +
-                                    getTestEmail(TEST_USERS.to) +
-                                    '\r\ncc: ' +
-                                    getTestEmail(TEST_USERS.cc) +
-                                    '\r\nsubject: test\r\n\r\nHello World!\r\n FLAGS (\\Seen))\r\n'
+                                `\r\n* 4 FETCH (RFC822 {${rfc822Length}}\r\n${rfc822Content} FLAGS (\\Seen))\r\n`
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -2030,7 +2066,16 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
-                        expect(resp.indexOf('\r\n* 4 FETCH (RFC822.SIZE 100)\r\n') >= 0).to.be.true;
+                        const messageContent = 'from: ' +
+                            getTestEmail(TEST_USERS.sender) +
+                            '\r\nto: ' +
+                            getTestEmail(TEST_USERS.to) +
+                            '\r\ncc: ' +
+                            getTestEmail(TEST_USERS.cc) +
+                            '\r\nsubject: test\r\n\r\nHello World!\r\n';
+                        const messageSize = Buffer.byteLength(messageContent, 'utf8');
+
+                        expect(resp.indexOf(`\r\n* 4 FETCH (RFC822.SIZE ${messageSize})\r\n`) >= 0).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
                         done();
                     }
@@ -2048,15 +2093,18 @@ describe('IMAP Protocol integration tests', function () {
                     },
                     function (resp) {
                         resp = resp.toString();
+                        const headerContent = 'from: ' +
+                            getTestEmail(TEST_USERS.sender) +
+                            '\r\nto: ' +
+                            getTestEmail(TEST_USERS.to) +
+                            '\r\ncc: ' +
+                            getTestEmail(TEST_USERS.cc) +
+                            '\r\nsubject: test\r\n\r\n';
+                        const headerLength = Buffer.byteLength(headerContent, 'utf8');
+
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (RFC822.HEADER {86}\r\nfrom: ' +
-                                    getTestEmail(TEST_USERS.sender) +
-                                    '\r\nto: ' +
-                                    getTestEmail(TEST_USERS.to) +
-                                    '\r\ncc: ' +
-                                    getTestEmail(TEST_USERS.cc) +
-                                    '\r\nsubject: test\r\n\r\n)\r\n'
+                                `\r\n* 4 FETCH (RFC822.HEADER {${headerLength}}\r\n${headerContent})\r\n`
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -2077,7 +2125,10 @@ describe('IMAP Protocol integration tests', function () {
                     function (resp) {
                         resp = resp.toString();
 
-                        expect(resp.indexOf('\r\n* 4 FETCH (RFC822.TEXT {14}\r\nHello World!\r\n)\r\n') >= 0).to.be.true;
+                        const textContent = 'Hello World!\r\n';
+                        const textLength = Buffer.byteLength(textContent, 'utf8');
+
+                        expect(resp.indexOf(`\r\n* 4 FETCH (RFC822.TEXT {${textLength}}\r\n${textContent})\r\n`) >= 0).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
                         done();
                     }

@@ -64,7 +64,8 @@
       "Bash(NODE_ENV=test npx mocha protocol-test.js --timeout 60000)",
       "Bash(NODE_ENV=test ./prepare.sh wildduck-test)",
       "Bash(NODE_ENV=test npx mocha protocol-test.js --timeout 600000)",
-      "Bash(NODE_ENV=test npx mocha protocol-test.js --timeout 600000 --grep \"should return partial BODY|should return BODY\\[HEADER\\.FIELDS\\]\")"
+      "Bash(NODE_ENV=test npx mocha protocol-test.js --timeout 600000 --grep \"should return partial BODY|should return BODY\\[HEADER\\.FIELDS\\]\")",
+      "Bash(NODE_ENV=test npx mocha test/api/users-test.js --timeout 60000)"
     ],
     "deny": [],
     "ask": []

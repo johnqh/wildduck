@@ -30,7 +30,7 @@ describe('API Users', function () {
                 .send({
                     username: TEST_USERS.myuser2,
                     name: 'John Smith',
-                    address: getTestEmail('john'),
+                    address: getTestEmail(TEST_USERS.john),
                     password: TEST_PASSWORDS.secretvalue,
                     hashedPassword: false,
                     emptyAddress: false,
@@ -132,7 +132,7 @@ describe('API Users', function () {
             expect(authResponse.body.success).to.be.true;
             expect(authResponse.body).to.deep.equal({
                 success: true,
-                address: getTestEmail('john'),
+                address: getTestEmail(TEST_USERS.john),
                 id: user,
                 username: TEST_USERS.myuser2,
                 scope: 'master',
@@ -366,7 +366,7 @@ describe('API Users', function () {
             expect(authResponse.body.success).to.be.true;
             expect(authResponse.body).to.deep.equal({
                 success: true,
-                address: `myuser2hash@${os.hostname().toLowerCase()}`,
+                address: `${TEST_USERS.myuser2hash}@${os.hostname().toLowerCase()}`,
                 id: user2,
                 username: TEST_USERS.myuser2hash,
                 scope: 'master',
@@ -407,7 +407,7 @@ describe('API Users', function () {
         logTest('should GET /users/resolve/{username} expect success', 'API Users', 'START', 'Starting user resolve test');
 
         try {
-            const response = await server.get('/users/resolve/myuser2').expect(200);
+            const response = await server.get(`/users/resolve/${TEST_USERS.myuser2}`).expect(200);
 
             logTest('should GET /users/resolve/{username} expect success', 'API Users', 'PASS', 'User resolve test completed successfully', {
                 username: TEST_USERS.myuser2,
@@ -795,7 +795,7 @@ describe('API Users', function () {
         expect(authResponse.body.success).to.be.true;
         expect(authResponse.body).to.deep.equal({
             success: true,
-            address: getTestEmail('john'),
+            address: getTestEmail(TEST_USERS.john),
             id: user,
             username: TEST_USERS.myuser2,
             scope: 'master',
@@ -900,7 +900,7 @@ describe('API Users', function () {
         const response = await server.get(`/users/${user}/restore`).expect(200);
         expect(response.body.success).to.be.true;
 
-        expect(response.body.username).to.equal('myuser2');
+        expect(response.body.username).to.equal(TEST_USERS.myuser2);
         expect(response.body.recoverableAddresses).to.deep.equal([getTestEmail(TEST_USERS.john)]);
     });
 

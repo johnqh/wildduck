@@ -499,7 +499,7 @@ describe('API Users', function () {
     });
 
     it('should GET /addresses expect success / with query', async () => {
-        const addressListResponse = await server.get(`/addresses?query=forwarded.1.addrtest`).expect(200);
+        const addressListResponse = await server.get(`/addresses?query=${TEST_USERS.forwarded_1_addrtest}`).expect(200);
         expect(addressListResponse.body.success).to.be.true;
         expect(addressListResponse.body.total).to.equal(1);
         expect(forwarded).to.exist;
@@ -518,7 +518,7 @@ describe('API Users', function () {
                 .expect(200);
             expect(response.body.success).to.be.true;
 
-            const addressListResponse = await server.get(`/addresses?query=forwarded.1.addrtest`).expect(200);
+            const addressListResponse = await server.get(`/addresses?query=${TEST_USERS.forwarded_1_addrtest}`).expect(200);
             expect(addressListResponse.body.total).to.equal(1);
 
             logTest('should PUT /addresses/forwarded/{id} expect success', 'API Addresses', 'PASS', 'Forwarded address update test completed successfully', {

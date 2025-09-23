@@ -293,7 +293,7 @@ describe('Send multiple messages', function () {
                                 { address: getTestEmail(TEST_USERS.user4), name: 'User #4' },
                                 { address: getTestEmail(TEST_USERS.user5), name: 'User #5' }
                             ]);
-                            expect(message.parsed.headers.get('delivered-to').value[0].address).equal('user' + user + '@example.com');
+                            expect(message.parsed.headers.get('delivered-to').value[0].address).equal(getTestEmail(TEST_USERS['user' + user]));
 
                             setImmediate(checkUser);
                         });
@@ -320,7 +320,7 @@ describe('Send multiple messages', function () {
                                 { address: getTestEmail(TEST_USERS.user4), name: 'User #4' },
                                 { address: getTestEmail(TEST_USERS.user5), name: 'User #5' }
                             ]);
-                            expect(message.parsed.headers.get('delivered-to').value[0].address).equal('user' + user + '@example.com');
+                            expect(message.parsed.headers.get('delivered-to').value[0].address).equal(getTestEmail(TEST_USERS['user' + user]));
                             expect(message.parsed.attachments.length).equal(2);
                             expect(message.parsed.attachments[0].contentType).equal('application/pgp-encrypted');
                             expect(message.parsed.attachments[0].content.toString()).equal('Version: 1\r\n');

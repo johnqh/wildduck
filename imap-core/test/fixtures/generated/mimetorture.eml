@@ -1,6 +1,6 @@
 Subject: Ryan Finnie's MIME Torture Test v1.0
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-qYxqvD9rbH0PNeExagh1"
 Message-Id: <1066976914.4721.5.camel@localhost>
 Mime-Version: 1.0
@@ -34,8 +34,8 @@ Content-Description: I'll be whatever I wanna do. --Fry
 Content-Type: message/rfc822
 
 Subject: plain jane message
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Message-Id: <1066973156.4264.42.camel@localhost>
 Mime-Version: 1.0
 Date: 23 Oct 2003 22:25:56 -0700
@@ -43,8 +43,8 @@ Content-Type: text/plain; CHARSET=US-ASCII
 Content-Transfer-Encoding: 8bit
 
 Subject: plain jane message
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: text/plain
 Message-Id: <1066973156.4264.42.camel@localhost>
 Mime-Version: 1.0
@@ -58,8 +58,8 @@ Content-Description: Would you kindly shut your noise-hole? --Bender
 Content-Type: message/rfc822
 
 Subject: messages inside messages inside...
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-9Brg7LoMERBrIDtMRose"
 Message-Id: <1066976111.4263.74.camel@localhost>
 Mime-Version: 1.0
@@ -80,8 +80,8 @@ Content-Description: At the risk of sounding negative, no. --Leela
 Content-Type: message/rfc822
 
 Subject: the original message
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-XFYecI7w+0shpolXq8bb"
 Message-Id: <1066975745.4263.70.camel@localhost>
 Mime-Version: 1.0
@@ -113,8 +113,8 @@ Content-Description: Dirt doesn't need luck! --Professor
 Content-Type: message/rfc822
 
 Subject: this message JUST contains an attachment
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Disposition: attachment; filename=blah.gz
 Content-Transfer-Encoding: base64
 Content-Description: Attachment has identical content to above foo.gz
@@ -136,8 +136,8 @@ Content-Description: Hold still, I don't have good depth perception! --Leela
 Content-Type: message/rfc822
 
 Subject: Attachment filename vs. name
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-1066975756jd02"
 Message-Id: <1066975756.4263.70.camel@localhost>
 Mime-Version: 1.0
@@ -171,8 +171,8 @@ Content-Description: Hello little man.  I WILL DESTROY YOU! --Moro
 Content-Type: message/rfc822
 
 Subject: No filename?  No problem!
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-1066975756jd03"
 Message-Id: <1066975761.4263.70.camel@localhost>
 Mime-Version: 1.0
@@ -210,8 +210,8 @@ Content-Description: Friends! Help! A guinea pig tricked me! --Zoidberg
 Content-Type: message/rfc822
 
 Subject: html and text, both inline
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-ZCKMfHzvHMyK1iBu4kff"
 Message-Id: <1066974044.4264.62.camel@localhost>
 Mime-Version: 1.0
@@ -249,8 +249,8 @@ Content-Description: Smeesh! --Amy
 Content-Type: message/rfc822
 
 Subject: text and text, both inline
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-pNc4wtlOIxs8RcX7H/AK"
 Message-Id: <1066974089.4265.64.camel@localhost>
 Mime-Version: 1.0
@@ -279,8 +279,8 @@ Content-Description: That's not a cigar. Uh... and it's not mine. --Hermes
 Content-Type: message/rfc822
 
 Subject: HTML and...  HTML?
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/mixed; boundary="=-zxh/IezwzZITiphpcbJZ"
 Message-Id: <1066973957.4263.59.camel@localhost>
 Mime-Version: 1.0
@@ -335,8 +335,8 @@ Content-Description: The spirit is willing, but the flesh is spongy, and
 Content-Type: message/rfc822
 
 Subject: smiley!
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-vH3FQO9a8icUn1ROCoAi"
 Message-Id: <1066972996.4264.39.camel@localhost>
 Mime-Version: 1.0
@@ -517,8 +517,8 @@ Content-Description: Kittens give Morbo gas. --Morbo
 Content-Type: message/rfc822
 
 Subject: the PROPER way to do alternative/related
-From: Ryan Finnie <rfinniex@domain.dom>
-To: bobx@domain.dom
+From: Ryan Finnie <rfinniexx@domain.dom>
+To: bobxx@domain.dom
 Content-Type: multipart/alternative; type="multipart/alternative"; boundary="=-tyGlQ9JvB5uvPWzozI+y"
 Message-Id: <1066973557.4265.51.camel@localhost>
 Mime-Version: 1.0
