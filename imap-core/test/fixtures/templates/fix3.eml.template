@@ -1,0 +1,32 @@
+MIME-Version: 1.0
+From: {{ANDRIS_KREATA_EMAIL}}
+To: {{ANDRIS_TR_EMAIL}}
+Content-Type: multipart/mixed;
+ boundary='----mailcomposer-?=_1-1328088797399'
+Message-Id: <testmessage-for-bug>;
+
+------mailcomposer-?=_1-1328088797399
+Content-Type: message/rfc822
+Content-Transfer-Encoding: 7bit
+
+MIME-Version: 1.0
+From: {{ANDRIS_KREATA_EMAIL}}
+To: {{ANDRIS_PANGALINK_EMAIL}}
+In-Reply-To: <test1>
+
+Hello world 1!
+------mailcomposer-?=_1-1328088797399
+Content-Type: message/rfc822
+Content-Transfer-Encoding: 7bit
+
+MIME-Version: 1.0
+From: {{ANDRIS_KREATA_EMAIL}}
+To: {{ANDRIS_PANGALINK_EMAIL}}
+
+Hello world 2!
+------mailcomposer-?=_1-1328088797399
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<b>Hello world 3!</b>
+------mailcomposer-?=_1-1328088797399--

@@ -127,6 +127,14 @@ if [ "$FIXTURE_MODE" = "files" ]; then
         echo "Using original fix1.eml"
     fi
 
+    if [ "$EML_GENERATION_SUCCESS" = "0" ] && [ -f "fixtures/generated/fix3.eml" ]; then
+        FIX3_FILE="fixtures/generated/fix3.eml"
+        echo "Using generated fix3.eml"
+    else
+        FIX3_FILE="fixtures/fix3.eml"
+        echo "Using original fix3.eml"
+    fi
+
     if [ "$EML_GENERATION_SUCCESS" = "0" ] && [ -f "fixtures/generated/fix4.eml" ]; then
         FIX4_FILE="fixtures/generated/fix4.eml"
         echo "Using generated fix4.eml"
@@ -145,7 +153,7 @@ if [ "$FIXTURE_MODE" = "files" ]; then
 
     curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
         -H 'Content-type: message/rfc822' \
-        --data-binary "@fixtures/fix3.eml"
+        --data-binary "@$FIX3_FILE"
 
     curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
         -H 'Content-type: message/rfc822' \

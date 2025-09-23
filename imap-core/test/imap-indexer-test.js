@@ -15,9 +15,16 @@ chai.config.includeStack = true;
 
 //const HTTP_PORT = 9998;
 
+// Prefer generated EML files when available, fallback to originals
+const getEmlPath = (filename) => {
+    const generatedPath = __dirname + '/fixtures/generated/' + filename;
+    const originalPath = __dirname + '/fixtures/' + filename;
+    return fs.existsSync(generatedPath) ? generatedPath : originalPath;
+};
+
 const fixtures = {
     simple: {
-        eml: fs.readFileSync(__dirname + '/fixtures/simple.eml'),
+        eml: fs.readFileSync(getEmlPath('simple.eml')),
         tree: require('./fixtures/simple.json')
     },
     mimetorture: {
