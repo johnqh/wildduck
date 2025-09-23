@@ -8,6 +8,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const crypto = require('crypto');
 //const util = require('util');
 const chai = require('chai');
+// const { logTest, logError, logPerformance } = require('../lib/logger');
 const request = require('request');
 const fs = require('fs');
 const simpleParser = require('mailparser').simpleParser;

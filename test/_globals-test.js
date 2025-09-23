@@ -2,6 +2,7 @@
 
 const supertest = require('supertest');
 const fs = require('fs');
+// const { logTest, logError, logPerformance } = require('../lib/logger');
 
 const config = require('wild-config');
 

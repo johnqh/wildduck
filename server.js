@@ -8,9 +8,10 @@ const v8 = require('node:v8');
 const Path = require('path');
 const os = require('os');
 const config = require('wild-config');
+const { log: customLog } = require('./lib/logger');
 
 if (process.env.NODE_CONFIG_ONLY === 'true') {
-    console.log(require('util').inspect(config, false, 22)); // eslint-disable-line
+    customLog(require('util').inspect(config, false, 22)); // eslint-disable-line
     return process.exit();
 }
 

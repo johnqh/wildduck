@@ -4,6 +4,7 @@
 
 const supertest = require('supertest');
 const chai = require('chai');
+const { logTest, logError, logPerformance } = require('../../lib/logger');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -17,18 +18,50 @@ describe('API DomainAliases', function () {
     this.timeout(10000); // eslint-disable-line no-invalid-this
 
     it('should POST /domainaliases expect success', async () => {
-        const response = await server
-            .post('/domainaliases')
-            .send({
+        const startTime = Date.now();
+        logTest('should POST /domainaliases expect success', 'API DomainAliases', 'START', 'Starting domain alias creation test');
+
+        try {
+            const response = await server
+                .post('/domainaliases')
+                .send({
+                    domain: 'example.com',
+                    alias: 'alias.example.com',
+                    sess: '12345',
+                    ip: '127.0.0.1'
+                })
+                .expect(200);
+
+            domainalias = response.body.id;
+
+            logTest('should POST /domainaliases expect success', 'API DomainAliases', 'PASS', 'Domain alias creation test completed successfully', {
+                domainAliasId: domainalias,
                 domain: 'example.com',
                 alias: 'alias.example.com',
-                sess: '12345',
-                ip: '127.0.0.1'
-            })
-            .expect(200);
-        expect(response.body.success).to.be.true;
-        expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
-        domainalias = response.body.id;
+                success: response.body.success
+            });
+
+            expect(response.body.success).to.be.true;
+            expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+
+            const duration = Date.now() - startTime;
+            logPerformance('POST /domainaliases test', duration, {
+                testSuite: 'API DomainAliases',
+                status: 'PASS',
+                domainAliasId: domainalias
+            }, 'Domain alias creation test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should POST /domainaliases expect success',
+                testSuite: 'API DomainAliases',
+                operation: 'domain alias creation'
+            }, 'Domain alias creation test failed');
+            logTest('should POST /domainaliases expect success', 'API DomainAliases', 'FAIL', 'Domain alias creation test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 
     it('should GET /domainaliases/:alias expect success', async () => {
@@ -53,8 +86,38 @@ describe('API DomainAliases', function () {
     });
 
     it('should DELETE /domainaliases/:alias expect success', async () => {
-        const response = await server.delete(`/domainaliases/${domainalias}`).expect(200);
+        const startTime = Date.now();
+        logTest('should DELETE /domainaliases/:alias expect success', 'API DomainAliases', 'START', 'Starting domain alias deletion test');
 
-        expect(response.body.success).to.be.true;
+        try {
+            const response = await server.delete(`/domainaliases/${domainalias}`).expect(200);
+
+            logTest('should DELETE /domainaliases/:alias expect success', 'API DomainAliases', 'PASS', 'Domain alias deletion test completed successfully', {
+                domainAliasId: domainalias,
+                success: response.body.success,
+                responseStatus: response.status
+            });
+
+            expect(response.body.success).to.be.true;
+
+            const duration = Date.now() - startTime;
+            logPerformance('DELETE /domainaliases/:alias test', duration, {
+                testSuite: 'API DomainAliases',
+                status: 'PASS',
+                domainAliasId: domainalias
+            }, 'Domain alias deletion test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should DELETE /domainaliases/:alias expect success',
+                testSuite: 'API DomainAliases',
+                operation: 'domain alias deletion',
+                domainAliasId: domainalias
+            }, 'Domain alias deletion test failed');
+            logTest('should DELETE /domainaliases/:alias expect success', 'API DomainAliases', 'FAIL', 'Domain alias deletion test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 });

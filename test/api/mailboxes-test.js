@@ -6,6 +6,7 @@
 
 const supertest = require('supertest');
 const chai = require('chai');
+// const { logTest, logError, logPerformance } = require('../../lib/logger');
 
 const expect = chai.expect;
 chai.config.includeStack = true;

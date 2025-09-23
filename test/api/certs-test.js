@@ -4,6 +4,7 @@
 
 const supertest = require('supertest');
 const chai = require('chai');
+const { logTest, logError, logPerformance } = require('../../lib/logger');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -17,11 +18,15 @@ describe('API Certs', function () {
     this.timeout(10000); // eslint-disable-line no-invalid-this
 
     it('should POST /certs expect success', async () => {
-        const response = await server
-            .post('/certs')
-            .send({
-                servername: 'example.com',
-                privateKey: `-----BEGIN PRIVATE KEY-----
+        const startTime = Date.now();
+        logTest('should POST /certs expect success', 'API Certs', 'START', 'Starting certificate creation test');
+
+        try {
+            const response = await server
+                .post('/certs')
+                .send({
+                    servername: 'example.com',
+                    privateKey: `-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDUwsIjU4ItLme5
 8bhvsdU3ifpYxCA0sz1GaDnUIeH62JW1XLR5dM9yh1vNCZNeMnZ2YASA7dh1+SNT
 J8O46OWaIaDMt3PqBeYs8seuJDiHc1kZtsXWaoKQpeA0LkQsDMTpHm/m2j4lpMeI
@@ -50,7 +55,7 @@ XzoNjcESSn09LuY0Jmm6eq927QPWvr7HGpvHZJCtsoPhSAqoVVL2f4SlDfxko+NG
 gWkJtB9ZKR6nboyDYCFNjfYw
 -----END PRIVATE KEY-----
 `,
-                cert: `-----BEGIN CERTIFICATE-----
+                    cert: `-----BEGIN CERTIFICATE-----
 MIIDADCCAegCCQCPXSqvTzty/zANBgkqhkiG9w0BAQsFADBCMRQwEgYDVQQDDAtl
 eGFtcGxlLmNvbTEdMBsGA1UECgwUTXkgQ29tcGFueSBOYW1lIExURC4xCzAJBgNV
 BAYTAlVTMB4XDTIxMTEzMDEzMjUyOFoXDTIyMTEzMDEzMjUyOFowQjEUMBIGA1UE
@@ -70,43 +75,195 @@ nBhCzyAvD7Z2TQjrszlbekiIeqTgN/D+r7WWJ3Urpf2NdfLOGNWTDe9cVgZlR85n
 rp+tEw==
 -----END CERTIFICATE-----
 `,
-                description: 'Some text about this certificate',
-                sess: '12345',
-                ip: '127.0.0.1'
-            })
-            .expect(200);
-        expect(response.body.success).to.be.true;
-        expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
-        expect(response.body.servername).to.equal('example.com');
-        expect(response.body.altNames).to.deep.equal(['example.com']);
-        cert = response.body.id;
+                    description: 'Some text about this certificate',
+                    sess: '12345',
+                    ip: '127.0.0.1'
+                })
+                .expect(200);
+
+            cert = response.body.id;
+
+            logTest('should POST /certs expect success', 'API Certs', 'PASS', 'Certificate creation test completed successfully', {
+                certId: cert,
+                servername: response.body.servername,
+                altNames: response.body.altNames,
+                success: response.body.success,
+                description: 'Some text about this certificate'
+            });
+
+            expect(response.body.success).to.be.true;
+            expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+            expect(response.body.servername).to.equal('example.com');
+            expect(response.body.altNames).to.deep.equal(['example.com']);
+
+            const duration = Date.now() - startTime;
+            logPerformance('POST /certs test', duration, {
+                testSuite: 'API Certs',
+                status: 'PASS',
+                certId: cert
+            }, 'Certificate creation test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should POST /certs expect success',
+                testSuite: 'API Certs',
+                operation: 'certificate creation'
+            }, 'Certificate creation test failed');
+            logTest('should POST /certs expect success', 'API Certs', 'FAIL', 'Certificate creation test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 
     it('should GET /certs/:cert expect success', async () => {
-        const response = await server.get(`/certs/${cert}`).expect(200);
+        const startTime = Date.now();
+        logTest('should GET /certs/:cert expect success', 'API Certs', 'START', 'Starting certificate details test');
 
-        expect(response.body.success).to.be.true;
-        expect(response.body.id).to.equal(cert);
+        try {
+            const response = await server.get(`/certs/${cert}`).expect(200);
+
+            logTest('should GET /certs/:cert expect success', 'API Certs', 'PASS', 'Certificate details test completed successfully', {
+                certId: cert,
+                responseId: response.body.id,
+                success: response.body.success,
+                responseStatus: response.status
+            });
+
+            expect(response.body.success).to.be.true;
+            expect(response.body.id).to.equal(cert);
+
+            const duration = Date.now() - startTime;
+            logPerformance('GET /certs/:cert test', duration, {
+                testSuite: 'API Certs',
+                status: 'PASS',
+                certId: cert
+            }, 'Certificate details test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should GET /certs/:cert expect success',
+                testSuite: 'API Certs',
+                operation: 'certificate details',
+                certId: cert
+            }, 'Certificate details test failed');
+            logTest('should GET /certs/:cert expect success', 'API Certs', 'FAIL', 'Certificate details test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 
     it('should GET /certs/resolve/:servername expect success', async () => {
-        const response = await server.get(`/certs/resolve/example.com`).expect(200);
+        const startTime = Date.now();
+        logTest('should GET /certs/resolve/:servername expect success', 'API Certs', 'START', 'Starting certificate resolve test');
 
-        expect(response.body.success).to.be.true;
-        expect(response.body.id).to.equal(cert);
+        try {
+            const response = await server.get(`/certs/resolve/example.com`).expect(200);
+
+            logTest('should GET /certs/resolve/:servername expect success', 'API Certs', 'PASS', 'Certificate resolve test completed successfully', {
+                servername: 'example.com',
+                resolvedCertId: response.body.id,
+                expectedCertId: cert,
+                success: response.body.success
+            });
+
+            expect(response.body.success).to.be.true;
+            expect(response.body.id).to.equal(cert);
+
+            const duration = Date.now() - startTime;
+            logPerformance('GET /certs/resolve test', duration, {
+                testSuite: 'API Certs',
+                status: 'PASS',
+                servername: 'example.com'
+            }, 'Certificate resolve test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should GET /certs/resolve/:servername expect success',
+                testSuite: 'API Certs',
+                operation: 'certificate resolve',
+                servername: 'example.com'
+            }, 'Certificate resolve test failed');
+            logTest('should GET /certs/resolve/:servername expect success', 'API Certs', 'FAIL', 'Certificate resolve test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 
     it('should GET /certs expect success', async () => {
-        const response = await server.get(`/certs`).expect(200);
+        const startTime = Date.now();
+        logTest('should GET /certs expect success', 'API Certs', 'START', 'Starting certificates list test');
 
-        expect(response.body.success).to.be.true;
-        expect(response.body.results.length).to.gte(1);
-        expect(response.body.results.find(entry => entry.id === cert)).to.exist;
+        try {
+            const response = await server.get(`/certs`).expect(200);
+
+            const foundCert = response.body.results.find(entry => entry.id === cert);
+            logTest('should GET /certs expect success', 'API Certs', 'PASS', 'Certificates list test completed successfully', {
+                totalCertificates: response.body.results.length,
+                foundTargetCert: !!foundCert,
+                certId: cert,
+                success: response.body.success
+            });
+
+            expect(response.body.success).to.be.true;
+            expect(response.body.results.length).to.gte(1);
+            expect(response.body.results.find(entry => entry.id === cert)).to.exist;
+
+            const duration = Date.now() - startTime;
+            logPerformance('GET /certs test', duration, {
+                testSuite: 'API Certs',
+                status: 'PASS',
+                certificateCount: response.body.results.length
+            }, 'Certificates list test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should GET /certs expect success',
+                testSuite: 'API Certs',
+                operation: 'certificates list'
+            }, 'Certificates list test failed');
+            logTest('should GET /certs expect success', 'API Certs', 'FAIL', 'Certificates list test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 
     it('should DELETE /certs/:certs expect success', async () => {
-        const response = await server.delete(`/certs/${cert}`).expect(200);
+        const startTime = Date.now();
+        logTest('should DELETE /certs/:certs expect success', 'API Certs', 'START', 'Starting certificate deletion test');
 
-        expect(response.body.success).to.be.true;
+        try {
+            const response = await server.delete(`/certs/${cert}`).expect(200);
+
+            logTest('should DELETE /certs/:certs expect success', 'API Certs', 'PASS', 'Certificate deletion test completed successfully', {
+                certId: cert,
+                success: response.body.success,
+                responseStatus: response.status
+            });
+
+            expect(response.body.success).to.be.true;
+
+            const duration = Date.now() - startTime;
+            logPerformance('DELETE /certs/:cert test', duration, {
+                testSuite: 'API Certs',
+                status: 'PASS',
+                certId: cert
+            }, 'Certificate deletion test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should DELETE /certs/:certs expect success',
+                testSuite: 'API Certs',
+                operation: 'certificate deletion',
+                certId: cert
+            }, 'Certificate deletion test failed');
+            logTest('should DELETE /certs/:certs expect success', 'API Certs', 'FAIL', 'Certificate deletion test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 });

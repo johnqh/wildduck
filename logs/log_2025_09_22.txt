@@ -1,0 +1,13 @@
+[2025-09-22T20:17:37.015Z] This message should go to file
+[2025-09-22T20:17:37.017Z] File test with object: {
+  "timestamp": "2025-09-22T20:17:37.017Z",
+  "test": true
+}
+[2025-09-22T22:37:11.850Z] [API] GET /test-file {
+  "type": "API",
+  "method": "GET",
+  "endpoint": "/test-file",
+  "timestamp": "2025-09-22T22:37:11.849Z",
+  "userId": "test123",
+  "message": "Test file logging"
+} 

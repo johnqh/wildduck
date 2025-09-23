@@ -4,6 +4,7 @@
 
 const supertest = require('supertest');
 const chai = require('chai');
+const { logTest, logError, logPerformance } = require('../../lib/logger');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -17,22 +18,57 @@ describe('API DKIM', function () {
     this.timeout(10000); // eslint-disable-line no-invalid-this
 
     it('should POST /dkim expect success / key empty', async () => {
-        const response = await server
-            .post('/dkim')
-            .send({
+        const startTime = Date.now();
+        logTest('should POST /dkim expect success / key empty', 'API DKIM', 'START', 'Starting DKIM creation test with empty key');
+
+        try {
+            const response = await server
+                .post('/dkim')
+                .send({
+                    domain: 'example.com',
+                    selector: 'wildduck',
+                    description: 'Some text about this DKIM certificate',
+                    sess: '12345',
+                    ip: '127.0.0.1'
+                })
+                .expect(200);
+
+            dkim = response.body.id;
+            const dnsTxtParts = response.body.dnsTxt.value.split('p=');
+
+            logTest('should POST /dkim expect success / key empty', 'API DKIM', 'PASS', 'DKIM creation test with empty key completed successfully', {
+                dkimId: dkim,
                 domain: 'example.com',
                 selector: 'wildduck',
-                description: 'Some text about this DKIM certificate',
-                sess: '12345',
-                ip: '127.0.0.1'
-            })
-            .expect(200);
-        expect(response.body.success).to.be.true;
-        expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
-        dkim = response.body.id;
-        expect(response.body.dnsTxt.value).to.not.be.undefined;
-        expect(response.body.dnsTxt.value.split('p=').length).to.be.equal(2); // check that splitting is correct
-        expect(response.body.dnsTxt.value.split('p=')[1]).to.be.not.empty; // check that we actually have the key part and it is not an empty string
+                success: response.body.success,
+                hasDnsTxt: !!response.body.dnsTxt,
+                keyGenerated: dnsTxtParts.length === 2 && dnsTxtParts[1].length > 0
+            });
+
+            expect(response.body.success).to.be.true;
+            expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+            expect(response.body.dnsTxt.value).to.not.be.undefined;
+            expect(response.body.dnsTxt.value.split('p=').length).to.be.equal(2);
+            expect(response.body.dnsTxt.value.split('p=')[1]).to.be.not.empty;
+
+            const duration = Date.now() - startTime;
+            logPerformance('POST /dkim empty key test', duration, {
+                testSuite: 'API DKIM',
+                status: 'PASS',
+                dkimId: dkim
+            }, 'DKIM creation with empty key test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should POST /dkim expect success / key empty',
+                testSuite: 'API DKIM',
+                operation: 'DKIM creation with empty key'
+            }, 'DKIM creation with empty key test failed');
+            logTest('should POST /dkim expect success / key empty', 'API DKIM', 'FAIL', 'DKIM creation with empty key test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 
     it('should POST /dkim expect success / RSA pem', async () => {
@@ -88,10 +124,41 @@ describe('API DKIM', function () {
     });
 
     it('should GET /dkim/:dkim expect success', async () => {
-        const response = await server.get(`/dkim/${dkim}`).expect(200);
+        const startTime = Date.now();
+        logTest('should GET /dkim/:dkim expect success', 'API DKIM', 'START', 'Starting DKIM details test');
 
-        expect(response.body.success).to.be.true;
-        expect(response.body.id).to.equal(dkim);
+        try {
+            const response = await server.get(`/dkim/${dkim}`).expect(200);
+
+            logTest('should GET /dkim/:dkim expect success', 'API DKIM', 'PASS', 'DKIM details test completed successfully', {
+                dkimId: dkim,
+                responseId: response.body.id,
+                success: response.body.success,
+                responseStatus: response.status
+            });
+
+            expect(response.body.success).to.be.true;
+            expect(response.body.id).to.equal(dkim);
+
+            const duration = Date.now() - startTime;
+            logPerformance('GET /dkim/:dkim test', duration, {
+                testSuite: 'API DKIM',
+                status: 'PASS',
+                dkimId: dkim
+            }, 'DKIM details test performance measured');
+
+        } catch (error) {
+            logError(error, {
+                testName: 'should GET /dkim/:dkim expect success',
+                testSuite: 'API DKIM',
+                operation: 'DKIM details',
+                dkimId: dkim
+            }, 'DKIM details test failed');
+            logTest('should GET /dkim/:dkim expect success', 'API DKIM', 'FAIL', 'DKIM details test failed', {
+                error: error.message
+            });
+            throw error;
+        }
     });
 
     it('should GET /dkim/resolve/:domain expect success', async () => {
