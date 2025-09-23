@@ -29,7 +29,8 @@ class EmlGenerator {
             ANDRIS_TR_EMAIL: getTestEmail(TEST_USERS.andris, TEST_DOMAINS.tr),
             ANDRIS_PANGALINK_EMAIL: getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink),
             RFINNIE_EMAIL: getTestEmail(TEST_USERS.rfinnie, TEST_DOMAINS.domain),
-            BOB_EMAIL: getTestEmail(TEST_USERS.bob, TEST_DOMAINS.domain)
+            BOB_EMAIL: getTestEmail(TEST_USERS.bob, TEST_DOMAINS.domain),
+            TEST_DOMAIN: TEST_DOMAINS.example
         };
     }
 
