@@ -11,9 +11,16 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.config.includeStack = true;
 
+// Prefer generated EML files when available, fallback to originals
+const getEmlPath = filename => {
+    const generatedPath = __dirname + '/fixtures/generated/' + filename;
+    const originalPath = __dirname + '/fixtures/' + filename;
+    return fs.existsSync(generatedPath) ? generatedPath : originalPath;
+};
+
 const fixtures = {
     no_empty_line_between_text_boundary: {
-        eml: fs.readFileSync(__dirname + '/fixtures/no_empty_line_between_text_boundary.eml')
+        eml: fs.readFileSync(getEmlPath('no_empty_line_between_text_boundary.eml'))
     }
 };
 

@@ -28,7 +28,7 @@ const fixtures = {
         tree: require('./fixtures/simple.json')
     },
     mimetorture: {
-        eml: fs.readFileSync(__dirname + '/fixtures/mimetorture.eml'),
+        eml: fs.readFileSync(getEmlPath('mimetorture.eml')),
         tree: require('./fixtures/mimetorture.json')
     }
 };
