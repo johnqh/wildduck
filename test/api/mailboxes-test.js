@@ -7,6 +7,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 // const { logTest, logError, logPerformance } = require('../../lib/logger');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -27,9 +28,9 @@ describe('Mailboxes tests', function () {
         const response = await server
             .post('/users')
             .send({
-                username: 'mailboxesuser',
-                password: 'secretvalue',
-                address: 'mailboxesuser.addrtest@example.com',
+                username: TEST_USERS.mailboxesuser,
+                password: TEST_PASSWORDS.secretvalue,
+                address: getTestEmail(TEST_USERS.mailboxesuser_addrtest),
                 name: 'mailboxes user'
             })
             .expect(200);

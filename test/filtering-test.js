@@ -9,6 +9,7 @@ const crypto = require('crypto');
 //const util = require('util');
 const chai = require('chai');
 // const { logTest, logError, logPerformance } = require('../lib/logger');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('./test-config');
 const request = require('request');
 const fs = require('fs');
 const simpleParser = require('mailparser').simpleParser;
@@ -43,9 +44,9 @@ describe('Send multiple messages', function () {
             URL + '/users',
             {
                 json: {
-                    username: 'user1',
-                    password: 'secretpass',
-                    address: 'user1@example.com',
+                    username: TEST_USERS.user1,
+                    password: TEST_PASSWORDS.secretpass,
+                    address: getTestEmail(TEST_USERS.user1),
                     name: 'user1'
                 }
             },
@@ -57,9 +58,9 @@ describe('Send multiple messages', function () {
                     URL + '/users',
                     {
                         json: {
-                            username: 'user2',
-                            password: 'secretpass',
-                            address: 'user2@example.com',
+                            username: TEST_USERS.user2,
+                            password: TEST_PASSWORDS.secretpass,
+                            address: getTestEmail(TEST_USERS.user2),
                             name: 'user2',
                             pubKey: user2PubKey,
                             encryptMessages: true,
@@ -74,9 +75,9 @@ describe('Send multiple messages', function () {
                             URL + '/users',
                             {
                                 json: {
-                                    username: 'user3',
-                                    password: 'secretpass',
-                                    address: 'user3@example.com',
+                                    username: TEST_USERS.user3,
+                                    password: TEST_PASSWORDS.secretpass,
+                                    address: getTestEmail(TEST_USERS.user3),
                                     name: 'user3',
                                     pubKey: user3PubKey,
                                     encryptMessages: true,
@@ -91,9 +92,9 @@ describe('Send multiple messages', function () {
                                     URL + '/users',
                                     {
                                         json: {
-                                            username: 'user4',
-                                            password: 'secretpass',
-                                            address: 'user4@example.com',
+                                            username: TEST_USERS.user4,
+                                            password: TEST_PASSWORDS.secretpass,
+                                            address: getTestEmail(TEST_USERS.user4),
                                             name: 'user4',
                                             pubKey: user2PubKey,
                                             encryptMessages: false,
@@ -108,9 +109,9 @@ describe('Send multiple messages', function () {
                                             URL + '/users',
                                             {
                                                 json: {
-                                                    username: 'user5',
-                                                    password: 'secretpass',
-                                                    address: 'user5@example.com',
+                                                    username: TEST_USERS.user5,
+                                                    password: TEST_PASSWORDS.secretpass,
+                                                    address: getTestEmail(TEST_USERS.user5),
                                                     name: 'user5'
                                                 }
                                             },
@@ -137,12 +138,12 @@ describe('Send multiple messages', function () {
     });
 
     it('Send mail to all users', done => {
-        let recipients = ['user1@example.com', 'user2@example.com', 'user3@example.com', 'user4@example.com', 'user5@example.com'];
+        let recipients = [getTestEmail(TEST_USERS.user1), getTestEmail(TEST_USERS.user2), getTestEmail(TEST_USERS.user3), getTestEmail(TEST_USERS.user4), getTestEmail(TEST_USERS.user5)];
         let subject = 'Test ööö message [' + Date.now() + ']';
         transporter.sendMail(
             {
                 envelope: {
-                    from: 'andris@kreata.ee',
+                    from: getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata),
                     to: recipients
                 },
 
@@ -151,14 +152,14 @@ describe('Send multiple messages', function () {
                     'x-rspamd-spam': 'No'
                 },
 
-                from: 'Kärbes 🐧 <andris@kreata.ee>',
+                from: `Kärbes 🐧 <${getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata)}>`,
                 to: recipients.map((rcpt, i) => ({ name: 'User #' + (i + 1), address: rcpt })),
                 subject,
                 text: 'Hello world! Current time is ' + new Date().toString(),
                 html:
                     '<p>Hello world! Current time is <em>' +
                     new Date().toString() +
-                    '</em> <img src="cid:note@example.com"/> <img src="http://www.neti.ee/img/neti-logo-2015-1.png"></p>',
+                    `</em> <img src="cid:${getTestEmail('note')}"/> <img src="http://www.${TEST_DOMAINS.neti}/img/neti-logo-2015-1.png"></p>`,
                 attachments: [
                     // attachment as plaintext
                     {
@@ -177,7 +178,7 @@ describe('Send multiple messages', function () {
                             'base64'
                         ),
 
-                        cid: 'note@example.com' // should be as unique as possible
+                        cid: getTestEmail('note') // should be as unique as possible
                     },
 
                     // Large Binary Buffer attachment, should be kept separately
@@ -189,7 +190,7 @@ describe('Send multiple messages', function () {
             },
             (err, info) => {
                 expect(err).to.not.exist;
-                expect(info.accepted).to.deep.equal(['user1@example.com', 'user2@example.com', 'user3@example.com', 'user4@example.com', 'user5@example.com']);
+                expect(info.accepted).to.deep.equal([getTestEmail(TEST_USERS.user1), getTestEmail(TEST_USERS.user2), getTestEmail(TEST_USERS.user3), getTestEmail(TEST_USERS.user4), getTestEmail(TEST_USERS.user5)]);
 
                 let getFirstMessage = (userId, callback) => {
                     request(URL + '/users/' + userId + '/mailboxes', { json: true }, (err, meta, response) => {
@@ -274,11 +275,11 @@ describe('Send multiple messages', function () {
                                 expect(hashA).equal(hashB);
                             }
                             expect(message.parsed.to.value).deep.equal([
-                                { address: 'user1@example.com', name: 'User #1' },
-                                { address: 'user2@example.com', name: 'User #2' },
-                                { address: 'user3@example.com', name: 'User #3' },
-                                { address: 'user4@example.com', name: 'User #4' },
-                                { address: 'user5@example.com', name: 'User #5' }
+                                { address: getTestEmail(TEST_USERS.user1), name: 'User #1' },
+                                { address: getTestEmail(TEST_USERS.user2), name: 'User #2' },
+                                { address: getTestEmail(TEST_USERS.user3), name: 'User #3' },
+                                { address: getTestEmail(TEST_USERS.user4), name: 'User #4' },
+                                { address: getTestEmail(TEST_USERS.user5), name: 'User #5' }
                             ]);
                             expect(message.parsed.headers.get('delivered-to').value[0].address).equal('user' + user + '@example.com');
 
@@ -301,11 +302,11 @@ describe('Send multiple messages', function () {
 
                             expect(message.subject).to.equal(subject);
                             expect(message.parsed.to.value).deep.equal([
-                                { address: 'user1@example.com', name: 'User #1' },
-                                { address: 'user2@example.com', name: 'User #2' },
-                                { address: 'user3@example.com', name: 'User #3' },
-                                { address: 'user4@example.com', name: 'User #4' },
-                                { address: 'user5@example.com', name: 'User #5' }
+                                { address: getTestEmail(TEST_USERS.user1), name: 'User #1' },
+                                { address: getTestEmail(TEST_USERS.user2), name: 'User #2' },
+                                { address: getTestEmail(TEST_USERS.user3), name: 'User #3' },
+                                { address: getTestEmail(TEST_USERS.user4), name: 'User #4' },
+                                { address: getTestEmail(TEST_USERS.user5), name: 'User #5' }
                             ]);
                             expect(message.parsed.headers.get('delivered-to').value[0].address).equal('user' + user + '@example.com');
                             expect(message.parsed.attachments.length).equal(2);
@@ -346,8 +347,8 @@ describe('Send multiple messages', function () {
             port: 9993,
             secure: true,
             auth: {
-                user: 'user4',
-                pass: 'secretpass'
+                user: TEST_USERS.user4,
+                pass: TEST_PASSWORDS.secretpass
             },
             tls: {
                 rejectUnauthorized: false

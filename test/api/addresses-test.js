@@ -7,6 +7,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 const { logTest, logError, logPerformance } = require('../../lib/logger');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -24,9 +25,9 @@ describe('API Users', function () {
         const response = await server
             .post('/users')
             .send({
-                username: 'addressuser',
-                password: 'secretvalue',
-                address: 'addressuser.addrtest@example.com',
+                username: TEST_USERS.addressuser,
+                password: TEST_PASSWORDS.secretvalue,
+                address: getTestEmail(TEST_USERS.addressuser_addrtest, TEST_DOMAINS.example),
                 name: 'address user'
             })
             .expect(200);
@@ -38,9 +39,9 @@ describe('API Users', function () {
         const response2 = await server
             .post('/users')
             .send({
-                username: 'addressuser2',
-                password: 'secretvalue',
-                address: 'addressuser2.addrtest@example.com',
+                username: TEST_USERS.addressuser2,
+                password: TEST_PASSWORDS.secretvalue,
+                address: getTestEmail(TEST_USERS.addressuser2_addrtest, TEST_DOMAINS.example),
                 name: 'address user 2'
             })
             .expect(200);
@@ -74,7 +75,7 @@ describe('API Users', function () {
             const response = await server
                 .post(`/users/${user}/addresses`)
                 .send({
-                    address: `user1.1.addrtest@example.com`,
+                    address: getTestEmail(TEST_USERS.user1_1_addrtest),
                     tags: ['TAG1', 'tag2']
                 })
                 .expect(200);
@@ -83,7 +84,7 @@ describe('API Users', function () {
             const response2 = await server
                 .post(`/users/${user2}/addresses`)
                 .send({
-                    address: `user2.1.addrtest@example.com`
+                    address: getTestEmail(TEST_USERS.user2_1_addrtest)
                 })
                 .expect(200);
             expect(response2.body.success).to.be.true;
@@ -91,7 +92,7 @@ describe('API Users', function () {
             const response3 = await server
                 .post(`/users/${user}/addresses`)
                 .send({
-                    address: `user1.2.addrtest@example.com`,
+                    address: getTestEmail(TEST_USERS.user1_2_addrtest),
                     tags: ['TAG2', 'tag3']
                 })
                 .expect(200);
@@ -243,8 +244,8 @@ describe('API Users', function () {
         const authResponse = await server
             .post('/authenticate')
             .send({
-                username: 'addressuser',
-                password: 'secretvalue',
+                username: TEST_USERS.addressuser,
+                password: TEST_PASSWORDS.secretvalue,
                 token: true
             })
             .expect(200);
@@ -279,7 +280,7 @@ describe('API Users', function () {
             expect(addressListResponse.body.success).to.be.true;
             expect(addressListResponse.body.results.length).to.equal(3);
             expect(addressListResponse.body.results.filter(addr => addr.main).length).to.equal(1);
-            expect(addressListResponse.body.results.find(addr => addr.main).address).to.equal('addressuser.addrtest@example.com');
+            expect(addressListResponse.body.results.find(addr => addr.main).address).to.equal(getTestEmail(TEST_USERS.addressuser_addrtest, TEST_DOMAINS.example));
 
             const duration = Date.now() - startTime;
             logPerformance('GET /users/{user}/addresses test', duration, {
@@ -317,7 +318,7 @@ describe('API Users', function () {
         let addressListResponse = await server.get(`/users/${user}/addresses`).expect(200);
         expect(addressListResponse.body.success).to.be.true;
         let addresses = addressListResponse.body.results;
-        let address = addresses.find(addr => addr.address === 'user1.1.addrtest@example.com').id;
+        let address = addresses.find(addr => addr.address === getTestEmail(TEST_USERS.user1_1_addrtest)).id;
 
         const response = await server
             .put(`/users/${user}/addresses/${address}`)
@@ -332,7 +333,7 @@ describe('API Users', function () {
 
         expect(addressListResponse.body.results.length).to.equal(3);
         expect(addressListResponse.body.results.filter(addr => addr.main).length).to.equal(1);
-        expect(addressListResponse.body.results.find(addr => addr.main).address).to.equal('user1.1.addrtest@example.com');
+        expect(addressListResponse.body.results.find(addr => addr.main).address).to.equal(getTestEmail(TEST_USERS.user1_1_addrtest));
     });
 
     it('should DELETE /users/{user}/addresses/{address} expect failure', async () => {
@@ -354,14 +355,14 @@ describe('API Users', function () {
             let addressListResponse = await server.get(`/users/${user}/addresses`).expect(200);
             expect(addressListResponse.body.success).to.be.true;
             let addresses = addressListResponse.body.results;
-            let address = addresses.find(addr => addr.address === 'user1.2.addrtest@example.com').id;
+            let address = addresses.find(addr => addr.address === getTestEmail(TEST_USERS.user1_2_addrtest)).id;
 
             const response = await server.delete(`/users/${user}/addresses/${address}`).expect(200);
 
             logTest('should DELETE /users/{user}/addresses/{address} expect success', 'API Addresses', 'PASS', 'Address deletion test completed successfully', {
                 userId: user,
                 addressId: address,
-                deletedAddress: 'user1.2.addrtest@example.com',
+                deletedAddress: getTestEmail(TEST_USERS.user1_2_addrtest),
                 success: response.body.success
             });
 
@@ -395,8 +396,8 @@ describe('API Users', function () {
             const response = await server
                 .post(`/addresses/forwarded`)
                 .send({
-                    address: `forwarded.1.addrtest@example.com`,
-                    targets: ['andris@ethereal.email'],
+                    address: getTestEmail(TEST_USERS.forwarded_1_addrtest),
+                    targets: [getTestEmail(TEST_USERS.andris, TEST_DOMAINS.ethereal)],
                     tags: ['TAG1', 'tag2']
                 })
                 .expect(200);
@@ -405,8 +406,8 @@ describe('API Users', function () {
 
             logTest('should POST /addresses/forwarded expect success', 'API Addresses', 'PASS', 'Forwarded address creation test completed successfully', {
                 forwardedId: forwarded,
-                address: 'forwarded.1.addrtest@example.com',
-                targets: ['andris@ethereal.email'],
+                address: getTestEmail(TEST_USERS.forwarded_1_addrtest),
+                targets: [getTestEmail(TEST_USERS.andris, TEST_DOMAINS.ethereal)],
                 tags: ['TAG1', 'tag2'],
                 success: response.body.success
             });

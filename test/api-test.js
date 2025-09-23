@@ -6,6 +6,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 // const { logTest, logError, logPerformance } = require('../lib/logger');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('./test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -24,9 +25,9 @@ describe('API tests', function () {
         const response = await server
             .post('/users')
             .send({
-                username: 'testuser',
-                password: 'secretpass',
-                address: 'testuser@example.com',
+                username: TEST_USERS.testuser,
+                password: TEST_PASSWORDS.secretpass,
+                address: getTestEmail(TEST_USERS.testuser),
                 name: 'test user'
             })
             .expect(200);
@@ -52,7 +53,7 @@ describe('API tests', function () {
             const response = await server
                 .post('/domainaliases')
                 .send({
-                    alias: 'jõgeva.öö',
+                    alias: TEST_DOMAINS.jogeva,
                     domain: 'example.com'
                 })
                 .expect(200);
@@ -89,8 +90,8 @@ describe('API tests', function () {
             const response = await server
                 .post(`/authenticate`)
                 .send({
-                    username: 'testuser@example.com',
-                    password: 'secretpass',
+                    username: getTestEmail(TEST_USERS.testuser),
+                    password: TEST_PASSWORDS.secretpass,
                     scope: 'master'
                 })
                 .expect(200);
@@ -101,7 +102,7 @@ describe('API tests', function () {
             const response = await server
                 .post(`/authenticate`)
                 .send({
-                    username: 'testuser@example.com',
+                    username: getTestEmail(TEST_USERS.testuser),
                     password: 'invalid',
                     scope: 'master'
                 })
@@ -114,8 +115,8 @@ describe('API tests', function () {
             const response = await server
                 .post(`/authenticate`)
                 .send({
-                    username: 'testuser@jõgeva.öö',
-                    password: 'secretpass',
+                    username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
+                    password: TEST_PASSWORDS.secretpass,
                     scope: 'master'
                 })
                 .expect(200);
@@ -126,7 +127,7 @@ describe('API tests', function () {
             const response = await server
                 .post(`/authenticate`)
                 .send({
-                    username: 'testuser@jõgeva.öö',
+                    username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
                     password: 'invalid',
                     scope: 'master'
                 })
@@ -141,7 +142,7 @@ describe('API tests', function () {
             const response = await server
                 .post(`/preauth`)
                 .send({
-                    username: 'testuser@example.com',
+                    username: getTestEmail(TEST_USERS.testuser),
                     scope: 'master'
                 })
                 .expect(200);
@@ -152,7 +153,7 @@ describe('API tests', function () {
             const response = await server
                 .post(`/preauth`)
                 .send({
-                    username: 'testuser@jõgeva.öö',
+                    username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
                     scope: 'master'
                 })
                 .expect(200);
@@ -211,7 +212,7 @@ describe('API tests', function () {
             const response = await server
                 .post(`/authenticate`)
                 .send({
-                    username: 'testuser@jõgeva.öö',
+                    username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
                     password: asp,
                     scope: 'imap'
                 })
@@ -223,7 +224,7 @@ describe('API tests', function () {
             const response = await server
                 .post(`/authenticate`)
                 .send({
-                    username: 'testuser@jõgeva.öö',
+                    username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
                     password: 'a'.repeat(16),
                     scope: 'imap'
                 })
@@ -235,7 +236,7 @@ describe('API tests', function () {
             const response = await server
                 .post(`/authenticate`)
                 .send({
-                    username: 'testuser@jõgeva.öö',
+                    username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
                     password: asp,
                     scope: 'master'
                 })
@@ -250,7 +251,7 @@ describe('API tests', function () {
             const response = await server.get(`/users/${userId}/addresses`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.results.length).to.equal(1);
-            expect(response.body.results[0].address).to.equal('testuser@example.com');
+            expect(response.body.results[0].address).to.equal(getTestEmail(TEST_USERS.testuser));
             expect(response.body.results[0].main).to.be.true;
         });
 
@@ -258,7 +259,7 @@ describe('API tests', function () {
             const response1 = await server
                 .post(`/users/${userId}/addresses`)
                 .send({
-                    address: 'alias1@example.com',
+                    address: getTestEmail(TEST_USERS.alias1),
                     main: true,
                     metaData: {
                         tere: 123
@@ -270,7 +271,7 @@ describe('API tests', function () {
             const response2 = await server
                 .post(`/users/${userId}/addresses`)
                 .send({
-                    address: 'alias2@example.com'
+                    address: getTestEmail(TEST_USERS.alias2)
                 })
                 .expect(200);
             expect(response2.body.success).to.be.true;
@@ -280,7 +281,7 @@ describe('API tests', function () {
             const response = await server.get(`/users/${userId}`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.id).to.equal(userId);
-            expect(response.body.address).to.equal('alias1@example.com');
+            expect(response.body.address).to.equal(getTestEmail(TEST_USERS.alias1));
         });
 
         it('should GET /users/:user/addresses expect success / (updated listing)', async () => {
@@ -291,15 +292,15 @@ describe('API tests', function () {
 
             response.body.results.sort((a, b) => a.id.localeCompare(b.id));
 
-            expect(response.body.results[0].address).to.equal('testuser@example.com');
+            expect(response.body.results[0].address).to.equal(getTestEmail(TEST_USERS.testuser));
             expect(response.body.results[0].main).to.be.false;
 
-            expect(response.body.results[1].address).to.equal('alias1@example.com');
+            expect(response.body.results[1].address).to.equal(getTestEmail(TEST_USERS.alias1));
             expect(response.body.results[1].main).to.be.true;
             expect(response.body.results[1].metaData).to.not.exist;
 
             // no metaData present
-            expect(response.body.results[2].address).to.equal('alias2@example.com');
+            expect(response.body.results[2].address).to.equal(getTestEmail(TEST_USERS.alias2));
             expect(response.body.results[2].main).to.be.false;
 
             address = response.body.results[2];
@@ -316,7 +317,7 @@ describe('API tests', function () {
             expect(response.body.results.length).to.equal(2);
             response.body.results.sort((a, b) => a.id.localeCompare(b.id));
 
-            expect(response.body.results[1].address).to.equal('alias1@example.com');
+            expect(response.body.results[1].address).to.equal(getTestEmail(TEST_USERS.alias1));
             expect(response.body.results[1].main).to.be.true;
             expect(response.body.results[1].metaData.tere).to.equal(123);
 
@@ -335,10 +336,10 @@ describe('API tests', function () {
             expect(response.body.results.length).to.equal(2);
             response.body.results.sort((a, b) => a.id.localeCompare(b.id));
 
-            expect(response.body.results[0].address).to.equal('testuser@example.com');
+            expect(response.body.results[0].address).to.equal(getTestEmail(TEST_USERS.testuser));
             expect(response.body.results[0].main).to.be.false;
 
-            expect(response.body.results[1].address).to.equal('alias1@example.com');
+            expect(response.body.results[1].address).to.equal(getTestEmail(TEST_USERS.alias1));
             expect(response.body.results[1].main).to.be.true;
         });
 
@@ -349,8 +350,8 @@ describe('API tests', function () {
                 const response = await server
                     .post(`/addresses/forwarded`)
                     .send({
-                        address: 'my.new.address@example.com',
-                        targets: ['my.old.address@example.com', 'smtp://mx2.zone.eu:25'],
+                        address: getTestEmail(TEST_USERS.my_new_address),
+                        targets: [getTestEmail(TEST_USERS.my_old_address), `smtp://mx2.${TEST_DOMAINS.zone}:25`],
                         forwards: 500,
                         metaData: {
                             tere: 123
@@ -564,7 +565,7 @@ describe('API tests', function () {
             const message = {
                 from: {
                     name: 'test tester',
-                    address: 'testuser@example.com'
+                    address: getTestEmail(TEST_USERS.testuser)
                 },
                 subject: 'hello world',
                 text: 'Hello hello world!',
@@ -603,15 +604,15 @@ describe('API tests', function () {
             const message = {
                 from: {
                     name: 'test tester1',
-                    address: 'testuser1@example.com'
+                    address: getTestEmail(TEST_USERS.testuser1)
                 },
                 to: [
-                    { name: 'test tester2', address: 'testuser2@example.com' },
-                    { name: 'test tester3', address: 'testuser3@example.com' },
-                    { name: 'test tester4', address: 'testuser4@example.com' },
-                    { name: 'test tester5', address: 'testuser5@example.com' },
-                    { name: 'test tester6', address: 'testuser6@example.com' },
-                    { name: 'test tester7', address: 'testuser7@example.com' }
+                    { name: 'test tester2', address: getTestEmail(TEST_USERS.testuser2) },
+                    { name: 'test tester3', address: getTestEmail(TEST_USERS.testuser3) },
+                    { name: 'test tester4', address: getTestEmail(TEST_USERS.testuser4) },
+                    { name: 'test tester5', address: getTestEmail(TEST_USERS.testuser5) },
+                    { name: 'test tester6', address: getTestEmail(TEST_USERS.testuser6) },
+                    { name: 'test tester7', address: getTestEmail(TEST_USERS.testuser7) }
                 ],
                 draft: true,
                 subject: 'hello world',
@@ -644,15 +645,15 @@ describe('API tests', function () {
             const message = {
                 from: {
                     name: 'test tester1',
-                    address: 'testuser1@example.com'
+                    address: getTestEmail(TEST_USERS.testuser1)
                 },
                 to: [
-                    { name: 'test tester2', address: 'testuser2@example.com' },
-                    { name: 'test tester3', address: 'testuser3@example.com' },
-                    { name: 'test tester4', address: 'testuser4@example.com' },
-                    { name: 'test tester5', address: 'testuser5@example.com' },
-                    { name: 'test tester6', address: 'testuser6@example.com' },
-                    { name: 'test tester7', address: 'testuser7@example.com' }
+                    { name: 'test tester2', address: getTestEmail(TEST_USERS.testuser2) },
+                    { name: 'test tester3', address: getTestEmail(TEST_USERS.testuser3) },
+                    { name: 'test tester4', address: getTestEmail(TEST_USERS.testuser4) },
+                    { name: 'test tester5', address: getTestEmail(TEST_USERS.testuser5) },
+                    { name: 'test tester6', address: getTestEmail(TEST_USERS.testuser6) },
+                    { name: 'test tester7', address: getTestEmail(TEST_USERS.testuser7) }
                 ],
                 draft: true,
                 subject: 'hello world',

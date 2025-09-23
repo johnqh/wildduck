@@ -5,6 +5,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 const { logTest, logError, logPerformance } = require('../../lib/logger');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -27,15 +28,15 @@ describe('API Users', function () {
             const response = await server
                 .post('/users')
                 .send({
-                    username: 'myuser2',
+                    username: TEST_USERS.myuser2,
                     name: 'John Smith',
-                    address: 'john@example.com',
-                    password: 'secretvalue',
+                    address: getTestEmail('john'),
+                    password: TEST_PASSWORDS.secretvalue,
                     hashedPassword: false,
                     emptyAddress: false,
                     language: 'et',
                     retention: 0,
-                    targets: ['user@example.com', 'https://example.com/upload/email'],
+                    targets: [getTestEmail('user'), `https://${TEST_DOMAINS.example}/upload/email`],
                     spamLevel: 50,
                     quota: 1073741824,
                     recipients: 2000,
@@ -47,7 +48,7 @@ describe('API Users', function () {
                     pop3MaxMessages: 300,
                     imapMaxConnections: 15,
                     receivedMax: 60,
-                    fromWhitelist: ['user@alternative.domain', '*@example.com'],
+                    fromWhitelist: [getTestEmail('user', TEST_DOMAINS.alternative), `*@${TEST_DOMAINS.example}`],
                     tags: ['status:user', 'account:example.com'],
                     addTagsToAddress: false,
                     uploadSentMessages: false,
@@ -72,7 +73,7 @@ describe('API Users', function () {
 
             logTest('should POST /users expect success', 'API Users', 'PASS', 'User creation test completed successfully', {
                 userId: response.body.id,
-                username: 'myuser2',
+                username: TEST_USERS.myuser2,
                 responseStatus: response.status
             });
 
@@ -108,23 +109,23 @@ describe('API Users', function () {
             const authResponse = await server
                 .post('/authenticate')
                 .send({
-                    username: 'myuser2',
+                    username: TEST_USERS.myuser2,
                     password: 'secretvalue'
                 })
                 .expect(200);
 
             logTest('should POST /authenticate expect success', 'API Users', 'PASS', 'Authentication test completed successfully', {
                 userId: user,
-                username: 'myuser2',
+                username: TEST_USERS.myuser2,
                 responseStatus: authResponse.status
             });
 
             expect(authResponse.body.success).to.be.true;
             expect(authResponse.body).to.deep.equal({
                 success: true,
-                address: 'john@example.com',
+                address: getTestEmail('john'),
                 id: user,
-                username: 'myuser2',
+                username: TEST_USERS.myuser2,
                 scope: 'master',
                 require2fa: false,
                 requirePasswordChange: false
@@ -158,7 +159,7 @@ describe('API Users', function () {
             const authResponse = await server
                 .post('/authenticate')
                 .send({
-                    username: 'myuser2',
+                    username: TEST_USERS.myuser2,
                     password: 'invalidpass'
                 })
                 .expect(403);
@@ -239,14 +240,14 @@ describe('API Users', function () {
             const authResponse = await server
                 .post('/authenticate')
                 .send({
-                    username: 'myuser2',
-                    password: 'secretvalue',
+                    username: TEST_USERS.myuser2,
+                    password: TEST_PASSWORDS.secretvalue,
                     token: true
                 })
                 .expect(200);
 
             logTest('should POST /authenticate expect success / request a token', 'API Users', 'PASS', 'Authentication with token test completed successfully', {
-                username: 'myuser2',
+                username: TEST_USERS.myuser2,
                 hasToken: !!authResponse.body.token,
                 responseStatus: authResponse.status
             });
@@ -283,9 +284,9 @@ describe('API Users', function () {
             const response = await server
                 .post('/users')
                 .send({
-                    username: 'myuser2hash',
+                    username: TEST_USERS.myuser2hash,
                     name: 'John Smith',
-                    // password: 'test',
+                    // password: TEST_PASSWORDS.test,
                     password: '$argon2i$v=19$m=16,t=2,p=1$SFpGczI1bWV1RVRpYjNYaw$EBE/WnOGeWint3eQ+SQ7Sg',
                     hashedPassword: true
                 })
@@ -297,14 +298,14 @@ describe('API Users', function () {
             const authResponse = await server
                 .post('/authenticate')
                 .send({
-                    username: 'myuser2hash',
-                    password: 'test'
+                    username: TEST_USERS.myuser2hash,
+                    password: TEST_PASSWORDS.test
                 })
                 .expect(200);
 
             logTest('should POST /users expect success / with hashed password', 'API Users', 'PASS', 'Hashed password user creation test completed successfully', {
                 userId: user2,
-                username: 'myuser2hash',
+                username: TEST_USERS.myuser2hash,
                 hashedPassword: true,
                 authenticationSuccess: authResponse.body.success
             });
@@ -314,7 +315,7 @@ describe('API Users', function () {
                 success: true,
                 address: `myuser2hash@${os.hostname().toLowerCase()}`,
                 id: user2,
-                username: 'myuser2hash',
+                username: TEST_USERS.myuser2hash,
                 scope: 'master',
                 require2fa: false,
                 requirePasswordChange: false
@@ -348,7 +349,7 @@ describe('API Users', function () {
             const response = await server.get('/users/resolve/myuser2').expect(200);
 
             logTest('should GET /users/resolve/{username} expect success', 'API Users', 'PASS', 'User resolve test completed successfully', {
-                username: 'myuser2',
+                username: TEST_USERS.myuser2,
                 resolvedUserId: response.body.id,
                 responseStatus: response.status
             });
@@ -594,8 +595,8 @@ describe('API Users', function () {
         const authResponse1 = await server
             .post('/authenticate')
             .send({
-                username: 'myuser2',
-                password: 'secretvalue',
+                username: TEST_USERS.myuser2,
+                password: TEST_PASSWORDS.secretvalue,
                 token: true
             })
             .expect(200);
@@ -608,8 +609,8 @@ describe('API Users', function () {
         const authResponse2 = await server
             .post('/authenticate')
             .send({
-                username: 'myuser2',
-                password: 'secretvalue',
+                username: TEST_USERS.myuser2,
+                password: TEST_PASSWORDS.secretvalue,
                 token: true
             })
             .expect(200);
@@ -677,7 +678,7 @@ describe('API Users', function () {
         const authResponse = await server
             .post('/authenticate')
             .send({
-                username: 'myuser2',
+                username: TEST_USERS.myuser2,
                 password: response.body.password
             })
             .expect(200);
@@ -685,9 +686,9 @@ describe('API Users', function () {
         expect(authResponse.body.success).to.be.true;
         expect(authResponse.body).to.deep.equal({
             success: true,
-            address: 'john@example.com',
+            address: getTestEmail('john'),
             id: user,
-            username: 'myuser2',
+            username: TEST_USERS.myuser2,
             scope: 'master',
             require2fa: false,
             // using a temporary password requires a password change
@@ -710,7 +711,7 @@ describe('API Users', function () {
         await server
             .post('/authenticate')
             .send({
-                username: 'myuser2',
+                username: TEST_USERS.myuser2,
                 password: response.body.password
             })
             .expect(403);
@@ -725,7 +726,7 @@ describe('API Users', function () {
             const passwordUpdateResponse = await server
                 .put(`/users/${user}`)
                 .send({
-                    password: 'secretvalue',
+                    password: TEST_PASSWORDS.secretvalue,
                     ip: '1.2.3.5'
                 })
                 .expect(200);
@@ -743,7 +744,7 @@ describe('API Users', function () {
             await server
                 .post('/authenticate')
                 .send({
-                    username: 'myuser2',
+                    username: TEST_USERS.myuser2,
                     password: 'secretvalue'
                 })
                 .expect(403);
@@ -781,7 +782,7 @@ describe('API Users', function () {
         expect(response.body.success).to.be.true;
 
         expect(response.body.username).to.equal('myuser2');
-        expect(response.body.recoverableAddresses).to.deep.equal(['john@example.com']);
+        expect(response.body.recoverableAddresses).to.deep.equal([getTestEmail(TEST_USERS.john)]);
     });
 
     it('should POST /users/{user}/restore expect success', async () => {
@@ -789,7 +790,7 @@ describe('API Users', function () {
         expect(response.body.success).to.be.true;
 
         expect(response.body.addresses.recovered).to.gte(1);
-        expect(response.body.addresses.main).to.equal('john@example.com');
+        expect(response.body.addresses.main).to.equal(getTestEmail(TEST_USERS.john));
     });
 
     it('should POST /users expect success / with DES hash', async () => {
@@ -800,9 +801,9 @@ describe('API Users', function () {
             const response = await server
                 .post('/users')
                 .send({
-                    username: 'desuser',
+                    username: TEST_USERS.desuser,
                     name: 'Crypt Des',
-                    address: 'des@example.com',
+                    address: getTestEmail('des'),
                     password: 'sBk81TlWxyZlc',
                     hashedPassword: true
                 })
@@ -814,7 +815,7 @@ describe('API Users', function () {
             const authResponseSuccess = await server
                 .post('/authenticate')
                 .send({
-                    username: 'desuser',
+                    username: TEST_USERS.desuser,
                     password: '12Mina34Ise56P.'
                 })
                 .expect(200);
@@ -823,7 +824,7 @@ describe('API Users', function () {
             const authResponseFail = await server
                 .post('/authenticate')
                 .send({
-                    username: 'desuser',
+                    username: TEST_USERS.desuser,
                     password: 'wrongpass'
                 })
                 .expect(403);
@@ -831,8 +832,8 @@ describe('API Users', function () {
 
             logTest('should POST /users expect success / with DES hash', 'API Users', 'PASS', 'DES hash user creation test completed successfully', {
                 userId: response.body.id,
-                username: 'desuser',
-                address: 'des@example.com',
+                username: TEST_USERS.desuser,
+                address: getTestEmail('des'),
                 authSuccessful: authResponseSuccess.body.success,
                 authFailureHandled: !!authResponseFail.body.error
             });

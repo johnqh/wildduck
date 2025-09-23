@@ -2,6 +2,15 @@
 
 DBNAME="$1"
 
+# Get test configuration values from Node.js test config
+get_test_config() {
+    node -e "const config = require('../../test/test-config'); console.log(JSON.stringify({username: config.TEST_USERS.testuser, password: config.TEST_PASSWORDS.pass}));"
+}
+
+TEST_CONFIG=$(get_test_config)
+TEST_USERNAME=$(echo "$TEST_CONFIG" | jq -r '.username')
+TEST_PASSWORD=$(echo "$TEST_CONFIG" | jq -r '.password')
+
 # Function to check if a string is a valid ObjectId
 is_valid_objectid() {
     [[ "$1" =~ ^[0-9a-fA-F]{24}$ ]]
@@ -15,9 +24,20 @@ extract_json_value() {
 echo "which mongo"
 which mongo
 
-echo "Clearing DB - looking for existing testuser"
-# Find and delete existing testuser
-EXISTING_USER=$(curl --silent "http://127.0.0.1:8080/users?query=testuser")
+# Wait for server to be fully ready
+echo "Waiting for server to be ready..."
+for i in {1..30}; do
+    if curl -s "http://127.0.0.1:8080/users" > /dev/null 2>&1; then
+        echo "Server is ready!"
+        break
+    fi
+    echo "Waiting for server... ($i/30)"
+    sleep 1
+done
+
+echo "Clearing DB - looking for existing $TEST_USERNAME"
+# Find and delete existing test user
+EXISTING_USER=$(curl --silent "http://127.0.0.1:8080/users?query=$TEST_USERNAME")
 EXISTING_USER_ID=$(extract_json_value "$EXISTING_USER" '.results[0].id')
 
 if [ "$EXISTING_USER_ID" != "null" ] && is_valid_objectid "$EXISTING_USER_ID"; then
@@ -30,11 +50,11 @@ fi
 echo "Creating user"
 USERRESPONSE=$(curl --silent -XPOST http://127.0.0.1:8080/users \
 -H 'Content-type: application/json' \
--d '{
-  "username": "testuser",
-  "password": "pass",
-  "name": "Test User"
-}')
+-d "{
+  \"username\": \"$TEST_USERNAME\",
+  \"password\": \"$TEST_PASSWORD\",
+  \"name\": \"Test User\"
+}")
 
 echo "UR: $USERRESPONSE"
 USERID=$(extract_json_value "$USERRESPONSE" '.id')

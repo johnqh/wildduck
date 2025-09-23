@@ -7,6 +7,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 // const { logTest, logError, logPerformance } = require('../../lib/logger');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -24,9 +25,9 @@ describe('API Filters', function () {
         const response = await server
             .post('/users')
             .send({
-                username: 'filteruser',
-                password: 'secretvalue',
-                address: 'filteruser.addrtest@example.com',
+                username: TEST_USERS.filteruser,
+                password: TEST_PASSWORDS.secretvalue,
+                address: getTestEmail(TEST_USERS.filteruser_addrtest, TEST_DOMAINS.example),
                 name: 'Filter User'
             })
             .expect(200);
@@ -38,9 +39,9 @@ describe('API Filters', function () {
         const response2 = await server
             .post('/users')
             .send({
-                username: 'filteruser2',
-                password: 'secretvalue',
-                address: 'filteruser2.addrtest@example.com',
+                username: TEST_USERS.filteruser2,
+                password: TEST_PASSWORDS.secretvalue,
+                address: getTestEmail(TEST_USERS.filteruser2_addrtest, TEST_DOMAINS.example),
                 name: 'Filter User 2'
             })
             .expect(200);
@@ -116,8 +117,8 @@ describe('API Filters', function () {
         const authResponse = await server
             .post('/authenticate')
             .send({
-                username: 'filteruser',
-                password: 'secretvalue',
+                username: TEST_USERS.filteruser,
+                password: TEST_PASSWORDS.secretvalue,
                 token: true
             })
             .expect(200);

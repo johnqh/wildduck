@@ -47,7 +47,11 @@
       "Bash(NODE_ENV=test npm run runtest -- mochaTest:api)",
       "Bash(npm run runtest -- --help)",
       "Bash(NODE_ENV=test npx grunt proto)",
-      "Bash(/Users/johnhuang/0xmail/wildduck/imap-core/test/prepare.sh:*)"
+      "Bash(/Users/johnhuang/0xmail/wildduck/imap-core/test/prepare.sh:*)",
+      "Bash(NODE_ENV=test npm test)",
+      "Bash(NODE_ENV=test node server.js)",
+      "Bash(NODE_ENV=test npx mocha test/api-test.js --timeout 60000)",
+      "Bash(bash:*)"
     ],
     "deny": [],
     "ask": []
