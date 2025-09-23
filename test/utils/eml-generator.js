@@ -27,7 +27,9 @@ class EmlGenerator {
             RECEIVER_EMAIL: getTestEmail(TEST_USERS.receiver),
             ANDRIS_KREATA_EMAIL: getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata),
             ANDRIS_TR_EMAIL: getTestEmail(TEST_USERS.andris, TEST_DOMAINS.tr),
-            ANDRIS_PANGALINK_EMAIL: getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink)
+            ANDRIS_PANGALINK_EMAIL: getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink),
+            RFINNIE_EMAIL: getTestEmail(TEST_USERS.rfinnie, TEST_DOMAINS.domain),
+            BOB_EMAIL: getTestEmail(TEST_USERS.bob, TEST_DOMAINS.domain)
         };
     }
 
@@ -63,8 +65,8 @@ class EmlGenerator {
             content = content.replace(regex, value);
         }
 
-        // Convert LF to CRLF for proper email format
-        content = content.replace(/\r?\n/g, '\r\n');
+        // Preserve original line ending style - don't force CRLF conversion
+        // The template should already have the correct line endings from the original file
 
         // Write generated file
         fs.writeFileSync(outputPath, content, 'utf8');

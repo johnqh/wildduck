@@ -8,6 +8,13 @@ const parseMimeTree = require('../lib/indexer/parse-mime-tree');
 const imapHandler = require('../lib/handler/imap-handler');
 const { TEST_USERS, getTestEmail, TEST_DOMAINS } = require('../../test/test-config');
 
+// Prefer generated EML files when available, fallback to originals
+const getEmlPath = (filename) => {
+    const generatedPath = __dirname + '/fixtures/generated/' + filename;
+    const originalPath = __dirname + '/fixtures/' + filename;
+    return fs.existsSync(generatedPath) ? generatedPath : originalPath;
+};
+
 module.exports = function (options) {
     // This example uses global folders and subscriptions
     let folders = new Map();
@@ -43,7 +50,7 @@ module.exports = function (options) {
                     flags: ['\\Seen'],
                     idate: new Date(),
                     modseq: 5000,
-                    mimeTree: parseMimeTree(fs.readFileSync(__dirname + '/fixtures/ryan_finnie_mime_torture.eml'))
+                    mimeTree: parseMimeTree(fs.readFileSync(getEmlPath('ryan_finnie_mime_torture.eml')))
                 },
                 {
                     uid: 50,
