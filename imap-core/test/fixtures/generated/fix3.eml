@@ -1,6 +1,6 @@
 MIME-Version: 1.0
-From: andrisxx@kreata.ee
-To: andrisxx@tr.ee
+From: andrisxx@xkreata.ee
+To: andrisxx@xtr.ee
 Content-Type: multipart/mixed;
  boundary='----mailcomposer-?=_1-1328088797399'
 Message-Id: <testmessage-for-bug>;
@@ -10,8 +10,8 @@ Content-Type: message/rfc822
 Content-Transfer-Encoding: 7bit
 
 MIME-Version: 1.0
-From: andrisxx@kreata.ee
-To: andrisxx@pangalink.net
+From: andrisxx@xkreata.ee
+To: andrisxx@xpangalink.net
 In-Reply-To: <test1>
 
 Hello world 1!
@@ -20,8 +20,8 @@ Content-Type: message/rfc822
 Content-Transfer-Encoding: 7bit
 
 MIME-Version: 1.0
-From: andrisxx@kreata.ee
-To: andrisxx@pangalink.net
+From: andrisxx@xkreata.ee
+To: andrisxx@xpangalink.net
 
 Hello world 2!
 ------mailcomposer-?=_1-1328088797399

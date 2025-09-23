@@ -1,7 +1,7 @@
 Content-Type: multipart/mixed;
  boundary="----sinikael-?=_1-14507714776260.4520441491622478"
-From: =?UTF-8?Q?Sender_Name_=F0=9F=91=BB?= <senderxx@example.com>
-To: =?UTF-8?Q?Receiver_Name_=F0=9F=91=A5?= <receiverxx@example.com>
+From: =?UTF-8?Q?Sender_Name_=F0=9F=91=BB?= <senderxx@xexample.com>
+To: =?UTF-8?Q?Receiver_Name_=F0=9F=91=A5?= <receiverxx@xexample.com>
 Subject: Nodemailer is unicode friendly =?UTF-8?Q?=E2=9C=94?=
 X-Laziness-Level: 1000
 X-Mailer: nodemailer (1.10.0; +http://www.nodemailer.com; Stub/1.0.0)

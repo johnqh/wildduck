@@ -1575,7 +1575,7 @@ describe('IMAP Protocol integration tests', function () {
                             resp
                                 .slice(/\n/)
                                 .indexOf(
-                                    `* 1 FETCH (UID 101 BODYSTRUCTURE ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 6 1 NIL NIL NIL NIL) ENVELOPE (NIL "test" ((NIL NIL "${TEST_USERS.sender}" "example.com")) ((NIL NIL "${TEST_USERS.sender}" "example.com")) ((NIL NIL "${TEST_USERS.sender}" "example.com")) ((NIL NIL "${TEST_USERS.to}" "example.com")) ((NIL NIL "${TEST_USERS.cc}" "example.com")) NIL NIL NIL))`
+                                    `* 1 FETCH (UID 101 BODYSTRUCTURE ("TEXT" "PLAIN" NIL NIL NIL "7BIT" 6 1 NIL NIL NIL NIL) ENVELOPE (NIL "test" ((NIL NIL "${TEST_USERS.sender}" "${TEST_DOMAINS.example}")) ((NIL NIL "${TEST_USERS.sender}" "${TEST_DOMAINS.example}")) ((NIL NIL "${TEST_USERS.sender}" "${TEST_DOMAINS.example}")) ((NIL NIL "${TEST_USERS.to}" "${TEST_DOMAINS.example}")) ((NIL NIL "${TEST_USERS.cc}" "${TEST_DOMAINS.example}")) NIL NIL NIL))`
                                 ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;

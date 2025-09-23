@@ -54,7 +54,7 @@ describe('API tests', function () {
                 .post('/domainaliases')
                 .send({
                     alias: TEST_DOMAINS.jogeva,
-                    domain: 'example.com'
+                    domain: TEST_DOMAINS.example
                 })
                 .expect(200);
             expect(response.body.success).to.be.true;
@@ -491,7 +491,7 @@ describe('API tests', function () {
             const response1 = await server
                 .post(`/domainaccess/${tag}/block`)
                 .send({
-                    domain: 'example.com'
+                    domain: TEST_DOMAINS.example
                 })
                 .expect(200);
             expect(response1.body.success).to.be.true;
@@ -499,7 +499,7 @@ describe('API tests', function () {
             const response2 = await server
                 .post(`/domainaccess/${tag}/block`)
                 .send({
-                    domain: 'jõgeva.ee'
+                    domain: TEST_DOMAINS.jogeva
                 })
                 .expect(200);
             expect(response2.body.success).to.be.true;
@@ -510,8 +510,8 @@ describe('API tests', function () {
             expect(response.body.success).to.be.true;
             expect(response.body.results.length).to.equal(2);
 
-            expect(response.body.results[0].domain).to.equal('example.com');
-            expect(response.body.results[1].domain).to.equal('jõgeva.ee');
+            expect(response.body.results[0].domain).to.equal(TEST_DOMAINS.example);
+            expect(response.body.results[1].domain).to.equal(TEST_DOMAINS.jogeva);
 
             domain = response.body.results[1];
         });

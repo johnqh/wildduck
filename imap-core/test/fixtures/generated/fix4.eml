@@ -1,6 +1,6 @@
-from: senderxx@example.com
-to: toxx@example.com
-cc: ccxx@example.com
+from: senderxx@xexample.com
+to: toxx@xexample.com
+cc: ccxx@xexample.com
 subject: test
 
 Hello World!

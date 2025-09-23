@@ -71,16 +71,16 @@ const TEST_PASSWORDS = {
 
 // Test domains for email generation
 const TEST_DOMAINS = {
-    example: 'example.com',
-    ethereal: 'ethereal.email',
-    kreata: 'kreata.ee',
-    jogeva: 'jõgeva.öö',
-    alternative: 'alternative.domain',
-    neti: 'neti.ee',
-    zone: 'zone.eu',
-    pangalink: 'pangalink.net',
-    tr: 'tr.ee',
-    domain: 'domain.dom'
+    example: 'xexample.com',
+    ethereal: 'xethereal.email',
+    kreata: 'xkreata.ee',
+    jogeva: 'xjõgeva.öö',
+    alternative: 'xalternative.domain',
+    neti: 'xneti.ee',
+    zone: 'xzone.eu',
+    pangalink: 'xpangalink.net',
+    tr: 'xtr.ee',
+    domain: 'xdomain.dom'
 };
 
 // Helper function to generate email addresses
