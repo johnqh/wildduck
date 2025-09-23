@@ -40,10 +40,7 @@ let argv = yargs
             await dbconnect();
 
             let accessToken = crypto.randomBytes(20).toString('hex');
-            let tokenHash = crypto
-                .createHash('sha256')
-                .update(accessToken)
-                .digest('hex');
+            let tokenHash = crypto.createHash('sha256').update(accessToken).digest('hex');
             let key = 'tn:token:' + tokenHash;
 
             let tokenData = {
@@ -92,10 +89,7 @@ let argv = yargs
 
             let accessToken = argv.token;
 
-            let tokenHash = crypto
-                .createHash('sha256')
-                .update(accessToken)
-                .digest('hex');
+            let tokenHash = crypto.createHash('sha256').update(accessToken).digest('hex');
 
             let key = 'tn:token:' + tokenHash;
 

@@ -30,7 +30,15 @@ client.on('error', err => {
     process.exit(1);
 });
 
-const raw = Buffer.from('from: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nzzzz\r\n');
+const raw = Buffer.from(
+    'from: ' +
+        getTestEmail(TEST_USERS.sender) +
+        '\r\nto: ' +
+        getTestEmail(TEST_USERS.to) +
+        '\r\ncc: ' +
+        getTestEmail(TEST_USERS.cc) +
+        '\r\nsubject: test\r\n\r\nzzzz\r\n'
+);
 
 client
     .connect()

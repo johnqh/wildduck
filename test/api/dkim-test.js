@@ -52,18 +52,26 @@ describe('API DKIM', function () {
             expect(response.body.dnsTxt.value.split('p=')[1]).to.be.not.empty;
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /dkim empty key test', duration, {
-                testSuite: 'API DKIM',
-                status: 'PASS',
-                dkimId: dkim
-            }, 'DKIM creation with empty key test performance measured');
-
+            logPerformance(
+                'POST /dkim empty key test',
+                duration,
+                {
+                    testSuite: 'API DKIM',
+                    status: 'PASS',
+                    dkimId: dkim
+                },
+                'DKIM creation with empty key test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /dkim expect success / key empty',
-                testSuite: 'API DKIM',
-                operation: 'DKIM creation with empty key'
-            }, 'DKIM creation with empty key test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /dkim expect success / key empty',
+                    testSuite: 'API DKIM',
+                    operation: 'DKIM creation with empty key'
+                },
+                'DKIM creation with empty key test failed'
+            );
             logTest('should POST /dkim expect success / key empty', 'API DKIM', 'FAIL', 'DKIM creation with empty key test failed', {
                 error: error.message
             });
@@ -141,19 +149,27 @@ describe('API DKIM', function () {
             expect(response.body.id).to.equal(dkim);
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /dkim/:dkim test', duration, {
-                testSuite: 'API DKIM',
-                status: 'PASS',
-                dkimId: dkim
-            }, 'DKIM details test performance measured');
-
+            logPerformance(
+                'GET /dkim/:dkim test',
+                duration,
+                {
+                    testSuite: 'API DKIM',
+                    status: 'PASS',
+                    dkimId: dkim
+                },
+                'DKIM details test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /dkim/:dkim expect success',
-                testSuite: 'API DKIM',
-                operation: 'DKIM details',
-                dkimId: dkim
-            }, 'DKIM details test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /dkim/:dkim expect success',
+                    testSuite: 'API DKIM',
+                    operation: 'DKIM details',
+                    dkimId: dkim
+                },
+                'DKIM details test failed'
+            );
             logTest('should GET /dkim/:dkim expect success', 'API DKIM', 'FAIL', 'DKIM details test failed', {
                 error: error.message
             });

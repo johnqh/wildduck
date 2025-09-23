@@ -155,15 +155,7 @@ export namespace WildDuck {
     }
 
     // Handler Response Types
-    export type IMAPResponse =
-        | 'OK'
-        | 'NO'
-        | 'BAD'
-        | 'NONEXISTENT'
-        | 'ALREADYEXISTS'
-        | 'TRYCREATE'
-        | 'OVERQUOTA'
-        | 'CANNOT';
+    export type IMAPResponse = 'OK' | 'NO' | 'BAD' | 'NONEXISTENT' | 'ALREADYEXISTS' | 'TRYCREATE' | 'OVERQUOTA' | 'CANNOT';
 
     export interface CopyResponse {
         uidValidity: number;
@@ -254,13 +246,16 @@ export namespace WildDuck {
         metadata?: Record<string, any>;
     }
 
-    export type AuthCallback = (err: Error | null, authData?: {
-        user: ObjectId;
-        username: string;
-        scope: string;
-        require2fa?: boolean;
-        requirePasswordChange?: boolean;
-    }) => void;
+    export type AuthCallback = (
+        err: Error | null,
+        authData?: {
+            user: ObjectId;
+            username: string;
+            scope: string;
+            require2fa?: boolean;
+            requirePasswordChange?: boolean;
+        }
+    ) => void;
 
     export interface UserCache {
         get(key: string, callback: (err: Error | null, value?: any) => void): void;

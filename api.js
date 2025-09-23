@@ -235,7 +235,7 @@ server.get(
 // Disable GZIP as it does not work with stream.pipe(res)
 //server.use(restify.plugins.gzipResponse());
 
-server.use(async (req) => {
+server.use(async req => {
     if (['public_get', 'public_post', 'acmeToken'].includes(req.route.name)) {
         // skip token check for public pages
         return;

@@ -62,36 +62,36 @@ async function transferMessage(messageId, sourceMailbox, targetMailbox) {
     try {
         await session.withTransaction(async () => {
             // Remove from source
-            await db.database.collection('messages').deleteOne(
-                { _id: messageId, mailbox: sourceMailbox },
-                { session }
-            );
+            await db.database.collection('messages').deleteOne({ _id: messageId, mailbox: sourceMailbox }, { session });
 
             // Add to target
             await db.database.collection('messages').insertOne(
                 {
                     _id: new ObjectId(),
-                    mailbox: targetMailbox,
+                    mailbox: targetMailbox
                     // ... other fields
                 },
                 { session }
             );
 
             // Update counters
-            await db.database.collection('mailboxes').bulkWrite([
-                {
-                    updateOne: {
-                        filter: { _id: sourceMailbox },
-                        update: { $inc: { total: -1 } }
+            await db.database.collection('mailboxes').bulkWrite(
+                [
+                    {
+                        updateOne: {
+                            filter: { _id: sourceMailbox },
+                            update: { $inc: { total: -1 } }
+                        }
+                    },
+                    {
+                        updateOne: {
+                            filter: { _id: targetMailbox },
+                            update: { $inc: { total: 1 } }
+                        }
                     }
-                },
-                {
-                    updateOne: {
-                        filter: { _id: targetMailbox },
-                        update: { $inc: { total: 1 } }
-                    }
-                }
-            ], { session });
+                ],
+                { session }
+            );
         });
 
         return { success: true };
@@ -111,15 +111,9 @@ async function listMessages(mailbox, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
 
     const [messages, total] = await Promise.all([
-        db.database.collection('messages')
-            .find({ mailbox })
-            .sort({ uid: -1 })
-            .skip(skip)
-            .limit(limit)
-            .toArray(),
+        db.database.collection('messages').find({ mailbox }).sort({ uid: -1 }).skip(skip).limit(limit).toArray(),
 
-        db.database.collection('messages')
-            .countDocuments({ mailbox })
+        db.database.collection('messages').countDocuments({ mailbox })
     ]);
 
     return {
@@ -188,7 +182,8 @@ async function searchMessages(user, query) {
         filter.idate = { $gte: new Date(query.dateAfter) };
     }
 
-    const messages = await db.database.collection('messages')
+    const messages = await db.database
+        .collection('messages')
         .find(filter)
         .project({
             _id: 1,
@@ -216,16 +211,12 @@ async function encryptMessage(userData, messageContent) {
     }
 
     return new Promise((resolve, reject) => {
-        messageHandler.encryptMessages(
-            userData.pubKey,
-            messageContent,
-            (err, encrypted) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(encrypted);
+        messageHandler.encryptMessages(userData.pubKey, messageContent, (err, encrypted) => {
+            if (err) {
+                return reject(err);
             }
-        );
+            resolve(encrypted);
+        });
     });
 }
 ```
@@ -334,11 +325,14 @@ module.exports = (server, messageHandler) => {
             // Return success
             callback(null, true, result);
         } catch (err) {
-            server.logger.error({
-                tnx: 'custom',
-                cid: session.id,
-                err
-            }, 'Custom command failed');
+            server.logger.error(
+                {
+                    tnx: 'custom',
+                    cid: session.id,
+                    err
+                },
+                'Custom command failed'
+            );
 
             callback(err);
         }
@@ -396,11 +390,14 @@ async function copyHandler(server, messageHandler, connection, mailbox, update, 
         await db.database.collection('messages').insertOne(messageData);
     }
 
-    return [true, {
-        uidValidity: targetData.uidValidity,
-        sourceUid,
-        destinationUid
-    }];
+    return [
+        true,
+        {
+            uidValidity: targetData.uidValidity,
+            sourceUid,
+            destinationUid
+        }
+    ];
 }
 ```
 
@@ -654,7 +651,8 @@ module.exports = {
             const lock = await redis.set(
                 `lock:task:${taskData._id}`,
                 '1',
-                'EX', 300, // 5 minute lock
+                'EX',
+                300, // 5 minute lock
                 'NX'
             );
 
@@ -724,14 +722,18 @@ function setupNotifier() {
     });
 
     // Notify on new message
-    notifier.addEntries(mailbox, {
-        command: 'EXISTS',
-        uid: messageData.uid,
-        message: messageData._id,
-        modseq: messageData.modseq
-    }, () => {
-        log.info('Notifier', 'Notification sent for mailbox %s', mailbox._id);
-    });
+    notifier.addEntries(
+        mailbox,
+        {
+            command: 'EXISTS',
+            uid: messageData.uid,
+            message: messageData._id,
+            modseq: messageData.modseq
+        },
+        () => {
+            log.info('Notifier', 'Notification sent for mailbox %s', mailbox._id);
+        }
+    );
 
     // Fire notifications
     notifier.fire(userId, mailboxPath);
@@ -745,8 +747,8 @@ function setupNotifier() {
 ```javascript
 const io = require('socket.io')(server);
 
-io.on('connection', (socket) => {
-    socket.on('subscribe', async (data) => {
+io.on('connection', socket => {
+    socket.on('subscribe', async data => {
         const { user, mailbox } = data;
 
         // Verify user
@@ -840,10 +842,7 @@ describe('API Integration', () => {
 
     describe('GET /users/:user', () => {
         it('should return user data', async () => {
-            const response = await request(app)
-                .get(`/users/${testUser.id}`)
-                .set('Authorization', `Bearer ${testUser.token}`)
-                .expect(200);
+            const response = await request(app).get(`/users/${testUser.id}`).set('Authorization', `Bearer ${testUser.token}`).expect(200);
 
             expect(response.body).to.have.property('success', true);
             expect(response.body.data).to.have.property('username', testUser.username);
@@ -852,10 +851,7 @@ describe('API Integration', () => {
         it('should return 404 for non-existent user', async () => {
             const fakeId = new ObjectId().toString();
 
-            await request(app)
-                .get(`/users/${fakeId}`)
-                .set('Authorization', `Bearer ${testUser.token}`)
-                .expect(404);
+            await request(app).get(`/users/${fakeId}`).set('Authorization', `Bearer ${testUser.token}`).expect(404);
         });
     });
 });
@@ -929,8 +925,7 @@ async function bulkUpdateMessages(updates) {
         }
     }));
 
-    const result = await db.database.collection('messages')
-        .bulkWrite(operations, { ordered: false });
+    const result = await db.database.collection('messages').bulkWrite(operations, { ordered: false });
 
     return {
         modified: result.modifiedCount,
@@ -960,11 +955,7 @@ async function getCachedUser(userId) {
 
     if (user) {
         // Store in cache
-        await db.redis.setex(
-            cacheKey,
-            CACHE_TTL,
-            JSON.stringify(user)
-        );
+        await db.redis.setex(cacheKey, CACHE_TTL, JSON.stringify(user));
     }
 
     return user;

@@ -11,11 +11,11 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.config.includeStack = true;
 
-describe('#parseQueryTerms', function() {
+describe('#parseQueryTerms', function () {
     let uidList = [39, 40, 44, 52, 53, 54, 59, 72];
 
-    describe('<sequence set>', function() {
-        it('should detect sequence as first argument', function() {
+    describe('<sequence set>', function () {
+        it('should detect sequence as first argument', function () {
             expect(parseQueryTerms('1,2,4:6'.split(' '), uidList).query).to.deep.equal([
                 {
                     key: 'uid',
@@ -24,7 +24,7 @@ describe('#parseQueryTerms', function() {
             ]);
         });
 
-        it('should detect sequence as subargument', function() {
+        it('should detect sequence as subargument', function () {
             expect(parseQueryTerms('NOT 1,2,4:6'.split(' '), uidList).query).to.deep.equal([
                 {
                     key: 'not',
@@ -37,7 +37,7 @@ describe('#parseQueryTerms', function() {
         });
     });
 
-    it('should handle ALL', function() {
+    it('should handle ALL', function () {
         expect(parseQueryTerms('ALL'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'all',
@@ -46,7 +46,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle ANSWERED', function() {
+    it('should handle ANSWERED', function () {
         expect(parseQueryTerms('ANSWERED'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -56,7 +56,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle BCC', function() {
+    it('should handle BCC', function () {
         expect(parseQueryTerms('BCC query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'header',
@@ -66,7 +66,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle BEFORE', function() {
+    it('should handle BEFORE', function () {
         expect(parseQueryTerms('BEFORE 1-Feb-1994'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'internaldate',
@@ -76,7 +76,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle BODY', function() {
+    it('should handle BODY', function () {
         expect(parseQueryTerms('BODY query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'body',
@@ -85,7 +85,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle CC', function() {
+    it('should handle CC', function () {
         expect(parseQueryTerms('CC query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'header',
@@ -95,7 +95,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle DELETED', function() {
+    it('should handle DELETED', function () {
         expect(parseQueryTerms('DELETED'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -105,7 +105,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle DRAFT', function() {
+    it('should handle DRAFT', function () {
         expect(parseQueryTerms('DRAFT'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -115,7 +115,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle FLAGGED', function() {
+    it('should handle FLAGGED', function () {
         expect(parseQueryTerms('FLAGGED'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -125,7 +125,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle FROM', function() {
+    it('should handle FROM', function () {
         expect(parseQueryTerms('FROM query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'header',
@@ -135,7 +135,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle HEADER', function() {
+    it('should handle HEADER', function () {
         expect(parseQueryTerms('HEADER X-FOO query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'header',
@@ -153,7 +153,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle KEYWORD', function() {
+    it('should handle KEYWORD', function () {
         expect(parseQueryTerms('KEYWORD $MyFlag'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -163,7 +163,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle LARGER', function() {
+    it('should handle LARGER', function () {
         expect(parseQueryTerms('LARGER 123'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'size',
@@ -173,8 +173,8 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    describe('MODSEQ', function() {
-        it('should handle only required param', function() {
+    describe('MODSEQ', function () {
+        it('should handle only required param', function () {
             expect(parseQueryTerms('MODSEQ 123'.split(' '), uidList).query).to.deep.equal([
                 {
                     key: 'modseq',
@@ -183,7 +183,7 @@ describe('#parseQueryTerms', function() {
             ]);
         });
 
-        it('should handle optional params', function() {
+        it('should handle optional params', function () {
             expect(parseQueryTerms('MODSEQ "/flags/\\\\draft" all 123'.split(' '), uidList).query).to.deep.equal([
                 {
                     key: 'modseq',
@@ -193,7 +193,7 @@ describe('#parseQueryTerms', function() {
         });
     });
 
-    it('should handle NEW', function() {
+    it('should handle NEW', function () {
         expect(parseQueryTerms('NEW'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -208,7 +208,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle NOT', function() {
+    it('should handle NOT', function () {
         expect(parseQueryTerms('NOT ALL'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'not',
@@ -233,7 +233,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle OLD', function() {
+    it('should handle OLD', function () {
         expect(parseQueryTerms('OLD'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -243,7 +243,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle ON', function() {
+    it('should handle ON', function () {
         expect(parseQueryTerms('ON 1-Feb-1994'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'internaldate',
@@ -253,7 +253,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle OR', function() {
+    it('should handle OR', function () {
         expect(parseQueryTerms('OR ALL NOT ALL'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'or',
@@ -274,7 +274,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle RECENT', function() {
+    it('should handle RECENT', function () {
         expect(parseQueryTerms('RECENT'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -284,7 +284,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle SEEN', function() {
+    it('should handle SEEN', function () {
         expect(parseQueryTerms('SEEN'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -294,7 +294,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle SENTBEFORE', function() {
+    it('should handle SENTBEFORE', function () {
         expect(parseQueryTerms('SENTBEFORE 1-Feb-1994'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'date',
@@ -304,7 +304,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle SENTON', function() {
+    it('should handle SENTON', function () {
         expect(parseQueryTerms('SENTON 1-Feb-1994'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'date',
@@ -314,7 +314,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle SENTSINCE', function() {
+    it('should handle SENTSINCE', function () {
         expect(parseQueryTerms('SENTSINCE 1-Feb-1994'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'date',
@@ -324,7 +324,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle SINCE', function() {
+    it('should handle SINCE', function () {
         expect(parseQueryTerms('SINCE 1-Feb-1994'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'internaldate',
@@ -337,7 +337,7 @@ describe('#parseQueryTerms', function() {
         expect(fn).to.throw(Error);
     });
 
-    it('should handle SMALLER', function() {
+    it('should handle SMALLER', function () {
         expect(parseQueryTerms('SMALLER 123'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'size',
@@ -347,7 +347,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle SUBJECT', function() {
+    it('should handle SUBJECT', function () {
         expect(parseQueryTerms('SUBJECT query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'header',
@@ -357,7 +357,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle TEXT', function() {
+    it('should handle TEXT', function () {
         expect(parseQueryTerms('TEXT query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'text',
@@ -366,7 +366,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle TO', function() {
+    it('should handle TO', function () {
         expect(parseQueryTerms('TO query'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'header',
@@ -376,7 +376,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle UID', function() {
+    it('should handle UID', function () {
         expect(parseQueryTerms('UID 44,54:*'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'uid',
@@ -385,7 +385,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle UNANSWERED', function() {
+    it('should handle UNANSWERED', function () {
         expect(parseQueryTerms('UNANSWERED'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -395,7 +395,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle UNDELETED', function() {
+    it('should handle UNDELETED', function () {
         expect(parseQueryTerms('UNDELETED'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -405,7 +405,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle UNDRAFT', function() {
+    it('should handle UNDRAFT', function () {
         expect(parseQueryTerms('UNDRAFT'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -415,7 +415,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle UNFLAGGED', function() {
+    it('should handle UNFLAGGED', function () {
         expect(parseQueryTerms('UNFLAGGED'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -425,7 +425,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle UNKEYWORD', function() {
+    it('should handle UNKEYWORD', function () {
         expect(parseQueryTerms('UNKEYWORD $MyFlag'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -435,7 +435,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle UNSEEN', function() {
+    it('should handle UNSEEN', function () {
         expect(parseQueryTerms('UNSEEN'.split(' '), uidList).query).to.deep.equal([
             {
                 key: 'flag',
@@ -445,7 +445,7 @@ describe('#parseQueryTerms', function() {
         ]);
     });
 
-    it('should handle complex query', function() {
+    it('should handle complex query', function () {
         // this is a query by iOS Mail app
         // UID SEARCH (OR FROM "Time" (OR SUBJECT "Time" (OR TO "Time" (OR CC "Time" BODY "Time")))) NOT DELETED
         expect(parseQueryTerms('OR FROM Time OR SUBJECT Time OR TO Time OR CC Time BODY Time NOT DELETED'.split(' '), uidList).query).to.deep.equal([
@@ -505,9 +505,9 @@ describe('#parseQueryTerms', function() {
     });
 });
 
-describe('Search term match tests', function() {
-    describe('AND', function() {
-        it('should find all matches', function(done) {
+describe('Search term match tests', function () {
+    describe('AND', function () {
+        it('should find all matches', function (done) {
             matchSearchQuery(
                 {},
                 [
@@ -536,7 +536,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should fail on single error', function(done) {
+        it('should fail on single error', function (done) {
             matchSearchQuery(
                 {},
                 [
@@ -567,8 +567,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('OR', function() {
-        it('should succeed with at least one match', function(done) {
+    describe('OR', function () {
+        it('should succeed with at least one match', function (done) {
             matchSearchQuery(
                 {},
                 {
@@ -598,7 +598,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should fail with no matches', function(done) {
+        it('should fail with no matches', function (done) {
             matchSearchQuery(
                 {},
                 {
@@ -625,8 +625,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('NOT', function() {
-        it('should succeed with false value', function(done) {
+    describe('NOT', function () {
+        it('should succeed with false value', function (done) {
             matchSearchQuery(
                 {},
                 {
@@ -645,7 +645,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should fail with thruthy value', function(done) {
+        it('should fail with thruthy value', function (done) {
             matchSearchQuery(
                 {},
                 {
@@ -664,8 +664,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('ALL', function() {
-        it('should match ALL', function(done) {
+    describe('ALL', function () {
+        it('should match ALL', function (done) {
             matchSearchQuery(
                 {},
                 {
@@ -681,8 +681,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('FLAG', function() {
-        it('should match existing flag', function(done) {
+    describe('FLAG', function () {
+        it('should match existing flag', function (done) {
             matchSearchQuery(
                 {
                     flags: ['abc', 'def', 'ghi']
@@ -700,7 +700,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match non-existing flag', function(done) {
+        it('should match non-existing flag', function (done) {
             matchSearchQuery(
                 {
                     flags: ['abc', 'def', 'ghi']
@@ -718,7 +718,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should fail non-existing flag', function(done) {
+        it('should fail non-existing flag', function (done) {
             matchSearchQuery(
                 {
                     flags: ['abc', 'def', 'ghi']
@@ -736,7 +736,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should fail existing flag', function(done) {
+        it('should fail existing flag', function (done) {
             matchSearchQuery(
                 {
                     flags: ['abc', 'def', 'ghi']
@@ -755,8 +755,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('INTERNALDATE', function() {
-        it('should match <', function(done) {
+    describe('INTERNALDATE', function () {
+        it('should match <', function (done) {
             matchSearchQuery(
                 {
                     idate: new Date('1999-01-01')
@@ -774,7 +774,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match <', function(done) {
+        it('should not match <', function (done) {
             matchSearchQuery(
                 {
                     idate: new Date('1999-01-01')
@@ -792,7 +792,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match =', function(done) {
+        it('should match =', function (done) {
             matchSearchQuery(
                 {
                     idate: new Date('1999-01-01')
@@ -810,7 +810,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match <', function(done) {
+        it('should not match <', function (done) {
             matchSearchQuery(
                 {
                     idate: new Date('1999-01-01')
@@ -828,7 +828,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match >=', function(done) {
+        it('should match >=', function (done) {
             matchSearchQuery(
                 {
                     idate: new Date('1999-01-01')
@@ -861,7 +861,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match >=', function(done) {
+        it('should not match >=', function (done) {
             matchSearchQuery(
                 {
                     idate: new Date('1999-01-01')
@@ -880,10 +880,10 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('DATE', function() {
+    describe('DATE', function () {
         let raw = 'Subject: test\r\nDate: 1999-01-01\r\n\r\nHello world!';
 
-        it('should match <', function(done) {
+        it('should match <', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -901,7 +901,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match <', function(done) {
+        it('should not match <', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -919,7 +919,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match =', function(done) {
+        it('should match =', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -937,7 +937,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match <', function(done) {
+        it('should not match <', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -955,7 +955,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match >=', function(done) {
+        it('should match >=', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -988,7 +988,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match >=', function(done) {
+        it('should not match >=', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1007,10 +1007,10 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('BODY', function() {
+    describe('BODY', function () {
         let raw = 'Subject: test\r\n\r\nHello world!';
 
-        it('should match a string', function(done) {
+        it('should match a string', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1027,7 +1027,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match a string', function(done) {
+        it('should not match a string', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1045,10 +1045,10 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('TEXT', function() {
+    describe('TEXT', function () {
         let raw = 'Subject: test\r\n\r\nHello world!';
 
-        it('should match a string', function(done) {
+        it('should match a string', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1079,7 +1079,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match a string', function(done) {
+        it('should not match a string', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1097,8 +1097,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('UID', function() {
-        it('should match message uid', function(done) {
+    describe('UID', function () {
+        it('should match message uid', function (done) {
             matchSearchQuery(
                 {
                     uid: 123
@@ -1115,7 +1115,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match message uid', function(done) {
+        it('should not match message uid', function (done) {
             matchSearchQuery(
                 {
                     uid: 124
@@ -1133,8 +1133,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('SIZE', function() {
-        it('should match <', function(done) {
+    describe('SIZE', function () {
+        it('should match <', function (done) {
             matchSearchQuery(
                 {
                     size: 10
@@ -1152,7 +1152,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match <', function(done) {
+        it('should not match <', function (done) {
             matchSearchQuery(
                 {
                     size: 10
@@ -1170,7 +1170,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match =', function(done) {
+        it('should match =', function (done) {
             matchSearchQuery(
                 {
                     size: 10
@@ -1188,7 +1188,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match =', function(done) {
+        it('should not match =', function (done) {
             matchSearchQuery(
                 {
                     size: 10
@@ -1206,7 +1206,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match >', function(done) {
+        it('should match >', function (done) {
             matchSearchQuery(
                 {
                     size: 10
@@ -1224,7 +1224,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match <', function(done) {
+        it('should not match <', function (done) {
             matchSearchQuery(
                 {
                     size: 10
@@ -1243,10 +1243,10 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('header', function() {
+    describe('header', function () {
         let raw = 'Subject: test\r\n\r\nHello world!';
 
-        it('should match header value', function(done) {
+        it('should match header value', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1264,7 +1264,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match empty header value', function(done) {
+        it('should match empty header value', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1282,7 +1282,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match header value', function(done) {
+        it('should not match header value', function (done) {
             matchSearchQuery(
                 {
                     mimeTree: indexer.parseMimeTree(raw)
@@ -1301,8 +1301,8 @@ describe('Search term match tests', function() {
         });
     });
 
-    describe('MODSEQ', function() {
-        it('should match equal modseq', function(done) {
+    describe('MODSEQ', function () {
+        it('should match equal modseq', function (done) {
             matchSearchQuery(
                 {
                     modseq: 500
@@ -1319,7 +1319,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should match greater modseq', function(done) {
+        it('should match greater modseq', function (done) {
             matchSearchQuery(
                 {
                     modseq: 1000
@@ -1336,7 +1336,7 @@ describe('Search term match tests', function() {
             );
         });
 
-        it('should not match lesser modseq', function(done) {
+        it('should not match lesser modseq', function (done) {
             matchSearchQuery(
                 {
                     modseq: 500

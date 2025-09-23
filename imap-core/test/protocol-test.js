@@ -40,30 +40,35 @@ describe('IMAP Protocol integration tests', function () {
 
     after(function (done) {
         // Use Node.js script instead of mongosh to avoid compatibility issues
-        exec('node -e "' +
-            'const { MongoClient } = require(\'mongodb\'); ' +
-            'const uri = \'mongodb://127.0.0.1:27017\'; ' +
-            'const dbName = \'' + config.dbs.dbname + '\'; ' +
-            'async function cleanup() { ' +
-            '  const client = new MongoClient(uri); ' +
-            '  try { ' +
-            '    await client.connect(); ' +
-            '    const db = client.db(dbName); ' +
-            '    const collections = await db.listCollections().toArray(); ' +
-            '    for (const col of collections) { ' +
-            '      await db.collection(col.name).deleteMany({}); ' +
-            '    } ' +
-            '  } finally { ' +
-            '    await client.close(); ' +
-            '  } ' +
-            '} ' +
-            'cleanup().catch(console.error);' +
-            '"', err => {
-            if (err) {
-                return done(err);
+        exec(
+            'node -e "' +
+                "const { MongoClient } = require('mongodb'); " +
+                "const uri = 'mongodb://127.0.0.1:27017'; " +
+                "const dbName = '" +
+                config.dbs.dbname +
+                "'; " +
+                'async function cleanup() { ' +
+                '  const client = new MongoClient(uri); ' +
+                '  try { ' +
+                '    await client.connect(); ' +
+                '    const db = client.db(dbName); ' +
+                '    const collections = await db.listCollections().toArray(); ' +
+                '    for (const col of collections) { ' +
+                '      await db.collection(col.name).deleteMany({}); ' +
+                '    } ' +
+                '  } finally { ' +
+                '    await client.close(); ' +
+                '  } ' +
+                '} ' +
+                'cleanup().catch(console.error);' +
+                '"',
+            err => {
+                if (err) {
+                    return done(err);
+                }
+                done();
             }
-            done();
-        });
+        );
     });
 
     describe('CAPABILITY', function () {
@@ -209,7 +214,11 @@ describe('IMAP Protocol integration tests', function () {
 
     describe('AUTHENTICATE PLAIN', function () {
         it('should authenticate', function (done) {
-            let cmds = ['T1 AUTHENTICATE PLAIN', Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass, 'utf-8').toString('base64'), 'T2 LOGOUT'];
+            let cmds = [
+                'T1 AUTHENTICATE PLAIN',
+                Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass, 'utf-8').toString('base64'),
+                'T2 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -225,7 +234,10 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should authenticate using SASL-IR', function (done) {
-            let cmds = ['T1 AUTHENTICATE PLAIN ' + Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass, 'utf-8').toString('base64'), 'T2 LOGOUT'];
+            let cmds = [
+                'T1 AUTHENTICATE PLAIN ' + Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass, 'utf-8').toString('base64'),
+                'T2 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -241,7 +253,11 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should fail authentication', function (done) {
-            let cmds = ['T1 AUTHENTICATE PLAIN', Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.wrongpass, 'utf-8').toString('base64'), 'T2 LOGOUT'];
+            let cmds = [
+                'T1 AUTHENTICATE PLAIN',
+                Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.wrongpass, 'utf-8').toString('base64'),
+                'T2 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -257,7 +273,11 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should reject client token', function (done) {
-            let cmds = ['T1 AUTHENTICATE PLAIN', Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass + '\x00token', 'utf-8').toString('base64'), 'T2 LOGOUT'];
+            let cmds = [
+                'T1 AUTHENTICATE PLAIN',
+                Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass + '\x00token', 'utf-8').toString('base64'),
+                'T2 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -273,7 +293,11 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should authenticate with client token', function (done) {
-            let cmds = ['T1 AUTHENTICATE PLAIN-CLIENTTOKEN', Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass + '\x00token', 'utf-8').toString('base64'), 'T2 LOGOUT'];
+            let cmds = [
+                'T1 AUTHENTICATE PLAIN-CLIENTTOKEN',
+                Buffer.from('\x00' + TEST_USERS.testuser + '\x00' + TEST_PASSWORDS.pass + '\x00token', 'utf-8').toString('base64'),
+                'T2 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -474,7 +498,14 @@ describe('IMAP Protocol integration tests', function () {
 
     describe('CREATE', function () {
         it('should create new mailbox', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 CREATE testfolder', 'T3 CREATE parent/child', 'T4 CREATE testfolder', 'T5 LIST "" "*"', 'T6 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 CREATE testfolder',
+                'T3 CREATE parent/child',
+                'T4 CREATE testfolder',
+                'T5 LIST "" "*"',
+                'T6 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -525,7 +556,14 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it(`cannot create a mailbox with more than ${MAX_SUB_MAILBOXES} subpaths`, function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, `T2 CREATE tobechanged`, 'T3 CREATE parent/child', 'T4 CREATE testfolder', 'T5 LIST "" "*"', 'T6 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                `T2 CREATE tobechanged`,
+                'T3 CREATE parent/child',
+                'T4 CREATE testfolder',
+                'T5 LIST "" "*"',
+                'T6 LOGOUT'
+            ];
 
             let path = '';
 
@@ -610,7 +648,13 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('cannot rename a mailbox to a mailbox path where there are more than max subpath count', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 CREATE testfolder', `T3 RENAME testfolder parent/child`, 'T5 LIST "" "*"', 'T6 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 CREATE testfolder',
+                `T3 RENAME testfolder parent/child`,
+                'T5 LIST "" "*"',
+                'T6 LOGOUT'
+            ];
 
             let path = '';
 
@@ -639,7 +683,14 @@ describe('IMAP Protocol integration tests', function () {
 
     describe('DELETE', function () {
         it('should delete existing mailbox', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 CREATE testfolder', 'T3 DELETE testfolder', 'T4 DELETE testfolder', 'T5 LIST "" "*"', 'T6 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 CREATE testfolder',
+                'T3 DELETE testfolder',
+                'T4 DELETE testfolder',
+                'T5 LIST "" "*"',
+                'T6 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -680,8 +731,20 @@ describe('IMAP Protocol integration tests', function () {
         this.timeout(60000); // eslint-disable-line no-invalid-this
 
         it('should fail appending to nonexistent mailbox', function (done) {
-            let message = Buffer.from('From: ' + TEST_USERS.sender + ' <' + getTestEmail(TEST_USERS.sender) + '>\r\nTo: ' + getTestEmail(TEST_USERS.receiver) + '\r\nSubject: HELLO!\r\n\r\nWORLD!');
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 APPEND zzz {' + message.length + '}\r\n' + message.toString('binary'), 'T3 LOGOUT'];
+            let message = Buffer.from(
+                'From: ' +
+                    TEST_USERS.sender +
+                    ' <' +
+                    getTestEmail(TEST_USERS.sender) +
+                    '>\r\nTo: ' +
+                    getTestEmail(TEST_USERS.receiver) +
+                    '\r\nSubject: HELLO!\r\n\r\nWORLD!'
+            );
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 APPEND zzz {' + message.length + '}\r\n' + message.toString('binary'),
+                'T3 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -699,8 +762,20 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should append to mailbox', function (done) {
-            let message = Buffer.from('From: ' + TEST_USERS.sender + ' <' + getTestEmail(TEST_USERS.sender) + '>\r\nTo: ' + getTestEmail(TEST_USERS.receiver) + '\r\nSubject: HELLO!\r\n\r\nWORLD!');
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 APPEND INBOX {' + message.length + '}\r\n' + message.toString('binary'), 'T3 LOGOUT'];
+            let message = Buffer.from(
+                'From: ' +
+                    TEST_USERS.sender +
+                    ' <' +
+                    getTestEmail(TEST_USERS.sender) +
+                    '>\r\nTo: ' +
+                    getTestEmail(TEST_USERS.receiver) +
+                    '\r\nSubject: HELLO!\r\n\r\nWORLD!'
+            );
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 APPEND INBOX {' + message.length + '}\r\n' + message.toString('binary'),
+                'T3 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -718,7 +793,15 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should append to mailbox with optional arguments', function (done) {
-            let message = Buffer.from('From: ' + TEST_USERS.sender + ' <' + getTestEmail(TEST_USERS.sender) + '>\r\nTo: ' + getTestEmail(TEST_USERS.receiver) + '\r\nSubject: HELLO!\r\n\r\nWORLD!');
+            let message = Buffer.from(
+                'From: ' +
+                    TEST_USERS.sender +
+                    ' <' +
+                    getTestEmail(TEST_USERS.sender) +
+                    '>\r\nTo: ' +
+                    getTestEmail(TEST_USERS.receiver) +
+                    '\r\nSubject: HELLO!\r\n\r\nWORLD!'
+            );
             let cmds = [
                 'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
                 'T2 APPEND INBOX (MyFlag) "14-Sep-2013 21:22:28 -0300" {' + message.length + '}\r\n' + message.toString('binary'),
@@ -1055,7 +1138,12 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should set some flags with modifier', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 STORE 1:* (UNCHANGEDSINCE 99) FLAGS (MyFlag1 MyFlag2)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 STORE 1:* (UNCHANGEDSINCE 99) FLAGS (MyFlag1 MyFlag2)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1074,7 +1162,12 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should set flags with modifier', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 STORE 1:* (UNCHANGEDSINCE 100000) FLAGS (MyFlag1 MyFlag2)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 STORE 1:* (UNCHANGEDSINCE 100000) FLAGS (MyFlag1 MyFlag2)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1095,7 +1188,12 @@ describe('IMAP Protocol integration tests', function () {
 
     describe('UID STORE', function () {
         it('should set flags', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 UID STORE 1:* FLAGS (MyFlag1 MyFlag2)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 UID STORE 1:* FLAGS (MyFlag1 MyFlag2)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1113,7 +1211,12 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should add flags', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 UID STORE 1:* +FLAGS (MyFlag1 MyFlag2)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 UID STORE 1:* +FLAGS (MyFlag1 MyFlag2)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1132,7 +1235,12 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should remove flags', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 UID STORE 1:* -FLAGS (\\Seen MyFlag2)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 UID STORE 1:* -FLAGS (\\Seen MyFlag2)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1150,7 +1258,12 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should set some flags with modifier', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 UID STORE 1:* (UNCHANGEDSINCE 99) FLAGS (MyFlag1 MyFlag2)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 UID STORE 1:* (UNCHANGEDSINCE 99) FLAGS (MyFlag1 MyFlag2)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1169,7 +1282,12 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should set some flags with modifier', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 UID STORE 1:* (UNCHANGEDSINCE 10000) FLAGS (MyFlag1 MyFlag2)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 UID STORE 1:* (UNCHANGEDSINCE 10000) FLAGS (MyFlag1 MyFlag2)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1251,7 +1369,13 @@ describe('IMAP Protocol integration tests', function () {
     describe('EXPUNGE', function () {
         // EXPUNGE is a NO OP with autoexpunge
         it('should expunge all deleted messages', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 STORE 2:* +FLAGS (\\Deleted)', 'T4 EXPUNGE', 'T6 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 STORE 2:* +FLAGS (\\Deleted)',
+                'T4 EXPUNGE',
+                'T6 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1272,7 +1396,13 @@ describe('IMAP Protocol integration tests', function () {
     describe('UID EXPUNGE', function () {
         // UID EXPUNGE is a NO OP with autoexpunge
         it('should expunge specific messages', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 STORE 1:* +FLAGS (\\Deleted)', 'T4 UID EXPUNGE 103,105', 'T5 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 STORE 1:* +FLAGS (\\Deleted)',
+                'T4 UID EXPUNGE 103,105',
+                'T5 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1294,7 +1424,13 @@ describe('IMAP Protocol integration tests', function () {
 
     describe('FETCH command', function () {
         it('should list by UID', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 UID FETCH 103 (FLAGS)', 'T4 FETCH 3 (FLAGS)', 'T4 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 UID FETCH 103 (FLAGS)',
+                'T4 FETCH 3 (FLAGS)',
+                'T4 LOGOUT'
+            ];
 
             testClient(
                 {
@@ -1345,7 +1481,12 @@ describe('IMAP Protocol integration tests', function () {
 
         describe('Multiple values', function () {
             it('should list mixed data', function (done) {
-                let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 FETCH 1:* (UID BODYSTRUCTURE ENVELOPE)', 'T4 LOGOUT'];
+                let cmds = [
+                    'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                    'T2 SELECT INBOX',
+                    'T3 FETCH 1:* (UID BODYSTRUCTURE ENVELOPE)',
+                    'T4 LOGOUT'
+                ];
                 testClient(
                     {
                         commands: cmds,
@@ -1370,7 +1511,13 @@ describe('IMAP Protocol integration tests', function () {
 
         describe('BODY[] marks message as seen', function () {
             it('should list raw message', function (done) {
-                let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 FETCH 3 BODY[2.HEADER]', 'TX FETCH 1:* BODY[2.HEADER]', 'T4 LOGOUT'];
+                let cmds = [
+                    'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                    'T2 SELECT INBOX',
+                    'T3 FETCH 3 BODY[2.HEADER]',
+                    'TX FETCH 1:* BODY[2.HEADER]',
+                    'T4 LOGOUT'
+                ];
 
                 testClient(
                     {
@@ -1385,8 +1532,12 @@ describe('IMAP Protocol integration tests', function () {
                             resp.indexOf(
                                 '\n* 3 FETCH (BODY[2.HEADER] {71}\r\n' +
                                     'MIME-Version: 1.0\r\n' +
-                                    'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +'\r\n' +
-                                    'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                                    'From: ' +
+                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
+                                    '\r\n' +
+                                    'To: ' +
+                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
+                                    '\r\n' +
                                     '\r\n' +
                                     ' FLAGS (\\Seen))\r\n'
                             ) >= 0
@@ -1523,7 +1674,13 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (BODY[] {97}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nHello World!\r\n)\r\n'
+                                '\r\n* 4 FETCH (BODY[] {97}\r\nfrom: ' +
+                                    getTestEmail(TEST_USERS.sender) +
+                                    '\r\nto: ' +
+                                    getTestEmail(TEST_USERS.to) +
+                                    '\r\ncc: ' +
+                                    getTestEmail(TEST_USERS.cc) +
+                                    '\r\nsubject: test\r\n\r\nHello World!\r\n)\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1533,7 +1690,13 @@ describe('IMAP Protocol integration tests', function () {
             });
 
             it('should return partial BODY[]', function (done) {
-                let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 FETCH 4 BODY.PEEK[]<4.5>', 'T4 FETCH 4 BODY.PEEK[]<4.10000>', 'T5 LOGOUT'];
+                let cmds = [
+                    'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                    'T2 SELECT INBOX',
+                    'T3 FETCH 4 BODY.PEEK[]<4.5>',
+                    'T4 FETCH 4 BODY.PEEK[]<4.10000>',
+                    'T5 LOGOUT'
+                ];
 
                 testClient(
                     {
@@ -1569,7 +1732,9 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 3 FETCH (BODY[1] {107}\r\nMIME-Version: 1.0\r\nFrom: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\nTo: andris@pangalink.net\r\nIn-Reply-To: <test1>\r\n\r\nHello world 1!)\r\n'
+                                '\r\n* 3 FETCH (BODY[1] {107}\r\nMIME-Version: 1.0\r\nFrom: ' +
+                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
+                                    '\r\nTo: andris@pangalink.net\r\nIn-Reply-To: <test1>\r\n\r\nHello world 1!)\r\n'
                             ) >= 0
                         ).to.be.true;
 
@@ -1592,7 +1757,13 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (BODY[HEADER] {83}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\n)\r\n'
+                                '\r\n* 4 FETCH (BODY[HEADER] {83}\r\nfrom: ' +
+                                    getTestEmail(TEST_USERS.sender) +
+                                    '\r\nto: ' +
+                                    getTestEmail(TEST_USERS.to) +
+                                    '\r\ncc: ' +
+                                    getTestEmail(TEST_USERS.cc) +
+                                    '\r\nsubject: test\r\n\r\n)\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1602,7 +1773,12 @@ describe('IMAP Protocol integration tests', function () {
             });
 
             it('should return BODY[HEADER.FIELDS]', function (done) {
-                let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 FETCH 4 BODY.PEEK[HEADER.FIELDS (From Cc)]', 'T4 LOGOUT'];
+                let cmds = [
+                    'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                    'T2 SELECT INBOX',
+                    'T3 FETCH 4 BODY.PEEK[HEADER.FIELDS (From Cc)]',
+                    'T4 LOGOUT'
+                ];
 
                 testClient(
                     {
@@ -1623,7 +1799,12 @@ describe('IMAP Protocol integration tests', function () {
             });
 
             it('should return BODY[HEADER.FIELDS.NOT]', function (done) {
-                let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 FETCH 4 BODY.PEEK[HEADER.FIELDS.NOT (From Cc)]', 'T4 LOGOUT'];
+                let cmds = [
+                    'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                    'T2 SELECT INBOX',
+                    'T3 FETCH 4 BODY.PEEK[HEADER.FIELDS.NOT (From Cc)]',
+                    'T4 LOGOUT'
+                ];
 
                 testClient(
                     {
@@ -1660,7 +1841,13 @@ describe('IMAP Protocol integration tests', function () {
             });
 
             it('should return BODY[x.HEADER]', function (done) {
-                let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 FETCH 3 BODY.PEEK[1.HEADER]', 'T4 FETCH 3 BODY.PEEK[2.HEADER]', 'T5 LOGOUT'];
+                let cmds = [
+                    'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                    'T2 SELECT INBOX',
+                    'T3 FETCH 3 BODY.PEEK[1.HEADER]',
+                    'T4 FETCH 3 BODY.PEEK[2.HEADER]',
+                    'T5 LOGOUT'
+                ];
 
                 testClient(
                     {
@@ -1675,8 +1862,12 @@ describe('IMAP Protocol integration tests', function () {
                             resp.indexOf(
                                 '\n* 3 FETCH (BODY[1.HEADER] {93}\r\n' +
                                     'MIME-Version: 1.0\r\n' +
-                                    'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
-                                    'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                                    'From: ' +
+                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
+                                    '\r\n' +
+                                    'To: ' +
+                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
+                                    '\r\n' +
                                     'In-Reply-To: <test1>\r\n' +
                                     '\r\n' +
                                     ')\r\n'
@@ -1687,8 +1878,12 @@ describe('IMAP Protocol integration tests', function () {
                             resp.indexOf(
                                 '\n* 3 FETCH (BODY[2.HEADER] {71}\r\n' +
                                     'MIME-Version: 1.0\r\n' +
-                                    'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
-                                    'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                                    'From: ' +
+                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
+                                    '\r\n' +
+                                    'To: ' +
+                                    getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
+                                    '\r\n' +
                                     '\r\n' +
                                     ')\r\n'
                             ) >= 0
@@ -1737,7 +1932,13 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (RFC822 {97}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nHello World!\r\n FLAGS (\\Seen))\r\n'
+                                '\r\n* 4 FETCH (RFC822 {97}\r\nfrom: ' +
+                                    getTestEmail(TEST_USERS.sender) +
+                                    '\r\nto: ' +
+                                    getTestEmail(TEST_USERS.to) +
+                                    '\r\ncc: ' +
+                                    getTestEmail(TEST_USERS.cc) +
+                                    '\r\nsubject: test\r\n\r\nHello World!\r\n FLAGS (\\Seen))\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1777,7 +1978,13 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (RFC822.HEADER {83}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\n)\r\n'
+                                '\r\n* 4 FETCH (RFC822.HEADER {83}\r\nfrom: ' +
+                                    getTestEmail(TEST_USERS.sender) +
+                                    '\r\nto: ' +
+                                    getTestEmail(TEST_USERS.to) +
+                                    '\r\ncc: ' +
+                                    getTestEmail(TEST_USERS.cc) +
+                                    '\r\nsubject: test\r\n\r\n)\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1848,7 +2055,13 @@ describe('IMAP Protocol integration tests', function () {
         });
 
         it('should find with FLAGS', function (done) {
-            let cmds = ['T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass, 'T2 SELECT INBOX', 'T3 SEARCH (UNSEEN)', 'T4 UID SEARCH UNSEEN', 'T7 LOGOUT'];
+            let cmds = [
+                'T1 LOGIN ' + TEST_USERS.testuser + ' ' + TEST_PASSWORDS.pass,
+                'T2 SELECT INBOX',
+                'T3 SEARCH (UNSEEN)',
+                'T4 UID SEARCH UNSEEN',
+                'T7 LOGOUT'
+            ];
 
             testClient(
                 {

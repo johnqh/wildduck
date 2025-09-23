@@ -26,8 +26,8 @@ const fixtures = {
     }
 };
 
-describe('#parseMimeTree', function() {
-    it('should parse mime message', function(done) {
+describe('#parseMimeTree', function () {
+    it('should parse mime message', function (done) {
         let parsed = indexer.parseMimeTree(fixtures.simple.eml);
 
         //expect(parsed).to.deep.equal(fixtures.simple.tree);

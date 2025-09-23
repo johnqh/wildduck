@@ -1,11 +1,13 @@
 # WildDuck AI Development Guide
 
 ## Project Overview
+
 WildDuck is a scalable IMAP/POP3 mail server built with Node.js and MongoDB, designed for high availability with no single point of failure.
 
 ## Quick Commands
 
 ### Development
+
 ```bash
 # Start development server
 npm start
@@ -27,6 +29,7 @@ npx eslint lib/**/*.js
 ```
 
 ### Database Operations
+
 ```bash
 # Connect to MongoDB
 mongosh wildduck
@@ -41,6 +44,7 @@ tail -f logs/wildduck.log
 ## Architecture
 
 ### Core Components
+
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   IMAP      │     │    POP3     │     │    LMTP     │
@@ -63,6 +67,7 @@ tail -f logs/wildduck.log
 ```
 
 ### Data Flow
+
 1. **Incoming Mail**: LMTP → MessageHandler → MongoDB
 2. **Client Access**: IMAP/POP3 → Handlers → MongoDB → Client
 3. **API Access**: REST API → UserHandler/MailboxHandler → MongoDB
@@ -70,6 +75,7 @@ tail -f logs/wildduck.log
 ## Key Files and Their Purpose
 
 ### Entry Points
+
 - `server.js` - Main entry point, handles clustering
 - `worker.js` - Worker process initialization
 - `imap.js` - IMAP server setup
@@ -78,6 +84,7 @@ tail -f logs/wildduck.log
 - `api.js` - REST API server
 
 ### Core Libraries
+
 - `lib/db.js` - Database connection management
 - `lib/message-handler.js` - Message storage and retrieval
 - `lib/user-handler.js` - User management operations
@@ -85,6 +92,7 @@ tail -f logs/wildduck.log
 - `lib/imap-notifier.js` - Real-time IMAP notifications
 
 ### IMAP Handlers (lib/handlers/)
+
 - `on-append.js` - Handle message append
 - `on-copy.js` - Handle message copy (LINE 178: TRYCREATE response)
 - `on-fetch.js` - Handle message fetch
@@ -94,6 +102,7 @@ tail -f logs/wildduck.log
 ## Database Schema
 
 ### Collections
+
 ```javascript
 // users collection
 {
@@ -133,17 +142,20 @@ tail -f logs/wildduck.log
 ## Common Development Tasks
 
 ### Adding a New API Endpoint
+
 1. Add handler in `lib/api/[module].js`
 2. Define schemas in `lib/schemas/`
 3. Update API documentation
 4. Add tests in `test/api/`
 
 ### Adding a New IMAP Command
+
 1. Create handler in `lib/handlers/on-[command].js`
 2. Register in `imap.js`
 3. Add tests in `test/imap/`
 
 ### Modifying Message Storage
+
 1. Update `lib/message-handler.js`
 2. Check indexes in `indexes.yaml`
 3. Update related handlers in `lib/handlers/`
@@ -172,6 +184,7 @@ try {
 ## Testing Guidelines
 
 ### Unit Tests
+
 ```bash
 # Run specific test file
 npx mocha test/api/users-test.js
@@ -181,6 +194,7 @@ npx nyc npm test
 ```
 
 ### Manual Testing
+
 ```bash
 # Test IMAP connection
 openssl s_client -connect localhost:993 -crlf
@@ -196,11 +210,13 @@ curl -X GET http://localhost:8080/users \
 ## Configuration
 
 ### Key Configuration Files
+
 - `config/default.toml` - Base configuration
 - `config/development.toml` - Development overrides
 - `config/production.toml` - Production settings
 
 ### Important Settings
+
 ```toml
 # Database connections
 [dbs]
@@ -220,11 +236,13 @@ port = 8080
 ## Performance Considerations
 
 ### Database Indexes
+
 - Check `indexes.yaml` for required indexes
 - Run indexing after schema changes
 - Monitor slow queries in MongoDB logs
 
 ### Scaling
+
 - Use `processes = "cpus"` for multi-core
 - Configure MongoDB sharding for large deployments
 - Use Redis Cluster for session distribution
@@ -232,11 +250,13 @@ port = 8080
 ## Security Notes
 
 ### Authentication
+
 - Passwords hashed with PBKDF2/bcrypt
 - Support for 2FA (TOTP, WebAuthn)
 - Application-specific passwords
 
 ### Encryption
+
 - TLS/SSL for all protocols
 - Optional PGP message encryption
 - Encrypted attachment storage
@@ -244,16 +264,18 @@ port = 8080
 ## Debugging Tips
 
 ### Enable Debug Logging
+
 ```javascript
 // In config
-[log]
-level = "silly"
+[log];
+level = 'silly';
 
 // In code
 server.logger.debug({ tnx: 'copy', cid: session.id }, 'Debug message');
 ```
 
 ### Common Issues
+
 1. **TRYCREATE error**: Target mailbox doesn't exist
 2. **OVERQUOTA**: User storage limit exceeded
 3. **Connection timeout**: Check MongoDB/Redis connectivity
@@ -262,6 +284,7 @@ server.logger.debug({ tnx: 'copy', cid: session.id }, 'Debug message');
 ## Code Style
 
 ### Async/Await Pattern
+
 ```javascript
 async function handler(params) {
     try {
@@ -275,6 +298,7 @@ async function handler(params) {
 ```
 
 ### Error First Callbacks (Legacy)
+
 ```javascript
 function oldHandler(params, callback) {
     db.collection.findOne({...}, (err, result) => {
@@ -287,12 +311,14 @@ function oldHandler(params, callback) {
 ## Contributing
 
 ### Before Committing
+
 1. Run linter: `npx eslint lib/**/*.js`
 2. Run tests: `npm test`
 3. Update documentation if needed
 4. Check for security issues
 
 ### Commit Message Format
+
 ```
 type(scope): description
 
@@ -303,6 +329,7 @@ Fixes #issue
 ```
 
 ## Resources
+
 - [MongoDB Driver Docs](https://mongodb.github.io/node-mongodb-native/)
 - [IMAP RFC 3501](https://tools.ietf.org/html/rfc3501)
 - [Redis Commands](https://redis.io/commands)

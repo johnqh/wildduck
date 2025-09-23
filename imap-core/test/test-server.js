@@ -27,7 +27,15 @@ module.exports = function (options) {
                     modseq: 100,
                     idate: new Date('14-Sep-2013 21:22:28 -0300'),
                     mimeTree: parseMimeTree(
-                        Buffer.from('from: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nzzzz\r\n')
+                        Buffer.from(
+                            'from: ' +
+                                getTestEmail(TEST_USERS.sender) +
+                                '\r\nto: ' +
+                                getTestEmail(TEST_USERS.to) +
+                                '\r\ncc: ' +
+                                getTestEmail(TEST_USERS.cc) +
+                                '\r\nsubject: test\r\n\r\nzzzz\r\n'
+                        )
                     )
                 },
                 {
@@ -44,8 +52,12 @@ module.exports = function (options) {
                     idate: new Date(),
                     mimeTree: parseMimeTree(
                         'MIME-Version: 1.0\r\n' +
-                            'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
-                            'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.tr) + '\r\n' +
+                            'From: ' +
+                            getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
+                            '\r\n' +
+                            'To: ' +
+                            getTestEmail(TEST_USERS.andris, TEST_DOMAINS.tr) +
+                            '\r\n' +
                             'Content-Type: multipart/mixed;\r\n' +
                             " boundary='----mailcomposer-?=_1-1328088797399'\r\n" +
                             'Message-Id: <testmessage-for-bug>;\r\n' +
@@ -55,8 +67,12 @@ module.exports = function (options) {
                             'Content-Transfer-Encoding: 7bit\r\n' +
                             '\r\n' +
                             'MIME-Version: 1.0\r\n' +
-                            'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
-                            'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                            'From: ' +
+                            getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
+                            '\r\n' +
+                            'To: ' +
+                            getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
+                            '\r\n' +
                             'In-Reply-To: <test1>\r\n' +
                             '\r\n' +
                             'Hello world 1!\r\n' +
@@ -65,8 +81,12 @@ module.exports = function (options) {
                             'Content-Transfer-Encoding: 7bit\r\n' +
                             '\r\n' +
                             'MIME-Version: 1.0\r\n' +
-                            'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
-                            'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
+                            'From: ' +
+                            getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +
+                            '\r\n' +
+                            'To: ' +
+                            getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) +
+                            '\r\n' +
                             '\r\n' +
                             'Hello world 2!\r\n' +
                             '------mailcomposer-?=_1-1328088797399\r\n' +
@@ -82,7 +102,15 @@ module.exports = function (options) {
                     flags: [],
                     modseq: 4,
                     idate: new Date(),
-                    mimeTree: parseMimeTree('from: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nHello World!\r\n')
+                    mimeTree: parseMimeTree(
+                        'from: ' +
+                            getTestEmail(TEST_USERS.sender) +
+                            '\r\nto: ' +
+                            getTestEmail(TEST_USERS.to) +
+                            '\r\ncc: ' +
+                            getTestEmail(TEST_USERS.cc) +
+                            '\r\nsubject: test\r\n\r\nHello World!\r\n'
+                    )
                 },
                 {
                     uid: 53,

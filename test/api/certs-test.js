@@ -97,18 +97,26 @@ rp+tEw==
             expect(response.body.altNames).to.deep.equal(['example.com']);
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /certs test', duration, {
-                testSuite: 'API Certs',
-                status: 'PASS',
-                certId: cert
-            }, 'Certificate creation test performance measured');
-
+            logPerformance(
+                'POST /certs test',
+                duration,
+                {
+                    testSuite: 'API Certs',
+                    status: 'PASS',
+                    certId: cert
+                },
+                'Certificate creation test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /certs expect success',
-                testSuite: 'API Certs',
-                operation: 'certificate creation'
-            }, 'Certificate creation test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /certs expect success',
+                    testSuite: 'API Certs',
+                    operation: 'certificate creation'
+                },
+                'Certificate creation test failed'
+            );
             logTest('should POST /certs expect success', 'API Certs', 'FAIL', 'Certificate creation test failed', {
                 error: error.message
             });
@@ -134,19 +142,27 @@ rp+tEw==
             expect(response.body.id).to.equal(cert);
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /certs/:cert test', duration, {
-                testSuite: 'API Certs',
-                status: 'PASS',
-                certId: cert
-            }, 'Certificate details test performance measured');
-
+            logPerformance(
+                'GET /certs/:cert test',
+                duration,
+                {
+                    testSuite: 'API Certs',
+                    status: 'PASS',
+                    certId: cert
+                },
+                'Certificate details test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /certs/:cert expect success',
-                testSuite: 'API Certs',
-                operation: 'certificate details',
-                certId: cert
-            }, 'Certificate details test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /certs/:cert expect success',
+                    testSuite: 'API Certs',
+                    operation: 'certificate details',
+                    certId: cert
+                },
+                'Certificate details test failed'
+            );
             logTest('should GET /certs/:cert expect success', 'API Certs', 'FAIL', 'Certificate details test failed', {
                 error: error.message
             });
@@ -172,19 +188,27 @@ rp+tEw==
             expect(response.body.id).to.equal(cert);
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /certs/resolve test', duration, {
-                testSuite: 'API Certs',
-                status: 'PASS',
-                servername: 'example.com'
-            }, 'Certificate resolve test performance measured');
-
+            logPerformance(
+                'GET /certs/resolve test',
+                duration,
+                {
+                    testSuite: 'API Certs',
+                    status: 'PASS',
+                    servername: 'example.com'
+                },
+                'Certificate resolve test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /certs/resolve/:servername expect success',
-                testSuite: 'API Certs',
-                operation: 'certificate resolve',
-                servername: 'example.com'
-            }, 'Certificate resolve test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /certs/resolve/:servername expect success',
+                    testSuite: 'API Certs',
+                    operation: 'certificate resolve',
+                    servername: 'example.com'
+                },
+                'Certificate resolve test failed'
+            );
             logTest('should GET /certs/resolve/:servername expect success', 'API Certs', 'FAIL', 'Certificate resolve test failed', {
                 error: error.message
             });
@@ -212,18 +236,26 @@ rp+tEw==
             expect(response.body.results.find(entry => entry.id === cert)).to.exist;
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /certs test', duration, {
-                testSuite: 'API Certs',
-                status: 'PASS',
-                certificateCount: response.body.results.length
-            }, 'Certificates list test performance measured');
-
+            logPerformance(
+                'GET /certs test',
+                duration,
+                {
+                    testSuite: 'API Certs',
+                    status: 'PASS',
+                    certificateCount: response.body.results.length
+                },
+                'Certificates list test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /certs expect success',
-                testSuite: 'API Certs',
-                operation: 'certificates list'
-            }, 'Certificates list test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /certs expect success',
+                    testSuite: 'API Certs',
+                    operation: 'certificates list'
+                },
+                'Certificates list test failed'
+            );
             logTest('should GET /certs expect success', 'API Certs', 'FAIL', 'Certificates list test failed', {
                 error: error.message
             });
@@ -247,19 +279,27 @@ rp+tEw==
             expect(response.body.success).to.be.true;
 
             const duration = Date.now() - startTime;
-            logPerformance('DELETE /certs/:cert test', duration, {
-                testSuite: 'API Certs',
-                status: 'PASS',
-                certId: cert
-            }, 'Certificate deletion test performance measured');
-
+            logPerformance(
+                'DELETE /certs/:cert test',
+                duration,
+                {
+                    testSuite: 'API Certs',
+                    status: 'PASS',
+                    certId: cert
+                },
+                'Certificate deletion test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should DELETE /certs/:certs expect success',
-                testSuite: 'API Certs',
-                operation: 'certificate deletion',
-                certId: cert
-            }, 'Certificate deletion test failed');
+            logError(
+                error,
+                {
+                    testName: 'should DELETE /certs/:certs expect success',
+                    testSuite: 'API Certs',
+                    operation: 'certificate deletion',
+                    certId: cert
+                },
+                'Certificate deletion test failed'
+            );
             logTest('should DELETE /certs/:certs expect success', 'API Certs', 'FAIL', 'Certificate deletion test failed', {
                 error: error.message
             });

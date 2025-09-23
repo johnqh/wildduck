@@ -138,7 +138,13 @@ describe('Send multiple messages', function () {
     });
 
     it('Send mail to all users', done => {
-        let recipients = [getTestEmail(TEST_USERS.user1), getTestEmail(TEST_USERS.user2), getTestEmail(TEST_USERS.user3), getTestEmail(TEST_USERS.user4), getTestEmail(TEST_USERS.user5)];
+        let recipients = [
+            getTestEmail(TEST_USERS.user1),
+            getTestEmail(TEST_USERS.user2),
+            getTestEmail(TEST_USERS.user3),
+            getTestEmail(TEST_USERS.user4),
+            getTestEmail(TEST_USERS.user5)
+        ];
         let subject = 'Test ööö message [' + Date.now() + ']';
         transporter.sendMail(
             {
@@ -190,7 +196,13 @@ describe('Send multiple messages', function () {
             },
             (err, info) => {
                 expect(err).to.not.exist;
-                expect(info.accepted).to.deep.equal([getTestEmail(TEST_USERS.user1), getTestEmail(TEST_USERS.user2), getTestEmail(TEST_USERS.user3), getTestEmail(TEST_USERS.user4), getTestEmail(TEST_USERS.user5)]);
+                expect(info.accepted).to.deep.equal([
+                    getTestEmail(TEST_USERS.user1),
+                    getTestEmail(TEST_USERS.user2),
+                    getTestEmail(TEST_USERS.user3),
+                    getTestEmail(TEST_USERS.user4),
+                    getTestEmail(TEST_USERS.user5)
+                ]);
 
                 let getFirstMessage = (userId, callback) => {
                     request(URL + '/users/' + userId + '/mailboxes', { json: true }, (err, meta, response) => {

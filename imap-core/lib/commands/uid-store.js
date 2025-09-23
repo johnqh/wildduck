@@ -160,8 +160,8 @@ module.exports = {
                         typeof success === 'string'
                             ? success.toUpperCase()
                             : modified && modified.length
-                            ? 'MODIFIED ' + imapTools.packMessageRange(modified)
-                            : false,
+                              ? 'MODIFIED ' + imapTools.packMessageRange(modified)
+                              : false,
                     message
                 });
             }

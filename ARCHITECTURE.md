@@ -229,27 +229,27 @@ erDiagram
 
 ### Core Services
 
-| Component | Responsibility | Key Files |
-|-----------|---------------|-----------|
-| **IMAP Server** | Handle IMAP protocol, session management | `imap.js`, `imap-core/` |
-| **POP3 Server** | Handle POP3 protocol | `pop3.js`, `lib/pop3/` |
-| **LMTP Server** | Receive incoming mail | `lmtp.js` |
-| **API Server** | REST API for management | `api.js`, `lib/api/` |
-| **Task Runner** | Background jobs (cleanup, quotas) | `tasks.js`, `lib/tasks/` |
-| **Indexer** | Search indexing, message parsing | `indexer.js` |
-| **Notifier** | Real-time IMAP notifications | `lib/imap-notifier.js` |
+| Component       | Responsibility                           | Key Files                |
+| --------------- | ---------------------------------------- | ------------------------ |
+| **IMAP Server** | Handle IMAP protocol, session management | `imap.js`, `imap-core/`  |
+| **POP3 Server** | Handle POP3 protocol                     | `pop3.js`, `lib/pop3/`   |
+| **LMTP Server** | Receive incoming mail                    | `lmtp.js`                |
+| **API Server**  | REST API for management                  | `api.js`, `lib/api/`     |
+| **Task Runner** | Background jobs (cleanup, quotas)        | `tasks.js`, `lib/tasks/` |
+| **Indexer**     | Search indexing, message parsing         | `indexer.js`             |
+| **Notifier**    | Real-time IMAP notifications             | `lib/imap-notifier.js`   |
 
 ### Handler Modules
 
-| Handler | Purpose | Database Collections |
-|---------|---------|---------------------|
-| **MessageHandler** | Message CRUD operations | messages, attachments.files |
-| **UserHandler** | User management, auth | users, addresses |
-| **MailboxHandler** | Mailbox operations | mailboxes |
-| **FilterHandler** | Message filtering | filters |
-| **AuditHandler** | Audit logging | audit |
-| **DkimHandler** | DKIM key management | dkim |
-| **CertHandler** | TLS certificate management | certs |
+| Handler            | Purpose                    | Database Collections        |
+| ------------------ | -------------------------- | --------------------------- |
+| **MessageHandler** | Message CRUD operations    | messages, attachments.files |
+| **UserHandler**    | User management, auth      | users, addresses            |
+| **MailboxHandler** | Mailbox operations         | mailboxes                   |
+| **FilterHandler**  | Message filtering          | filters                     |
+| **AuditHandler**   | Audit logging              | audit                       |
+| **DkimHandler**    | DKIM key management        | dkim                        |
+| **CertHandler**    | TLS certificate management | certs                       |
 
 ## Scaling Strategy
 
@@ -258,24 +258,24 @@ erDiagram
 ```yaml
 # Docker Compose Example
 services:
-  wildduck-1:
-    image: wildduck
-    environment:
-      - PROCESSES=4
-    deploy:
-      replicas: 3
+    wildduck-1:
+        image: wildduck
+        environment:
+            - PROCESSES=4
+        deploy:
+            replicas: 3
 
-  mongodb:
-    image: mongo
-    command: mongod --shardsvr --replSet shard1
-    deploy:
-      replicas: 3
+    mongodb:
+        image: mongo
+        command: mongod --shardsvr --replSet shard1
+        deploy:
+            replicas: 3
 
-  redis:
-    image: redis
-    command: redis-server --cluster-enabled yes
-    deploy:
-      replicas: 6
+    redis:
+        image: redis
+        command: redis-server --cluster-enabled yes
+        deploy:
+            replicas: 6
 ```
 
 ### Load Distribution
@@ -334,17 +334,18 @@ graph LR
 
 ### Caching Strategy
 
-| Cache Type | Location | TTL | Purpose |
-|------------|----------|-----|---------|
-| Session | Redis | 1 hour | User sessions |
-| Mailbox | Redis | 5 min | Mailbox metadata |
-| Message list | Redis | 1 min | UID lists |
-| User data | Memory | 30 sec | Frequent lookups |
-| Attachment | GridFS | Permanent | Deduplicated storage |
+| Cache Type   | Location | TTL       | Purpose              |
+| ------------ | -------- | --------- | -------------------- |
+| Session      | Redis    | 1 hour    | User sessions        |
+| Mailbox      | Redis    | 5 min     | Mailbox metadata     |
+| Message list | Redis    | 1 min     | UID lists            |
+| User data    | Memory   | 30 sec    | Frequent lookups     |
+| Attachment   | GridFS   | Permanent | Deduplicated storage |
 
 ### Database Indexes
 
 Critical indexes for performance:
+
 - `users`: username, address
 - `messages`: mailbox+uid, user+searchable
 - `mailboxes`: user+path
@@ -436,6 +437,7 @@ module.exports = {
 ### Custom Handlers
 
 Add custom IMAP commands:
+
 1. Create handler in `lib/handlers/`
 2. Register in `imap.js`
 3. Add tests in `test/`
@@ -443,6 +445,7 @@ Add custom IMAP commands:
 ### API Extensions
 
 Add new API endpoints:
+
 1. Create handler in `lib/api/`
 2. Define schemas in `lib/schemas/`
 3. Update OpenAPI documentation

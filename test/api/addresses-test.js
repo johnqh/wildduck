@@ -107,18 +107,26 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /users/{user}/addresses test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS',
-                addressCount: 3
-            }, 'Address creation test performance measured');
-
+            logPerformance(
+                'POST /users/{user}/addresses test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS',
+                    addressCount: 3
+                },
+                'Address creation test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /users/{user}/addresses expect success',
-                testSuite: 'API Addresses',
-                operation: 'address creation'
-            }, 'Address creation test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /users/{user}/addresses expect success',
+                    testSuite: 'API Addresses',
+                    operation: 'address creation'
+                },
+                'Address creation test failed'
+            );
             logTest('should POST /users/{user}/addresses expect success', 'API Addresses', 'FAIL', 'Address creation test failed', {
                 error: error.message
             });
@@ -143,18 +151,26 @@ describe('API Users', function () {
             expect(addressListResponse.body.total).to.gt(3);
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /addresses test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS',
-                totalAddresses: addressListResponse.body.total
-            }, 'Address list test performance measured');
-
+            logPerformance(
+                'GET /addresses test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS',
+                    totalAddresses: addressListResponse.body.total
+                },
+                'Address list test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /addresses expect success',
-                testSuite: 'API Addresses',
-                operation: 'address list'
-            }, 'Address list test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /addresses expect success',
+                    testSuite: 'API Addresses',
+                    operation: 'address list'
+                },
+                'Address list test failed'
+            );
             logTest('should GET /addresses expect success', 'API Addresses', 'FAIL', 'Address list test failed', {
                 error: error.message
             });
@@ -169,27 +185,41 @@ describe('API Users', function () {
         try {
             const addressListResponse = await server.get(`/addresses?limit=-1&query=${'a'.repeat(256)}`).expect(400);
 
-            logTest('should GET /addresses expect failure / incorrect query params data', 'API Addresses', 'PASS', 'Address list validation test completed successfully', {
-                expectedError: 'InputValidationError',
-                actualError: addressListResponse.body.code,
-                invalidLimit: -1,
-                queryLength: 256
-            });
+            logTest(
+                'should GET /addresses expect failure / incorrect query params data',
+                'API Addresses',
+                'PASS',
+                'Address list validation test completed successfully',
+                {
+                    expectedError: 'InputValidationError',
+                    actualError: addressListResponse.body.code,
+                    invalidLimit: -1,
+                    queryLength: 256
+                }
+            );
 
             expect(addressListResponse.body.code).to.be.equal('InputValidationError');
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /addresses validation test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS'
-            }, 'Address list validation test performance measured');
-
+            logPerformance(
+                'GET /addresses validation test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS'
+                },
+                'Address list validation test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /addresses expect failure / incorrect query params data',
-                testSuite: 'API Addresses',
-                operation: 'address list validation'
-            }, 'Address list validation test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /addresses expect failure / incorrect query params data',
+                    testSuite: 'API Addresses',
+                    operation: 'address list validation'
+                },
+                'Address list validation test failed'
+            );
             logTest('should GET /addresses expect failure / incorrect query params data', 'API Addresses', 'FAIL', 'Address list validation test failed', {
                 error: error.message
             });
@@ -215,18 +245,26 @@ describe('API Users', function () {
             expect(addressListResponse.body.total).to.equal(2);
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /addresses with tags test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS',
-                tagsUsed: 2
-            }, 'Address list with tags test performance measured');
-
+            logPerformance(
+                'GET /addresses with tags test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS',
+                    tagsUsed: 2
+                },
+                'Address list with tags test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /addresses expect success / with tags',
-                testSuite: 'API Addresses',
-                operation: 'address list with tags'
-            }, 'Address list with tags test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /addresses expect success / with tags',
+                    testSuite: 'API Addresses',
+                    operation: 'address list with tags'
+                },
+                'Address list with tags test failed'
+            );
             logTest('should GET /addresses expect success / with tags', 'API Addresses', 'FAIL', 'Address list with tags test failed', {
                 error: error.message
             });
@@ -280,22 +318,32 @@ describe('API Users', function () {
             expect(addressListResponse.body.success).to.be.true;
             expect(addressListResponse.body.results.length).to.equal(3);
             expect(addressListResponse.body.results.filter(addr => addr.main).length).to.equal(1);
-            expect(addressListResponse.body.results.find(addr => addr.main).address).to.equal(getTestEmail(TEST_USERS.addressuser_addrtest, TEST_DOMAINS.example));
+            expect(addressListResponse.body.results.find(addr => addr.main).address).to.equal(
+                getTestEmail(TEST_USERS.addressuser_addrtest, TEST_DOMAINS.example)
+            );
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /users/{user}/addresses test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS',
-                addressCount: 3
-            }, 'User addresses list test performance measured');
-
+            logPerformance(
+                'GET /users/{user}/addresses test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS',
+                    addressCount: 3
+                },
+                'User addresses list test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /users/{user}/addresses expect success',
-                testSuite: 'API Addresses',
-                operation: 'user addresses list',
-                userId: user
-            }, 'User addresses list test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /users/{user}/addresses expect success',
+                    testSuite: 'API Addresses',
+                    operation: 'user addresses list',
+                    userId: user
+                },
+                'User addresses list test failed'
+            );
             logTest('should GET /users/{user}/addresses expect success', 'API Addresses', 'FAIL', 'User addresses list test failed', {
                 error: error.message
             });
@@ -369,18 +417,26 @@ describe('API Users', function () {
             expect(response.body.success).to.be.true;
 
             const duration = Date.now() - startTime;
-            logPerformance('DELETE /users/{user}/addresses/{address} test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS'
-            }, 'Address deletion test performance measured');
-
+            logPerformance(
+                'DELETE /users/{user}/addresses/{address} test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS'
+                },
+                'Address deletion test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should DELETE /users/{user}/addresses/{address} expect success',
-                testSuite: 'API Addresses',
-                operation: 'address deletion',
-                userId: user
-            }, 'Address deletion test failed');
+            logError(
+                error,
+                {
+                    testName: 'should DELETE /users/{user}/addresses/{address} expect success',
+                    testSuite: 'API Addresses',
+                    operation: 'address deletion',
+                    userId: user
+                },
+                'Address deletion test failed'
+            );
             logTest('should DELETE /users/{user}/addresses/{address} expect success', 'API Addresses', 'FAIL', 'Address deletion test failed', {
                 error: error.message
             });
@@ -415,18 +471,26 @@ describe('API Users', function () {
             expect(response.body.success).to.be.true;
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /addresses/forwarded test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS',
-                forwardedId: forwarded
-            }, 'Forwarded address creation test performance measured');
-
+            logPerformance(
+                'POST /addresses/forwarded test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS',
+                    forwardedId: forwarded
+                },
+                'Forwarded address creation test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /addresses/forwarded expect success',
-                testSuite: 'API Addresses',
-                operation: 'forwarded address creation'
-            }, 'Forwarded address creation test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /addresses/forwarded expect success',
+                    testSuite: 'API Addresses',
+                    operation: 'forwarded address creation'
+                },
+                'Forwarded address creation test failed'
+            );
             logTest('should POST /addresses/forwarded expect success', 'API Addresses', 'FAIL', 'Forwarded address creation test failed', {
                 error: error.message
             });
@@ -465,19 +529,27 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('PUT /addresses/forwarded/{id} test', duration, {
-                testSuite: 'API Addresses',
-                status: 'PASS',
-                forwardedId: forwarded
-            }, 'Forwarded address update test performance measured');
-
+            logPerformance(
+                'PUT /addresses/forwarded/{id} test',
+                duration,
+                {
+                    testSuite: 'API Addresses',
+                    status: 'PASS',
+                    forwardedId: forwarded
+                },
+                'Forwarded address update test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should PUT /addresses/forwarded/{id} expect success',
-                testSuite: 'API Addresses',
-                operation: 'forwarded address update',
-                forwardedId: forwarded
-            }, 'Forwarded address update test failed');
+            logError(
+                error,
+                {
+                    testName: 'should PUT /addresses/forwarded/{id} expect success',
+                    testSuite: 'API Addresses',
+                    operation: 'forwarded address update',
+                    forwardedId: forwarded
+                },
+                'Forwarded address update test failed'
+            );
             logTest('should PUT /addresses/forwarded/{id} expect success', 'API Addresses', 'FAIL', 'Forwarded address update test failed', {
                 error: error.message
             });

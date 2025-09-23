@@ -4,5 +4,19 @@
         "https://json.schemastore.org/github-workflow.json": "file:///Users/andris/Projects/wildduck/.github/workflows/deploy.yml"
     },
     "typescript.validate.enable": false,
-    "javascript.validate.enable": true
+    "javascript.validate.enable": true,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    }
 }

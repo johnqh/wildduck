@@ -81,19 +81,28 @@ describe('API Users', function () {
             expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /users test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS',
-                userId: response.body.id
-            }, 'User creation test performance measured');
+            logPerformance(
+                'POST /users test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS',
+                    userId: response.body.id
+                },
+                'User creation test performance measured'
+            );
 
             user = response.body.id;
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /users expect success',
-                testSuite: 'API Users',
-                operation: 'user creation'
-            }, 'User creation test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /users expect success',
+                    testSuite: 'API Users',
+                    operation: 'user creation'
+                },
+                'User creation test failed'
+            );
             logTest('should POST /users expect success', 'API Users', 'FAIL', 'User creation test failed', {
                 error: error.message
             });
@@ -132,18 +141,26 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /authenticate test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS',
-                userId: user
-            }, 'Authentication test performance measured');
-
+            logPerformance(
+                'POST /authenticate test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS',
+                    userId: user
+                },
+                'Authentication test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /authenticate expect success',
-                testSuite: 'API Users',
-                operation: 'authentication'
-            }, 'Authentication test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /authenticate expect success',
+                    testSuite: 'API Users',
+                    operation: 'authentication'
+                },
+                'Authentication test failed'
+            );
             logTest('should POST /authenticate expect success', 'API Users', 'FAIL', 'Authentication test failed', {
                 error: error.message
             });
@@ -173,17 +190,25 @@ describe('API Users', function () {
             expect(authResponse.body.code).to.equal('AuthFailed');
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /authenticate failure test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'Authentication failure test performance measured');
-
+            logPerformance(
+                'POST /authenticate failure test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'Authentication failure test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /authenticate expect failure',
-                testSuite: 'API Users',
-                operation: 'authentication failure'
-            }, 'Authentication failure test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /authenticate expect failure',
+                    testSuite: 'API Users',
+                    operation: 'authentication failure'
+                },
+                'Authentication failure test failed'
+            );
             logTest('should POST /authenticate expect failure', 'API Users', 'FAIL', 'Authentication failure test failed', {
                 error: error.message
             });
@@ -214,17 +239,25 @@ describe('API Users', function () {
             expect(response.body.details.username).to.exist;
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /users invalid username test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'Invalid username test performance measured');
-
+            logPerformance(
+                'POST /users invalid username test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'Invalid username test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /users expect failure / invalid username',
-                testSuite: 'API Users',
-                operation: 'invalid username validation'
-            }, 'Invalid username test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /users expect failure / invalid username',
+                    testSuite: 'API Users',
+                    operation: 'invalid username validation'
+                },
+                'Invalid username test failed'
+            );
             logTest('should POST /users expect failure / invalid username', 'API Users', 'FAIL', 'Invalid username test failed', {
                 error: error.message
             });
@@ -246,11 +279,17 @@ describe('API Users', function () {
                 })
                 .expect(200);
 
-            logTest('should POST /authenticate expect success / request a token', 'API Users', 'PASS', 'Authentication with token test completed successfully', {
-                username: TEST_USERS.myuser2,
-                hasToken: !!authResponse.body.token,
-                responseStatus: authResponse.status
-            });
+            logTest(
+                'should POST /authenticate expect success / request a token',
+                'API Users',
+                'PASS',
+                'Authentication with token test completed successfully',
+                {
+                    username: TEST_USERS.myuser2,
+                    hasToken: !!authResponse.body.token,
+                    responseStatus: authResponse.status
+                }
+            );
 
             expect(authResponse.body.success).to.be.true;
             expect(authResponse.body.token).to.exist;
@@ -258,17 +297,25 @@ describe('API Users', function () {
             token = authResponse.body.token;
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /authenticate token test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'Authentication with token test performance measured');
-
+            logPerformance(
+                'POST /authenticate token test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'Authentication with token test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /authenticate expect success / request a token',
-                testSuite: 'API Users',
-                operation: 'authentication with token'
-            }, 'Authentication with token test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /authenticate expect success / request a token',
+                    testSuite: 'API Users',
+                    operation: 'authentication with token'
+                },
+                'Authentication with token test failed'
+            );
             logTest('should POST /authenticate expect success / request a token', 'API Users', 'FAIL', 'Authentication with token test failed', {
                 error: error.message
             });
@@ -303,12 +350,18 @@ describe('API Users', function () {
                 })
                 .expect(200);
 
-            logTest('should POST /users expect success / with hashed password', 'API Users', 'PASS', 'Hashed password user creation test completed successfully', {
-                userId: user2,
-                username: TEST_USERS.myuser2hash,
-                hashedPassword: true,
-                authenticationSuccess: authResponse.body.success
-            });
+            logTest(
+                'should POST /users expect success / with hashed password',
+                'API Users',
+                'PASS',
+                'Hashed password user creation test completed successfully',
+                {
+                    userId: user2,
+                    username: TEST_USERS.myuser2hash,
+                    hashedPassword: true,
+                    authenticationSuccess: authResponse.body.success
+                }
+            );
 
             expect(authResponse.body.success).to.be.true;
             expect(authResponse.body).to.deep.equal({
@@ -322,18 +375,26 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /users hashed password test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS',
-                userId: user2
-            }, 'Hashed password user creation test performance measured');
-
+            logPerformance(
+                'POST /users hashed password test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS',
+                    userId: user2
+                },
+                'Hashed password user creation test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /users expect success / with hashed password',
-                testSuite: 'API Users',
-                operation: 'hashed password user creation'
-            }, 'Hashed password user creation test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /users expect success / with hashed password',
+                    testSuite: 'API Users',
+                    operation: 'hashed password user creation'
+                },
+                'Hashed password user creation test failed'
+            );
             logTest('should POST /users expect success / with hashed password', 'API Users', 'FAIL', 'Hashed password user creation test failed', {
                 error: error.message
             });
@@ -360,17 +421,25 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /users/resolve test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'User resolve test performance measured');
-
+            logPerformance(
+                'GET /users/resolve test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'User resolve test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /users/resolve/{username} expect success',
-                testSuite: 'API Users',
-                operation: 'user resolve'
-            }, 'User resolve test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /users/resolve/{username} expect success',
+                    testSuite: 'API Users',
+                    operation: 'user resolve'
+                },
+                'User resolve test failed'
+            );
             logTest('should GET /users/resolve/{username} expect success', 'API Users', 'FAIL', 'User resolve test failed', {
                 error: error.message
             });
@@ -395,17 +464,25 @@ describe('API Users', function () {
             expect(response.body.code).to.equal('UserNotFound');
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /users/resolve failure test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'User resolve failure test performance measured');
-
+            logPerformance(
+                'GET /users/resolve failure test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'User resolve failure test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /users/resolve/{username} expect failure',
-                testSuite: 'API Users',
-                operation: 'user resolve failure'
-            }, 'User resolve failure test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /users/resolve/{username} expect failure',
+                    testSuite: 'API Users',
+                    operation: 'user resolve failure'
+                },
+                'User resolve failure test failed'
+            );
             logTest('should GET /users/resolve/{username} expect failure', 'API Users', 'FAIL', 'User resolve failure test failed', {
                 error: error.message
             });
@@ -431,17 +508,25 @@ describe('API Users', function () {
             expect(response.body.results.find(entry => entry.id === user)).to.exist;
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /users test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'Users list test performance measured');
-
+            logPerformance(
+                'GET /users test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'Users list test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /users expect success',
-                testSuite: 'API Users',
-                operation: 'users list'
-            }, 'Users list test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /users expect success',
+                    testSuite: 'API Users',
+                    operation: 'users list'
+                },
+                'Users list test failed'
+            );
             logTest('should GET /users expect success', 'API Users', 'FAIL', 'Users list test failed', {
                 error: error.message
             });
@@ -466,19 +551,27 @@ describe('API Users', function () {
             expect(response.body.id).to.equal(user);
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /users/{user} test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS',
-                userId: user
-            }, 'User details test performance measured');
-
+            logPerformance(
+                'GET /users/{user} test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS',
+                    userId: user
+                },
+                'User details test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /users/{user} expect success',
-                testSuite: 'API Users',
-                operation: 'user details',
-                userId: user
-            }, 'User details test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /users/{user} expect success',
+                    testSuite: 'API Users',
+                    operation: 'user details',
+                    userId: user
+                },
+                'User details test failed'
+            );
             logTest('should GET /users/{user} expect success', 'API Users', 'FAIL', 'User details test failed', {
                 error: error.message
             });
@@ -503,17 +596,25 @@ describe('API Users', function () {
             expect(response.body.id).to.equal(user);
 
             const duration = Date.now() - startTime;
-            logPerformance('GET /users/{user} with token test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'User details with token test performance measured');
-
+            logPerformance(
+                'GET /users/{user} with token test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'User details with token test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should GET /users/{user} expect success / using a token',
-                testSuite: 'API Users',
-                operation: 'user details with token'
-            }, 'User details with token test failed');
+            logError(
+                error,
+                {
+                    testName: 'should GET /users/{user} expect success / using a token',
+                    testSuite: 'API Users',
+                    operation: 'user details with token'
+                },
+                'User details with token test failed'
+            );
             logTest('should GET /users/{user} expect success / using a token', 'API Users', 'FAIL', 'User details with token test failed', {
                 error: error.message
             });
@@ -573,17 +674,25 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('PUT /users/{user} test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS'
-            }, 'User update test performance measured');
-
+            logPerformance(
+                'PUT /users/{user} test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS'
+                },
+                'User update test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should PUT /users/{user} expect success',
-                testSuite: 'API Users',
-                operation: 'user update'
-            }, 'User update test failed');
+            logError(
+                error,
+                {
+                    testName: 'should PUT /users/{user} expect success',
+                    testSuite: 'API Users',
+                    operation: 'user update'
+                },
+                'User update test failed'
+            );
             logTest('should PUT /users/{user} expect success', 'API Users', 'FAIL', 'User update test failed', {
                 error: error.message
             });
@@ -734,7 +843,9 @@ describe('API Users', function () {
             expect(passwordUpdateResponse.body.success).to.be.true;
 
             // Delete user
-            const response = await server.delete(`/users/${user}?deleteAfter=${encodeURIComponent(new Date(Date.now() + 3600 * 1000).toISOString())}`).expect(200);
+            const response = await server
+                .delete(`/users/${user}?deleteAfter=${encodeURIComponent(new Date(Date.now() + 3600 * 1000).toISOString())}`)
+                .expect(200);
             expect(response.body.success).to.be.true;
 
             expect(response.body.addresses.deleted).to.gte(1);
@@ -757,19 +868,27 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('DELETE /users/{user} test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS',
-                userId: user
-            }, 'User deletion test performance measured');
-
+            logPerformance(
+                'DELETE /users/{user} test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS',
+                    userId: user
+                },
+                'User deletion test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should DELETE /users/{user} expect success',
-                testSuite: 'API Users',
-                operation: 'user deletion',
-                userId: user
-            }, 'User deletion test failed');
+            logError(
+                error,
+                {
+                    testName: 'should DELETE /users/{user} expect success',
+                    testSuite: 'API Users',
+                    operation: 'user deletion',
+                    userId: user
+                },
+                'User deletion test failed'
+            );
             logTest('should DELETE /users/{user} expect success', 'API Users', 'FAIL', 'User deletion test failed', {
                 error: error.message
             });
@@ -839,18 +958,26 @@ describe('API Users', function () {
             });
 
             const duration = Date.now() - startTime;
-            logPerformance('POST /users DES hash test', duration, {
-                testSuite: 'API Users',
-                status: 'PASS',
-                userId: response.body.id
-            }, 'DES hash user creation test performance measured');
-
+            logPerformance(
+                'POST /users DES hash test',
+                duration,
+                {
+                    testSuite: 'API Users',
+                    status: 'PASS',
+                    userId: response.body.id
+                },
+                'DES hash user creation test performance measured'
+            );
         } catch (error) {
-            logError(error, {
-                testName: 'should POST /users expect success / with DES hash',
-                testSuite: 'API Users',
-                operation: 'DES hash user creation'
-            }, 'DES hash user creation test failed');
+            logError(
+                error,
+                {
+                    testName: 'should POST /users expect success / with DES hash',
+                    testSuite: 'API Users',
+                    operation: 'DES hash user creation'
+                },
+                'DES hash user creation test failed'
+            );
             logTest('should POST /users expect success / with DES hash', 'API Users', 'FAIL', 'DES hash user creation test failed', {
                 error: error.message
             });
