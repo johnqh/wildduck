@@ -50,7 +50,11 @@ const TEST_USERS = {
     note: 'note',
     user: 'user',
     sender: 'sender',
-    receiver: 'receiver'
+    receiver: 'receiver',
+    andris1: 'andris1',
+    andris2: 'andris2',
+    to: 'to',
+    cc: 'cc'
 };
 
 // Test passwords
@@ -71,7 +75,9 @@ const TEST_DOMAINS = {
     jogeva: 'jõgeva.öö',
     alternative: 'alternative.domain',
     neti: 'neti.ee',
-    zone: 'zone.eu'
+    zone: 'zone.eu',
+    pangalink: 'pangalink.net',
+    tr: 'tr.ee'
 };
 
 // Helper function to generate email addresses

@@ -1386,7 +1386,7 @@ describe('IMAP Protocol integration tests', function () {
                                 '\n* 3 FETCH (BODY[2.HEADER] {71}\r\n' +
                                     'MIME-Version: 1.0\r\n' +
                                     'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) +'\r\n' +
-                                    'To: andris@pangalink.net\r\n' +
+                                    'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
                                     '\r\n' +
                                     ' FLAGS (\\Seen))\r\n'
                             ) >= 0
@@ -1523,7 +1523,7 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (BODY[] {97}\r\nfrom: sender@example.com\r\nto: to@example.com\r\ncc: cc@example.com\r\nsubject: test\r\n\r\nHello World!\r\n)\r\n'
+                                '\r\n* 4 FETCH (BODY[] {97}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nHello World!\r\n)\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1592,7 +1592,7 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (BODY[HEADER] {83}\r\nfrom: sender@example.com\r\nto: to@example.com\r\ncc: cc@example.com\r\nsubject: test\r\n\r\n)\r\n'
+                                '\r\n* 4 FETCH (BODY[HEADER] {83}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\n)\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1676,7 +1676,7 @@ describe('IMAP Protocol integration tests', function () {
                                 '\n* 3 FETCH (BODY[1.HEADER] {93}\r\n' +
                                     'MIME-Version: 1.0\r\n' +
                                     'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
-                                    'To: andris@pangalink.net\r\n' +
+                                    'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
                                     'In-Reply-To: <test1>\r\n' +
                                     '\r\n' +
                                     ')\r\n'
@@ -1688,7 +1688,7 @@ describe('IMAP Protocol integration tests', function () {
                                 '\n* 3 FETCH (BODY[2.HEADER] {71}\r\n' +
                                     'MIME-Version: 1.0\r\n' +
                                     'From: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.kreata) + '\r\n' +
-                                    'To: andris@pangalink.net\r\n' +
+                                    'To: ' + getTestEmail(TEST_USERS.andris, TEST_DOMAINS.pangalink) + '\r\n' +
                                     '\r\n' +
                                     ')\r\n'
                             ) >= 0
@@ -1737,7 +1737,7 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (RFC822 {97}\r\nfrom: sender@example.com\r\nto: to@example.com\r\ncc: cc@example.com\r\nsubject: test\r\n\r\nHello World!\r\n FLAGS (\\Seen))\r\n'
+                                '\r\n* 4 FETCH (RFC822 {97}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nHello World!\r\n FLAGS (\\Seen))\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
@@ -1777,7 +1777,7 @@ describe('IMAP Protocol integration tests', function () {
                         resp = resp.toString();
                         expect(
                             resp.indexOf(
-                                '\r\n* 4 FETCH (RFC822.HEADER {83}\r\nfrom: sender@example.com\r\nto: to@example.com\r\ncc: cc@example.com\r\nsubject: test\r\n\r\n)\r\n'
+                                '\r\n* 4 FETCH (RFC822.HEADER {83}\r\nfrom: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\n)\r\n'
                             ) >= 0
                         ).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;

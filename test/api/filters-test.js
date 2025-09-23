@@ -68,7 +68,7 @@ describe('API Filters', function () {
             .send({
                 name: 'test filter 1',
                 query: {
-                    from: 'andris1'
+                    from: TEST_USERS.andris1
                 },
                 action: {
                     seen: true
@@ -82,7 +82,7 @@ describe('API Filters', function () {
             .send({
                 name: 'test filter 2',
                 query: {
-                    from: 'andris2'
+                    from: TEST_USERS.andris2
                 },
                 action: {
                     seen: true
@@ -96,7 +96,7 @@ describe('API Filters', function () {
             .send({
                 name: 'test filter 3',
                 query: {
-                    from: 'andris'
+                    from: TEST_USERS.andris
                 },
                 action: {
                     seen: false
@@ -192,7 +192,7 @@ describe('API Filters', function () {
             .send({
                 name: 'mailbox test filter',
                 query: {
-                    from: 'andris1'
+                    from: TEST_USERS.andris1
                 },
                 action: {
                     mailbox: inbox
@@ -218,7 +218,7 @@ describe('API Filters', function () {
                 .send({
                     name: 'test filter 4',
                     query: {
-                        from: 'andris'
+                        from: TEST_USERS.andris
                     },
                     action: {
                         seen: true
@@ -240,7 +240,7 @@ describe('API Filters', function () {
                 .send({
                     name: 'test filter 5',
                     query: {
-                        from: 'andris'
+                        from: TEST_USERS.andris
                     },
                     action: {
                         seen: true

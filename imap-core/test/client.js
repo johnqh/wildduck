@@ -6,6 +6,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const config = require('wild-config');
 const { ImapFlow } = require('imapflow');
+const { TEST_USERS, getTestEmail } = require('../../test/test-config');
 
 const client = new ImapFlow({
     host: '127.0.0.1',
@@ -29,7 +30,7 @@ client.on('error', err => {
     process.exit(1);
 });
 
-const raw = Buffer.from('from: sender@example.com\r\nto: to@example.com\r\ncc: cc@example.com\r\nsubject: test\r\n\r\nzzzz\r\n');
+const raw = Buffer.from('from: ' + getTestEmail(TEST_USERS.sender) + '\r\nto: ' + getTestEmail(TEST_USERS.to) + '\r\ncc: ' + getTestEmail(TEST_USERS.cc) + '\r\nsubject: test\r\n\r\nzzzz\r\n');
 
 client
     .connect()

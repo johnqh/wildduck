@@ -4,12 +4,14 @@ DBNAME="$1"
 
 # Get test configuration values from Node.js test config
 get_test_config() {
-    node -e "const config = require('../../test/test-config'); console.log(JSON.stringify({username: config.TEST_USERS.testuser, password: config.TEST_PASSWORDS.pass}));"
+    node -e "const config = require('../../test/test-config'); console.log(JSON.stringify({username: config.TEST_USERS.testuser, password: config.TEST_PASSWORDS.pass, sender: config.getTestEmail(config.TEST_USERS.sender), receiver: config.getTestEmail(config.TEST_USERS.receiver)}));"
 }
 
 TEST_CONFIG=$(get_test_config)
 TEST_USERNAME=$(echo "$TEST_CONFIG" | jq -r '.username')
 TEST_PASSWORD=$(echo "$TEST_CONFIG" | jq -r '.password')
+SENDER_EMAIL=$(echo "$TEST_CONFIG" | jq -r '.sender')
+RECEIVER_EMAIL=$(echo "$TEST_CONFIG" | jq -r '.receiver')
 
 # Function to check if a string is a valid ObjectId
 is_valid_objectid() {
@@ -125,8 +127,8 @@ fi
 
 curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
     -H 'Content-type: message/rfc822' \
-    --data-binary "from: sender@example.com
-to: receiver@example.com
+    --data-binary "from: $SENDER_EMAIL
+to: $RECEIVER_EMAIL
 subject: test5
 
 hello 5
@@ -134,8 +136,8 @@ hello 5
 
 curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
     -H 'Content-type: message/rfc822' \
-    --data-binary "from: sender@example.com
-to: receiver@example.com
+    --data-binary "from: $SENDER_EMAIL
+to: $RECEIVER_EMAIL
 subject: test6
 
 hello 6
