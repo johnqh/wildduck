@@ -1,0 +1,6 @@
+from: {{SENDER_EMAIL}}
+to: {{TO_EMAIL}}
+cc: {{CC_EMAIL}}
+subject: test
+
+Hello World!

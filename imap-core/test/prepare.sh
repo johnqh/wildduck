@@ -98,6 +98,16 @@ curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID/mailboxes/$SENTID" \
 MAILBOXLIST=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes")
 echo "$MAILBOXLIST" | jq
 
+# Generate dynamic EML files from templates
+echo "Generating EML files from templates..."
+if [ -f "../../test/utils/eml-generator.js" ]; then
+    node ../../test/utils/eml-generator.js generate
+    EML_GENERATION_SUCCESS=$?
+else
+    echo "Warning: EML generator not found, using static fixtures"
+    EML_GENERATION_SUCCESS=1
+fi
+
 # Check if fixtures directory exists
 if [ ! -d "fixtures" ]; then
     echo "Warning: fixtures directory not found, creating test messages without fixtures"
@@ -108,9 +118,26 @@ fi
 
 # Add messages
 if [ "$FIXTURE_MODE" = "files" ]; then
+    # Use generated files if available, fallback to original fixtures
+    if [ "$EML_GENERATION_SUCCESS" = "0" ] && [ -f "fixtures/generated/fix1.eml" ]; then
+        FIX1_FILE="fixtures/generated/fix1.eml"
+        echo "Using generated fix1.eml"
+    else
+        FIX1_FILE="fixtures/fix1.eml"
+        echo "Using original fix1.eml"
+    fi
+
+    if [ "$EML_GENERATION_SUCCESS" = "0" ] && [ -f "fixtures/generated/fix4.eml" ]; then
+        FIX4_FILE="fixtures/generated/fix4.eml"
+        echo "Using generated fix4.eml"
+    else
+        FIX4_FILE="fixtures/fix4.eml"
+        echo "Using original fix4.eml"
+    fi
+
     curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?date=14-Sep-2013%2021%3A22%3A28%20-0300&unseen=true" \
         -H 'Content-type: message/rfc822' \
-        --data-binary "@fixtures/fix1.eml"
+        --data-binary "@$FIX1_FILE"
 
     curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
         -H 'Content-type: message/rfc822' \
@@ -122,7 +149,7 @@ if [ "$FIXTURE_MODE" = "files" ]; then
 
     curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
         -H 'Content-type: message/rfc822' \
-        --data-binary "@fixtures/fix4.eml"
+        --data-binary "@$FIX4_FILE"
 fi
 
 curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
