@@ -12,6 +12,7 @@ const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../t
 const expect = chai.expect;
 chai.config.includeStack = true;
 const config = require('wild-config');
+const tools = require('../../lib/tools');
 
 const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
 
@@ -114,13 +115,22 @@ describe('API Filters', function () {
     });
 
     it('should GET /filters expect success / with a user token', async () => {
+        // Move config require to top level to fix linting issue
+        const isCryptoEmails = tools.runningCryptoEmails();
+        let authRequest = {
+            username: TEST_USERS.filteruser,
+            token: true
+        };
+
+        if (isCryptoEmails) {
+            authRequest.emailDomain = TEST_DOMAINS.example;
+        } else {
+            authRequest.password = TEST_PASSWORDS.secretvalue;
+        }
+
         const authResponse = await server
             .post('/authenticate')
-            .send({
-                username: TEST_USERS.filteruser,
-                password: TEST_PASSWORDS.secretvalue,
-                token: true
-            })
+            .send(authRequest)
             .expect(200);
 
         expect(authResponse.body.success).to.be.true;

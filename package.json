@@ -5,6 +5,13 @@
     "main": "server.js",
     "scripts": {
         "test": "node test/drop-test-db.js && redis-cli -n 13 flushdb && npm run runtest",
+        "test:crypto": "APPCONF_api_cryptoEmails=true node test/drop-test-db.js && redis-cli -n 13 flushdb && APPCONF_api_cryptoEmails=true npm run runtest",
+        "test:standard": "APPCONF_api_cryptoEmails=false node test/drop-test-db.js && redis-cli -n 13 flushdb && APPCONF_api_cryptoEmails=false npm run runtest",
+        "test:both": "npm run test:standard && npm run test:crypto",
+        "test:api:crypto": "APPCONF_api_cryptoEmails=true node test/drop-test-db.js && redis-cli -n 13 flushdb && APPCONF_api_cryptoEmails=true NODE_ENV=test grunt mochaTest:api",
+        "test:api:standard": "APPCONF_api_cryptoEmails=false node test/drop-test-db.js && redis-cli -n 13 flushdb && APPCONF_api_cryptoEmails=false NODE_ENV=test grunt mochaTest:api",
+        "test:imap:crypto": "APPCONF_api_cryptoEmails=true NODE_ENV=test grunt mochaTest:imap",
+        "test:imap:standard": "APPCONF_api_cryptoEmails=false NODE_ENV=test grunt mochaTest:imap",
         "test:proto": "NODE_ENV=test grunt proto",
         "printconf": "NODE_CONFIG_ONLY=true npm start",
         "runtest": "NODE_ENV=test grunt",

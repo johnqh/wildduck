@@ -12,6 +12,7 @@ const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../t
 const expect = chai.expect;
 chai.config.includeStack = true;
 const config = require('wild-config');
+const tools = require('../../lib/tools');
 
 const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
 
@@ -72,39 +73,62 @@ describe('API Users', function () {
         logTest('should POST /users/{user}/addresses expect success', 'API Addresses', 'START', 'Starting address creation test');
 
         try {
-            const response = await server
-                .post(`/users/${user}/addresses`)
-                .send({
-                    address: getTestEmail(TEST_USERS.user1_1_addrtest),
-                    tags: ['TAG1', 'tag2']
-                })
-                .expect(200);
-            expect(response.body.success).to.be.true;
+            const isCryptoEmails = tools.runningCryptoEmails();
 
-            const response2 = await server
-                .post(`/users/${user2}/addresses`)
-                .send({
-                    address: getTestEmail(TEST_USERS.user2_1_addrtest)
-                })
-                .expect(200);
-            expect(response2.body.success).to.be.true;
+            if (isCryptoEmails) {
+                // In crypto emails mode, POST /users/:user/addresses should return 400
+                const response = await server
+                    .post(`/users/${user}/addresses`)
+                    .send({
+                        address: getTestEmail(TEST_USERS.user1_1_addrtest),
+                        tags: ['TAG1', 'tag2']
+                    })
+                    .expect(400);
+                expect(response.body.error).to.equal('Endpoint not available in crypto emails mode');
+                expect(response.body.code).to.equal('EndpointNotAvailable');
 
-            const response3 = await server
-                .post(`/users/${user}/addresses`)
-                .send({
-                    address: getTestEmail(TEST_USERS.user1_2_addrtest),
-                    tags: ['TAG2', 'tag3']
-                })
-                .expect(200);
+                logTest('should POST /users/{user}/addresses expect success', 'API Addresses', 'PASS', 'Address creation test completed successfully (crypto mode)', {
+                    userId: user,
+                    cryptoMode: true,
+                    errorCode: response.body.code
+                });
+            } else {
+                // In standard mode, should work normally
+                const response = await server
+                    .post(`/users/${user}/addresses`)
+                    .send({
+                        address: getTestEmail(TEST_USERS.user1_1_addrtest),
+                        tags: ['TAG1', 'tag2']
+                    })
+                    .expect(200);
+                expect(response.body.success).to.be.true;
 
-            expect(response3.body.success).to.be.true;
+                const response2 = await server
+                    .post(`/users/${user2}/addresses`)
+                    .send({
+                        address: getTestEmail(TEST_USERS.user2_1_addrtest)
+                    })
+                    .expect(200);
+                expect(response2.body.success).to.be.true;
 
-            logTest('should POST /users/{user}/addresses expect success', 'API Addresses', 'PASS', 'Address creation test completed successfully', {
-                addressesCreated: 3,
-                user1Addresses: 2,
-                user2Addresses: 1,
-                tagsUsed: ['TAG1', 'tag2', 'TAG2', 'tag3']
-            });
+                const response3 = await server
+                    .post(`/users/${user}/addresses`)
+                    .send({
+                        address: getTestEmail(TEST_USERS.user1_2_addrtest),
+                        tags: ['TAG2', 'tag3']
+                    })
+                    .expect(200);
+
+                expect(response3.body.success).to.be.true;
+
+                logTest('should POST /users/{user}/addresses expect success', 'API Addresses', 'PASS', 'Address creation test completed successfully (standard mode)', {
+                    addressesCreated: 3,
+                    user1Addresses: 2,
+                    user2Addresses: 1,
+                    tagsUsed: ['TAG1', 'tag2', 'TAG2', 'tag3'],
+                    cryptoMode: false
+                });
+            }
 
             const duration = Date.now() - startTime;
             logPerformance(
@@ -279,13 +303,22 @@ describe('API Users', function () {
     });
 
     it('should GET /addresses expect success / with a user token', async () => {
+        // Move config require to top level to fix linting issue
+        const isCryptoEmails = tools.runningCryptoEmails();
+        let authRequest = {
+            username: TEST_USERS.addressuser,
+            token: true
+        };
+
+        if (isCryptoEmails) {
+            authRequest.emailDomain = TEST_DOMAINS.example;
+        } else {
+            authRequest.password = TEST_PASSWORDS.secretvalue;
+        }
+
         const authResponse = await server
             .post('/authenticate')
-            .send({
-                username: TEST_USERS.addressuser,
-                password: TEST_PASSWORDS.secretvalue,
-                token: true
-            })
+            .send(authRequest)
             .expect(200);
 
         expect(authResponse.body.success).to.be.true;
@@ -400,21 +433,40 @@ describe('API Users', function () {
         logTest('should DELETE /users/{user}/addresses/{address} expect success', 'API Addresses', 'START', 'Starting address deletion test');
 
         try {
-            let addressListResponse = await server.get(`/users/${user}/addresses`).expect(200);
-            expect(addressListResponse.body.success).to.be.true;
-            let addresses = addressListResponse.body.results;
-            let address = addresses.find(addr => addr.address === getTestEmail(TEST_USERS.user1_2_addrtest)).id;
+            const isCryptoEmails = tools.runningCryptoEmails();
 
-            const response = await server.delete(`/users/${user}/addresses/${address}`).expect(200);
+            if (isCryptoEmails) {
+                // In crypto emails mode, DELETE /users/:user/addresses should return 400
+                // We'll try to delete an address directly without listing first
+                const fakeAddressId = '000000000000000000000000'; // fake ID
+                const response = await server.delete(`/users/${user}/addresses/${fakeAddressId}`).expect(400);
+                expect(response.body.error).to.equal('Endpoint not available in crypto emails mode');
+                expect(response.body.code).to.equal('EndpointNotAvailable');
 
-            logTest('should DELETE /users/{user}/addresses/{address} expect success', 'API Addresses', 'PASS', 'Address deletion test completed successfully', {
-                userId: user,
-                addressId: address,
-                deletedAddress: getTestEmail(TEST_USERS.user1_2_addrtest),
-                success: response.body.success
-            });
+                logTest('should DELETE /users/{user}/addresses/{address} expect success', 'API Addresses', 'PASS', 'Address deletion test completed successfully (crypto mode)', {
+                    userId: user,
+                    cryptoMode: true,
+                    errorCode: response.body.code
+                });
+            } else {
+                // In standard mode, should work normally
+                let addressListResponse = await server.get(`/users/${user}/addresses`).expect(200);
+                expect(addressListResponse.body.success).to.be.true;
+                let addresses = addressListResponse.body.results;
+                let address = addresses.find(addr => addr.address === getTestEmail(TEST_USERS.user1_2_addrtest)).id;
 
-            expect(response.body.success).to.be.true;
+                const response = await server.delete(`/users/${user}/addresses/${address}`).expect(200);
+
+                logTest('should DELETE /users/{user}/addresses/{address} expect success', 'API Addresses', 'PASS', 'Address deletion test completed successfully (standard mode)', {
+                    userId: user,
+                    addressId: address,
+                    deletedAddress: getTestEmail(TEST_USERS.user1_2_addrtest),
+                    success: response.body.success,
+                    cryptoMode: false
+                });
+
+                expect(response.body.success).to.be.true;
+            }
 
             const duration = Date.now() - startTime;
             logPerformance(

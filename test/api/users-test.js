@@ -10,6 +10,7 @@ const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../t
 const expect = chai.expect;
 chai.config.includeStack = true;
 const config = require('wild-config');
+const tools = require('../../lib/tools');
 
 const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
 
@@ -25,60 +26,106 @@ describe('API Users', function () {
         logTest('should POST /users expect success', 'API Users', 'START', 'Starting user creation test');
 
         try {
-            const response = await server
-                .post('/users')
-                .send({
+            const isCryptoEmails = tools.runningCryptoEmails();
+
+            if (isCryptoEmails) {
+                // In crypto emails mode, POST /users should return 400
+                const userResponse = await server
+                    .post('/users')
+                    .send({
+                        username: TEST_USERS.myuser2,
+                        name: 'John Smith',
+                        address: getTestEmail(TEST_USERS.john),
+                        password: TEST_PASSWORDS.secretvalue
+                    })
+                    .expect(400);
+
+                expect(userResponse.body.error).to.equal('Endpoint not available in crypto emails mode');
+                expect(userResponse.body.code).to.equal('EndpointNotAvailable');
+
+                // Instead, use /authenticate to create the user
+                const response = await server
+                    .post('/authenticate')
+                    .send({
+                        username: TEST_USERS.myuser2,
+                        emailDomain: TEST_DOMAINS.example,
+                        token: true
+                    })
+                    .expect(200);
+
+                logTest('should POST /users expect success', 'API Users', 'PASS', 'User creation test completed successfully (crypto mode)', {
+                    userId: response.body.id,
                     username: TEST_USERS.myuser2,
-                    name: 'John Smith',
-                    address: getTestEmail(TEST_USERS.john),
-                    password: TEST_PASSWORDS.secretvalue,
-                    hashedPassword: false,
-                    emptyAddress: false,
-                    language: 'et',
-                    retention: 0,
-                    targets: [getTestEmail('user'), `https://${TEST_DOMAINS.example}/upload/email`],
-                    spamLevel: 50,
-                    quota: 1073741824,
-                    recipients: 2000,
-                    forwards: 2000,
-                    requirePasswordChange: false,
-                    imapMaxUpload: 5368709120,
-                    imapMaxDownload: 21474836480,
-                    pop3MaxDownload: 21474836480,
-                    pop3MaxMessages: 300,
-                    imapMaxConnections: 15,
-                    receivedMax: 60,
-                    fromWhitelist: [getTestEmail('user', TEST_DOMAINS.alternative), `*@${TEST_DOMAINS.example}`],
-                    tags: ['status:user', 'account:example.com'],
-                    addTagsToAddress: false,
-                    uploadSentMessages: false,
-                    mailboxes: {
-                        sent: 'Saadetud kirjad',
-                        trash: 'Prügikast',
-                        junk: 'Praht',
-                        drafts: 'Mustandid'
-                    },
-                    disabledScopes: ['imap', 'pop3', 'smtp'],
-                    metaData: {
-                        accountIcon: 'avatar.png'
-                    },
-                    internalData: {
-                        inTrial: true
-                    },
-                    pubKey: '-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: Keybase OpenPGP v1.0.0\nComment: https://keybase.io/crypto\n\nxo0EYb0PqAEEANJtI/ivwudfCMmxm+a77Fll5YwSzaaI2nqhcp6pMRJ4l0aafsX3\nBcXUQpsyyELelt2xFtwTNygR4RFWVTn4OoXmO5zFtWCSegAwSyUNK7R/GXi2GTKk\nkYtxUwGcNKBkfY7yAn5KsaeuZL1feDXUGt0YHUmBds5i+6ylI+i4tNbRABEBAAHN\nH1dpbGQgRHVjayA8dGVzdEB3aWxkZHVjay5lbWFpbD7CrQQTAQoAFwUCYb0PqAIb\nLwMLCQcDFQoIAh4BAheAAAoJEJVLs8wf5gSCzBoD/3gz32OfJM1D4IrmKVwyLKxC\n1P81kL7E6ICWD2A0JF9EkojsMHl+/zagwoJejBQhmzTNkFmui5zwmdLGforKl303\ntB0l9vCTb5+eDDHOTUatJrvlw76Fz2ZjIhQTqD4xEM7MWx4xwTGY8bC5roIpdZJD\n9+vr81MXxiq9LZJDBXIyzo0EYb0PqAEEAL/uCTOrAncTRC/3cOQz+kLIzF4A9OTe\n6yxdNWWmx+uo9yJxnBv59Xz9qt8OT8Ih7SD/A4kFCuQqlyd0OFVhyd3KTAQ3CEml\nYOgL5jOE11YrEQjr36xPqO646JZuZIorKDf9PoIyipAMG89BlAoAjSXB1oeQADYn\n5fFLFVm1S7pLABEBAAHCwIMEGAEKAA8FAmG9D6gFCQ8JnAACGy4AqAkQlUuzzB/m\nBIKdIAQZAQoABgUCYb0PqAAKCRBhR/oKY9pg/YqnA/0Szmy4q4TnTBby+j57oXtn\nX/7H/xiaqlCd6bA3lbj3cPK4ybn/gnI4ECsfZfmSFG3T5C9EcZU0e9ByzimH6sxi\nOwPgKFWeJzpl5o8toR7m4wQVhv2NZRUukHe+2JH7nITS0gKeIBHMq2TbufcH6do1\n8s2G7XyLSd5Kkljxx7YmNiKoA/9CQ4l2WkARAFByyEJT9BEE4NBO0m0bI8sg0HRK\nGuP3FKcUu0Pz9R8AExEecofh8s4kaxofa2sbrTcK+L0p0hdR/39JWNuTJbxwEU3C\nA0mZKthjzL7seiRTG7Eny5gGenejRp2x0ziyMEaTgkvf44LPi06XiuE6FGnhElOc\nC7JoIc6NBGG9D6gBBADzW30GOysnqYkexL+bY9o+ai1mL+X58GPLilXJ5WXgEEdf\n8Pg/9jlEOzOnWTTgJAQDGHtwm0duKmK7EJGozLEY94QGOzRjAir6tMF2OYDQIDgj\nAoXavPAc5chFABEVUS12hUPPLoW6YgvaIb3AAZbIM8603BLXTaLGbtZ0z7eYxwAR\nAQABwsCDBBgBCgAPBQJhvQ+oBQkPCZwAAhsuAKgJEJVLs8wf5gSCnSAEGQEKAAYF\nAmG9D6gACgkQ58zrS0TNGbAiVAP/UIxYiSdoHDnBW5qB7onEiUVL5ZFk1Xk+NB0z\n7jOm1oAV0RH8I5NRQBtZ+75xar0vPTX122IdkgpaiNT0wy5Kd/2vz4LKVK9apyJI\neaZ+D7dt5Ipu1p0lWtglqL0xtjOSWuwHFwHuiRYg6eyhGN1RylFpuiKi5KykhrBS\nuBL/BHrk6AP/boRA+KIlb6s19KHNt54Kl8n8G4ZApCwZbUc2jzvbP5DZL5rcjlHd\ns4i4XE+uIJxsiX3iJZtVXzhTKuQlaoEljlhPs/TZYUmxeJ3TdV4o7emWiZ4gE8EQ\nhfxV37ew/GoYm6yME3tAZLIXbv2+bj6HZ4eE8bAMmPvpcQ+UwNJXvnk=\n=dR+x\n-----END PGP PUBLIC KEY BLOCK-----',
-                    encryptMessages: false,
-                    encryptForwarded: false
-                })
-                .expect(200);
+                    responseStatus: response.status,
+                    cryptoMode: true
+                });
 
-            logTest('should POST /users expect success', 'API Users', 'PASS', 'User creation test completed successfully', {
-                userId: response.body.id,
-                username: TEST_USERS.myuser2,
-                responseStatus: response.status
-            });
+                expect(response.body.success).to.be.true;
+                expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+                expect(response.body.token).to.exist;
 
-            expect(response.body.success).to.be.true;
-            expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+                user = response.body.id;
+                token = response.body.token;
+            } else {
+                // In standard mode, POST /users should work normally
+                const response = await server
+                    .post('/users')
+                    .send({
+                        username: TEST_USERS.myuser2,
+                        name: 'John Smith',
+                        address: getTestEmail(TEST_USERS.john),
+                        password: TEST_PASSWORDS.secretvalue,
+                        hashedPassword: false,
+                        emptyAddress: false,
+                        language: 'et',
+                        retention: 0,
+                        targets: [getTestEmail('user'), `https://${TEST_DOMAINS.example}/upload/email`],
+                        spamLevel: 50,
+                        quota: 1073741824,
+                        recipients: 2000,
+                        forwards: 2000,
+                        requirePasswordChange: false,
+                        imapMaxUpload: 5368709120,
+                        imapMaxDownload: 21474836480,
+                        pop3MaxDownload: 21474836480,
+                        pop3MaxMessages: 300,
+                        imapMaxConnections: 15,
+                        receivedMax: 60,
+                        fromWhitelist: [getTestEmail('user', TEST_DOMAINS.alternative), `*@${TEST_DOMAINS.example}`],
+                        tags: ['status:user', 'account:example.com'],
+                        addTagsToAddress: false,
+                        uploadSentMessages: false,
+                        mailboxes: {
+                            sent: 'Saadetud kirjad',
+                            trash: 'Prügikast',
+                            junk: 'Praht',
+                            drafts: 'Mustandid'
+                        },
+                        disabledScopes: ['imap', 'pop3', 'smtp'],
+                        metaData: {
+                            accountIcon: 'avatar.png'
+                        },
+                        internalData: {
+                            inTrial: true
+                        },
+                        pubKey: '-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: Keybase OpenPGP v1.0.0\nComment: https://keybase.io/crypto\n\nxo0EYb0PqAEEANJtI/ivwudfCMmxm+a77Fll5YwSzaaI2nqhcp6pMRJ4l0aafsX3\nBcXUQpsyyELelt2xFtwTNygR4RFWVTn4OoXmO5zFtWCSegAwSyUNK7R/GXi2GTKk\nkYtxUwGcNKBkfY7yAn5KsaeuZL1feDXUGt0YHUmBds5i+6ylI+i4tNbRABEBAAHN\nH1dpbGQgRHVjayA8dGVzdEB3aWxkZHVjay5lbWFpbD7CrQQTAQoAFwUCYb0PqAIb\nLwMLCQcDFQoIAh4BAheAAAoJEJVLs8wf5gSCzBoD/3gz32OfJM1D4IrmKVwyLKxC\n1P81kL7E6ICWD2A0JF9EkojsMHl+/zagwoJejBQhmzTNkFmui5zwmdLGforKl303\ntB0l9vCTb5+eDDHOTUatJrvlw76Fz2ZjIhQTqD4xEM7MWx4xwTGY8bC5roIpdZJD\n9+vr81MXxiq9LZJDBXIyzo0EYb0PqAEEAL/uCTOrAncTRC/3cOQz+kLIzF4A9OTe\n6yxdNWWmx+uo9yJxnBv59Xz9qt8OT8Ih7SD/A4kFCuQqlyd0OFVhyd3KTAQ3CEml\nYOgL5jOE11YrEQjr36xPqO646JZuZIorKDf9PoIyipAMG89BlAoAjSXB1oeQADYn\n5fFLFVm1S7pLABEBAAHCwIMEGAEKAA8FAmG9D6gFCQ8JnAACGy4AqAkQlUuzzB/m\nBIKdIAQZAQoABgUCYb0PqAAKCRBhR/oKY9pg/YqnA/0Szmy4q4TnTBby+j57oXtn\nX/7H/xiaqlCd6bA3lbj3cPK4ybn/gnI4ECsfZfmSFG3T5C9EcZU0e9ByzimH6sxi\nOwPgKFWeJzpl5o8toR7m4wQVhv2NZRUukHe+2JH7nITS0gKeIBHMq2TbufcH6do1\n8s2G7XyLSd5Kkljxx7YmNiKoA/9CQ4l2WkARAFByyEJT9BEE4NBO0m0bI8sg0HRK\nGuP3FKcUu0Pz9R8AExEecofh8s4kaxofa2sbrTcK+L0p0hdR/39JWNuTJbxwEU3C\nA0mZKthjzL7seiRTG7Eny5gGenejRp2x0ziyMEaTgkvf44LPi06XiuE6FGnhElOc\nC7JoIc6NBGG9D6gBBADzW30GOysnqYkexL+bY9o+ai1mL+X58GPLilXJ5WXgEEdf\n8Pg/9jlEOzOnWTTgJAQDGHtwm0duKmK7EJGozLEY94QGOzRjAir6tMF2OYDQIDgj\nAoXavPAc5chFABEVUS12hUPPLoW6YgvaIb3AAZbIM8603BLXTaLGbtZ0z7eYxwAR\nAQABwsCDBBgBCgAPBQJhvQ+oBQkPCZwAAhsuAKgJEJVLs8wf5gSCnSAEGQEKAAYF\nAmG9D6gACgkQ58zrS0TNGbAiVAP/UIxYiSdoHDnBW5qB7onEiUVL5ZFk1Xk+NB0z\n7jOm1oAV0RH8I5NRQBtZ+75xar0vPTX122IdkgpaiNT0wy5Kd/2vz4LKVK9apyJI\neaZ+D7dt5Ipu1p0lWtglqL0xtjOSWuwHFwHuiRYg6eyhGN1RylFpuiKi5KykhrBS\nuBL/BHrk6AP/boRA+KIlb6s19KHNt54Kl8n8G4ZApCwZbUc2jzvbP5DZL5rcjlHd\ns4i4XE+uIJxsiX3iJZtVXzhTKuQlaoEljlhPs/TZYUmxeJ3TdV4o7emWiZ4gE8EQ\nhfxV37ew/GoYm6yME3tAZLIXbv2+bj6HZ4eE8bAMmPvpcQ+UwNJXvnk=\n=dR+x\n-----END PGP PUBLIC KEY BLOCK-----',
+                        encryptMessages: false,
+                        encryptForwarded: false
+                    })
+                    .expect(200);
+
+                logTest('should POST /users expect success', 'API Users', 'PASS', 'User creation test completed successfully (standard mode)', {
+                    userId: response.body.id,
+                    username: TEST_USERS.myuser2,
+                    responseStatus: response.status,
+                    cryptoMode: false
+                });
+
+                expect(response.body.success).to.be.true;
+                expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+
+                user = response.body.id;
+            }
 
             const duration = Date.now() - startTime;
             logPerformance(
@@ -87,12 +134,11 @@ describe('API Users', function () {
                 {
                     testSuite: 'API Users',
                     status: 'PASS',
-                    userId: response.body.id
+                    userId: user,
+                    cryptoMode: isCryptoEmails
                 },
                 'User creation test performance measured'
             );
-
-            user = response.body.id;
         } catch (error) {
             logError(
                 error,
@@ -115,30 +161,51 @@ describe('API Users', function () {
         logTest('should POST /authenticate expect success', 'API Users', 'START', 'Starting authentication test');
 
         try {
+            const isCryptoEmails = tools.runningCryptoEmails();
+            let authRequest = {
+                username: TEST_USERS.myuser2
+            };
+
+            if (isCryptoEmails) {
+                // Crypto emails mode: no password required, emailDomain required
+                authRequest.emailDomain = TEST_DOMAINS.example;
+            } else {
+                // Standard mode: password required
+                authRequest.password = TEST_PASSWORDS.secretvalue;
+            }
+
             const authResponse = await server
                 .post('/authenticate')
-                .send({
-                    username: TEST_USERS.myuser2,
-                    password: TEST_PASSWORDS.secretvalue
-                })
+                .send(authRequest)
                 .expect(200);
 
             logTest('should POST /authenticate expect success', 'API Users', 'PASS', 'Authentication test completed successfully', {
                 userId: user,
                 username: TEST_USERS.myuser2,
-                responseStatus: authResponse.status
+                responseStatus: authResponse.status,
+                cryptoEmailsMode: isCryptoEmails
             });
 
             expect(authResponse.body.success).to.be.true;
-            expect(authResponse.body).to.deep.equal({
-                success: true,
-                address: getTestEmail(TEST_USERS.john),
-                id: user,
-                username: TEST_USERS.myuser2,
-                scope: 'master',
-                require2fa: false,
-                requirePasswordChange: false
-            });
+
+            if (isCryptoEmails) {
+                // In crypto emails mode, we might create a new user with different email
+                expect(authResponse.body.username).to.equal(TEST_USERS.myuser2);
+                expect(authResponse.body.scope).to.equal('master');
+                expect(authResponse.body.require2fa).to.exist;
+                expect(authResponse.body.requirePasswordChange).to.exist;
+            } else {
+                // Standard mode expects exact match
+                expect(authResponse.body).to.deep.equal({
+                    success: true,
+                    address: getTestEmail(TEST_USERS.john),
+                    id: user,
+                    username: TEST_USERS.myuser2,
+                    scope: 'master',
+                    require2fa: false,
+                    requirePasswordChange: false
+                });
+            }
 
             const duration = Date.now() - startTime;
             logPerformance(
@@ -173,21 +240,44 @@ describe('API Users', function () {
         logTest('should POST /authenticate expect failure', 'API Users', 'START', 'Starting authentication failure test');
 
         try {
-            const authResponse = await server
-                .post('/authenticate')
-                .send({
-                    username: TEST_USERS.myuser2,
-                    password: TEST_PASSWORDS.invalidpass
-                })
-                .expect(403);
+            const isCryptoEmails = tools.runningCryptoEmails();
 
-            logTest('should POST /authenticate expect failure', 'API Users', 'PASS', 'Authentication failure test completed successfully', {
-                expectedError: 'AuthFailed',
-                actualError: authResponse.body.code,
-                responseStatus: authResponse.status
-            });
+            if (isCryptoEmails) {
+                // In crypto emails mode, authentication doesn't fail - it creates/finds users
+                // So we'll test missing emailDomain instead
+                const authResponse = await server
+                    .post('/authenticate')
+                    .send({
+                        username: TEST_USERS.myuser2
+                        // Missing emailDomain in crypto mode should fail validation
+                    })
+                    .expect(400);
 
-            expect(authResponse.body.code).to.equal('AuthFailed');
+                logTest('should POST /authenticate expect failure', 'API Users', 'PASS', 'Authentication validation failure test completed successfully (crypto mode)', {
+                    expectedError: 'InputValidationError',
+                    actualError: authResponse.body.code,
+                    responseStatus: authResponse.status
+                });
+
+                expect(authResponse.body.code).to.equal('InputValidationError');
+            } else {
+                // Standard mode: test invalid password
+                const authResponse = await server
+                    .post('/authenticate')
+                    .send({
+                        username: TEST_USERS.myuser2,
+                        password: TEST_PASSWORDS.invalidpass
+                    })
+                    .expect(403);
+
+                logTest('should POST /authenticate expect failure', 'API Users', 'PASS', 'Authentication failure test completed successfully (standard mode)', {
+                    expectedError: 'AuthFailed',
+                    actualError: authResponse.body.code,
+                    responseStatus: authResponse.status
+                });
+
+                expect(authResponse.body.code).to.equal('AuthFailed');
+            }
 
             const duration = Date.now() - startTime;
             logPerformance(
@@ -221,6 +311,8 @@ describe('API Users', function () {
         logTest('should POST /users expect failure / invalid username', 'API Users', 'START', 'Starting invalid username test');
 
         try {
+            const isCryptoEmails = tools.runningCryptoEmails();
+
             const response = await server
                 .post('/users')
                 .send({
@@ -230,13 +322,28 @@ describe('API Users', function () {
                 })
                 .expect(400);
 
-            logTest('should POST /users expect failure / invalid username', 'API Users', 'PASS', 'Invalid username test completed successfully', {
-                invalidUsername: 'ömyuser2',
-                responseStatus: response.status,
-                hasUsernameError: !!response.body.details.username
-            });
+            if (isCryptoEmails) {
+                // In crypto emails mode, should get endpoint not available error
+                expect(response.body.error).to.equal('Endpoint not available in crypto emails mode');
+                expect(response.body.code).to.equal('EndpointNotAvailable');
 
-            expect(response.body.details.username).to.exist;
+                logTest('should POST /users expect failure / invalid username', 'API Users', 'PASS', 'Invalid username test completed successfully (crypto mode)', {
+                    invalidUsername: 'ömyuser2',
+                    responseStatus: response.status,
+                    cryptoMode: true,
+                    errorCode: response.body.code
+                });
+            } else {
+                // In standard mode, should get username validation error
+                expect(response.body.details.username).to.exist;
+
+                logTest('should POST /users expect failure / invalid username', 'API Users', 'PASS', 'Invalid username test completed successfully (standard mode)', {
+                    invalidUsername: 'ömyuser2',
+                    responseStatus: response.status,
+                    cryptoMode: false,
+                    hasUsernameError: !!response.body.details.username
+                });
+            }
 
             const duration = Date.now() - startTime;
             logPerformance(

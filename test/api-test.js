@@ -14,6 +14,7 @@ const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('./te
 const expect = chai.expect;
 chai.config.includeStack = true;
 const config = require('wild-config');
+const tools = require('../lib/tools');
 
 const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
 const ObjectId = require('mongodb').ObjectId;
@@ -213,25 +214,57 @@ describe('API tests', function () {
 
     describe('preauth', () => {
         it('should POST /preauth expect success', async () => {
-            const response = await server
-                .post(`/preauth`)
-                .send({
-                    username: getTestEmail(TEST_USERS.testuser),
-                    scope: 'master'
-                })
-                .expect(200);
-            expect(response.body.success).to.be.true;
+            const isCryptoEmails = tools.runningCryptoEmails();
+
+            if (isCryptoEmails) {
+                // In crypto emails mode, preauth should return 400
+                const response = await server
+                    .post(`/preauth`)
+                    .send({
+                        username: getTestEmail(TEST_USERS.testuser),
+                        scope: 'master'
+                    })
+                    .expect(400);
+                expect(response.body.error).to.equal('Endpoint not available in crypto emails mode');
+                expect(response.body.code).to.equal('EndpointNotAvailable');
+            } else {
+                // In standard mode, preauth should work normally
+                const response = await server
+                    .post(`/preauth`)
+                    .send({
+                        username: getTestEmail(TEST_USERS.testuser),
+                        scope: 'master'
+                    })
+                    .expect(200);
+                expect(response.body.success).to.be.true;
+            }
         });
 
         it('should POST /preauth expect success / using alias domain', async () => {
-            const response = await server
-                .post(`/preauth`)
-                .send({
-                    username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
-                    scope: 'master'
-                })
-                .expect(200);
-            expect(response.body.success).to.be.true;
+            const isCryptoEmails = tools.runningCryptoEmails();
+
+            if (isCryptoEmails) {
+                // In crypto emails mode, preauth should return 400
+                const response = await server
+                    .post(`/preauth`)
+                    .send({
+                        username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
+                        scope: 'master'
+                    })
+                    .expect(400);
+                expect(response.body.error).to.equal('Endpoint not available in crypto emails mode');
+                expect(response.body.code).to.equal('EndpointNotAvailable');
+            } else {
+                // In standard mode, preauth should work normally
+                const response = await server
+                    .post(`/preauth`)
+                    .send({
+                        username: getTestEmail(TEST_USERS.testuser, TEST_DOMAINS.jogeva),
+                        scope: 'master'
+                    })
+                    .expect(200);
+                expect(response.body.success).to.be.true;
+            }
         });
     });
 
