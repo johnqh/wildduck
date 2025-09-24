@@ -111,7 +111,8 @@ describe('IMAP Protocol integration tests', function () {
     });
 
     afterEach(function (done) {
-        done();
+        // Add a small delay to ensure any pending operations complete
+        setTimeout(done, 100);
     });
 
     after(function (done) {

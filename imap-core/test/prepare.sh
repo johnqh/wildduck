@@ -83,6 +83,14 @@ if [ "$IS_CRYPTO_MODE" = "true" ]; then
     USER_SEARCH=$(curl --silent "http://127.0.0.1:8080/users?query=$TEST_USERNAME")
     USERID=$(extract_json_value "$USER_SEARCH" '.results[0].id')
 
+    # Set the correct password for the user (since crypto mode creates with default password)
+    PASSWORD_UPDATE=$(curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID" \
+    -H 'Content-type: application/json' \
+    -d "{
+      \"password\": \"$TEST_PASSWORD\"
+    }")
+    echo "Password update: $PASSWORD_UPDATE"
+
 else
     echo "Using standard mode - creating user via users endpoint"
     # In standard mode, create user via users endpoint
