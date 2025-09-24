@@ -1795,7 +1795,9 @@ describe('IMAP Protocol integration tests', function () {
                         const partialContent = `: ${senderEmail}\r\nto: ${toEmail}\r\ncc: ${ccEmail}\r\nsubject: test\r\n\r\nHello World!\r\n`;
                         const partialLength = Buffer.byteLength(partialContent, 'utf8');
 
-                        const shortContent = ': sen';
+                        // The content starting at byte 4 of the email (after "from")
+                        // This should be exactly 5 bytes starting from position 4 of the email
+                        const shortContent = `: ${senderEmail.substring(0, 3)}`;
                         const shortLength = Buffer.byteLength(shortContent, 'utf8');
 
                         expect(resp.indexOf(`\n* 4 FETCH (BODY[]<4> {${shortLength}}\r\n${shortContent})\r\n`) >= 0).to.be.true;

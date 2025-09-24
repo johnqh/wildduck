@@ -493,17 +493,18 @@ describe('API Users', function () {
         logTest('should GET /users expect success', 'API Users', 'START', 'Starting users list test');
 
         try {
-            const response = await server.get('/users?query=myuser2').expect(200);
+            const response = await server.get(`/users?query=${TEST_USERS.myuser2}`).expect(200);
 
             logTest('should GET /users expect success', 'API Users', 'PASS', 'Users list test completed successfully', {
-                query: 'myuser2',
+                query: TEST_USERS.myuser2,
                 resultsCount: response.body.results?.length,
                 foundUser: !!response.body.results.find(entry => entry.id === user),
                 responseStatus: response.status
             });
 
             expect(response.body.success).to.be.true;
-            expect(response.body.results.find(entry => entry.id === user)).to.exist;
+            expect(response.body.results.length).to.be.greaterThan(0);
+            expect(response.body.results.find(entry => entry.username === TEST_USERS.myuser2)).to.exist;
 
             const duration = Date.now() - startTime;
             logPerformance(
