@@ -4,7 +4,12 @@ DBNAME="$1"
 
 # Get test configuration values from Node.js test config
 get_test_config() {
-    node -e "const config = require('../../test/test-config'); console.log(JSON.stringify({username: config.TEST_USERS.testuser, password: config.TEST_PASSWORDS.pass, sender: config.getTestEmail(config.TEST_USERS.sender), receiver: config.getTestEmail(config.TEST_USERS.receiver)}));"
+    node -e "const config = require('../../test/test-config'); console.log(JSON.stringify({username: config.TEST_USERS.testuser, password: config.TEST_PASSWORDS.pass, sender: config.getTestEmail(config.TEST_USERS.sender), receiver: config.getTestEmail(config.TEST_USERS.receiver), domain: config.TEST_DOMAINS.example}));"
+}
+
+# Check if crypto emails mode is enabled
+check_crypto_mode() {
+    node -e "const tools = require('../../lib/tools'); console.log(tools.runningCryptoEmails());"
 }
 
 TEST_CONFIG=$(get_test_config)
@@ -12,6 +17,8 @@ TEST_USERNAME=$(echo "$TEST_CONFIG" | jq -r '.username')
 TEST_PASSWORD=$(echo "$TEST_CONFIG" | jq -r '.password')
 SENDER_EMAIL=$(echo "$TEST_CONFIG" | jq -r '.sender')
 RECEIVER_EMAIL=$(echo "$TEST_CONFIG" | jq -r '.receiver')
+TEST_DOMAIN=$(echo "$TEST_CONFIG" | jq -r '.domain')
+IS_CRYPTO_MODE=$(check_crypto_mode)
 
 # Function to check if a string is a valid ObjectId
 is_valid_objectid() {
@@ -49,17 +56,47 @@ if [ "$EXISTING_USER_ID" != "null" ] && is_valid_objectid "$EXISTING_USER_ID"; t
     sleep 2
 fi
 
-echo "Creating user"
-USERRESPONSE=$(curl --silent -XPOST http://127.0.0.1:8080/users \
--H 'Content-type: application/json' \
--d "{
-  \"username\": \"$TEST_USERNAME\",
-  \"password\": \"$TEST_PASSWORD\",
-  \"name\": \"Test User\"
-}")
+echo "Creating user (crypto mode: $IS_CRYPTO_MODE)"
 
-echo "UR: $USERRESPONSE"
-USERID=$(extract_json_value "$USERRESPONSE" '.id')
+if [ "$IS_CRYPTO_MODE" = "true" ]; then
+    echo "Using crypto mode - creating user via authentication"
+    # In crypto mode, create user via authentication endpoint
+    USERRESPONSE=$(curl --silent -XPOST http://127.0.0.1:8080/authenticate \
+    -H 'Content-type: application/json' \
+    -d "{
+      \"username\": \"$TEST_USERNAME\",
+      \"emailDomain\": \"$TEST_DOMAIN\",
+      \"token\": true
+    }")
+
+    echo "UR: $USERRESPONSE"
+    # Extract user ID from token info or search for the created user
+    TOKEN=$(extract_json_value "$USERRESPONSE" '.token')
+
+    if [ "$TOKEN" = "null" ]; then
+        echo "Error: Failed to authenticate/create user in crypto mode"
+        echo "Response: $USERRESPONSE"
+        exit 1
+    fi
+
+    # Get the user ID by searching for the username
+    USER_SEARCH=$(curl --silent "http://127.0.0.1:8080/users?query=$TEST_USERNAME")
+    USERID=$(extract_json_value "$USER_SEARCH" '.results[0].id')
+
+else
+    echo "Using standard mode - creating user via users endpoint"
+    # In standard mode, create user via users endpoint
+    USERRESPONSE=$(curl --silent -XPOST http://127.0.0.1:8080/users \
+    -H 'Content-type: application/json' \
+    -d "{
+      \"username\": \"$TEST_USERNAME\",
+      \"password\": \"$TEST_PASSWORD\",
+      \"name\": \"Test User\"
+    }")
+
+    echo "UR: $USERRESPONSE"
+    USERID=$(extract_json_value "$USERRESPONSE" '.id')
+fi
 
 # Validate USERID
 if [ "$USERID" = "null" ] || ! is_valid_objectid "$USERID"; then
