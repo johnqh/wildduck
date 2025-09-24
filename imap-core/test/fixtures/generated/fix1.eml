@@ -1,6 +1,6 @@
-from: senderxx@xexample.com
-to: toxx@xexample.com
-cc: ccxx@xexample.com
+from: 0xb06cdefa1a2b3c4d5e6f789012345678abcdef0123456789abcde@xexample.com
+to: 0xf4a0bcde1a2b3c4d5e6f789012345678abcdef0123456789abcdef012@xexample.com
+cc: 0x05b1cdef1a2b3c4d5e6f789012345678abcdef0123456789abcdef0123@xexample.com
 subject: test
 
 zzzz

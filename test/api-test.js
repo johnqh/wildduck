@@ -1,7 +1,10 @@
-/*eslint no-unused-expressions: 0, prefer-arrow-callback: 0, no-console:0 */
+/*eslint no-unused-expressions: 0, prefer-arrow-callback: 0, no-console:0, global-require: 0 */
 /* globals before: false, after: false */
 
 'use strict';
+
+// Set NODE_ENV for standalone test runs
+process.env.NODE_ENV = 'test';
 
 const supertest = require('supertest');
 const chai = require('chai');
@@ -15,10 +18,81 @@ const config = require('wild-config');
 const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
 const ObjectId = require('mongodb').ObjectId;
 
+let spawn = require('child_process').spawn;
+
+// Global server management for standalone test runs
+let serverProcess = null;
+
 describe('API tests', function () {
     let userId, asp, address, inbox;
 
     this.timeout(10000); // eslint-disable-line no-invalid-this
+
+    // Start server before all tests (for standalone test runs)
+    before(function (done) {
+        this.timeout(20000); // eslint-disable-line no-invalid-this
+
+        // Check if we're running as part of the full test suite by checking for grunt process
+        const isStandalone = !process.env.GRUNT_STARTED && (process.argv.some(arg => arg.includes('api-test.js')) || process.argv.some(arg => arg.includes('users-test.js')));
+
+        if (isStandalone) {
+            console.log('Starting WildDuck server for standalone API test...');
+
+            // Start server from the main wildduck directory
+            serverProcess = spawn('node', ['server.js'], {
+                cwd: require('path').resolve(__dirname, '..'),
+                env: { ...process.env, NODE_ENV: 'test' },
+                stdio: ['ignore', 'pipe', 'pipe']
+            });
+
+            let serverReady = false;
+            const timeout = setTimeout(() => {
+                if (!serverReady) {
+                    console.log('Server should be ready, proceeding with tests...');
+                    return done();
+                }
+            }, 12000);
+
+            serverProcess.stdout.on('data', data => {
+                const output = data.toString();
+                if (output.includes('HTTP API server listening')) {
+                    serverReady = true;
+                    clearTimeout(timeout);
+                    console.log('Server ready, proceeding with tests...');
+                    return setTimeout(done, 1000); // Give a bit more time for full startup
+                }
+            });
+
+            serverProcess.stderr.on('data', data => {
+                console.error('Server stderr:', data.toString());
+            });
+
+            serverProcess.on('error', err => {
+                console.error('Failed to start server:', err);
+                done(err);
+            });
+        } else {
+            return done();
+        }
+    });
+
+    // Stop server after all tests (for standalone test runs)
+    after(function (done) {
+        this.timeout(10000); // eslint-disable-line no-invalid-this
+
+        if (serverProcess) {
+            console.log('Stopping WildDuck server...');
+            serverProcess.kill('SIGTERM');
+            setTimeout(() => {
+                if (serverProcess && !serverProcess.killed) {
+                    serverProcess.kill('SIGKILL');
+                }
+                return done();
+            }, 5000);
+        } else {
+            return done();
+        }
+    });
 
     before(async () => {
         // ensure that we have an existing user account

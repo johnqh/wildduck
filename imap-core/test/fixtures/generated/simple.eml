@@ -1,7 +1,7 @@
 Content-Type: multipart/mixed;
  boundary="----sinikael-?=_1-14508625179060.6947296333964914"
-From: =?UTF-8?Q?Sender_Name_=F0=9F=91=BB?= <senderxx@xexample.com>
-To: =?UTF-8?Q?Receiver_Name_=F0=9F=91=A5?= <receiverxx@xexample.com>
+From: =?UTF-8?Q?Sender_Name_=F0=9F=91=BB?= <0xb06cdefa1a2b3c4d5e6f789012345678abcdef0123456789abcde@xexample.com>
+To: =?UTF-8?Q?Receiver_Name_=F0=9F=91=A5?= <0xc17defab1a2b3c4d5e6f789012345678abcdef0123456789abcdef@xexample.com>
 Subject: Nodemailer is unicode friendly =?UTF-8?Q?=E2=9C=94?=
 Date: Wed, 23 Dec 2015 09:21:57 +0000
 Message-Id: <1450862517911-ebf3ac1e-e421bda1-4d17b820@example.com>

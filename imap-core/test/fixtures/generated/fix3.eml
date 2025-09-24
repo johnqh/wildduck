@@ -1,6 +1,6 @@
 MIME-Version: 1.0
-From: andrisxx@xkreata.ee
-To: andrisxx@xtr.ee
+From: 0x6b17efab1a2b3c4d5e6f789012345678abcdef0123456789@xkreata.ee
+To: 0x6b17efab1a2b3c4d5e6f789012345678abcdef0123456789@xtr.ee
 Content-Type: multipart/mixed;
  boundary='----mailcomposer-?=_1-1328088797399'
 Message-Id: <testmessage-for-bug>;
@@ -10,8 +10,8 @@ Content-Type: message/rfc822
 Content-Transfer-Encoding: 7bit
 
 MIME-Version: 1.0
-From: andrisxx@xkreata.ee
-To: andrisxx@xpangalink.net
+From: 0x6b17efab1a2b3c4d5e6f789012345678abcdef0123456789@xkreata.ee
+To: 0x6b17efab1a2b3c4d5e6f789012345678abcdef0123456789@xpangalink.net
 In-Reply-To: <test1>
 
 Hello world 1!
@@ -20,8 +20,8 @@ Content-Type: message/rfc822
 Content-Transfer-Encoding: 7bit
 
 MIME-Version: 1.0
-From: andrisxx@xkreata.ee
-To: andrisxx@xpangalink.net
+From: 0x6b17efab1a2b3c4d5e6f789012345678abcdef0123456789@xkreata.ee
+To: 0x6b17efab1a2b3c4d5e6f789012345678abcdef0123456789@xpangalink.net
 
 Hello world 2!
 ------mailcomposer-?=_1-1328088797399
