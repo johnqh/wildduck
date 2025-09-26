@@ -27,7 +27,20 @@
       "Bash(env APPCONF_api_cryptoEmails=false NODE_ENV=test timeout 1200 npm test)",
       "Read(///**)",
       "Bash(env APPCONF_api_cryptoEmails=true NODE_ENV=test timeout 600 npm test)",
-      "Bash(env APPCONF_api_cryptoEmails=true NODE_ENV=test gtimeout 600 npm test)"
+      "Bash(env APPCONF_api_cryptoEmails=true NODE_ENV=test gtimeout 600 npm test)",
+      "Bash(npx grunt mochaTest:*)",
+      "Bash(npx mocha test:*)",
+      "Bash(APPCONF_api_cryptoEmails=false NODE_ENV=test npm test)",
+      "Bash(tee:*)",
+      "Bash(node:*)",
+      "Bash(NODE_ENV=test node -e \"const config = require(''wild-config''); console.log(''emailDomain:'', config.emailDomain); console.log(''api.emailDomain:'', config.api?.emailDomain); console.log(''Config keys:'', Object.keys(config).slice(0,10));\")",
+      "Bash(pkill:*)",
+      "Bash(env APPCONF_api_cryptoEmails=true NODE_ENV=test npx grunt shell:server wait:server mochaTest:api)",
+      "Bash(env APPCONF_api_cryptoEmails=false NODE_ENV=test npx grunt shell:server wait:server mochaTest:api)",
+      "Bash(redis-cli:*)",
+      "Bash(env APPCONF_api_cryptoEmails=true NODE_ENV=test node test/drop-test-db.js)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

@@ -316,9 +316,10 @@ describe('Send multiple messages', function () {
                     });
                 };
 
+                const cryptoEmails = tools.runningCryptoEmails();
                 let checkNormalUsers = next => {
                     let npos = 0;
-                    let nusers = [1, 4, 5];
+                    let nusers = cryptoEmails ? [1, 2, 3, 4, 5] : [1, 4, 5];
                     let checkUser = () => {
                         if (npos >= nusers.length) {
                             return next();
@@ -351,7 +352,7 @@ describe('Send multiple messages', function () {
 
                 let checkEncryptedUsers = next => {
                     let npos = 0;
-                    let nusers = [2, 3];
+                    let nusers = cryptoEmails ? [] : [2, 3];
                     let checkUser = () => {
                         if (npos >= nusers.length) {
                             return next();

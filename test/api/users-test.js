@@ -5,7 +5,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 const { logTest, logError, logPerformance } = require('../../lib/logger');
-const { TEST_USERS, TEST_PASSWORDS, getTestEmail, createUser } = require('../test-config');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, createUser, TEST_DOMAINS } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -13,8 +13,6 @@ const config = require('wild-config');
 const tools = require('../../lib/tools');
 
 const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
-
-const os = require('os');
 
 describe('API Users', function () {
     this.timeout(10000); // eslint-disable-line no-invalid-this
@@ -29,7 +27,7 @@ describe('API Users', function () {
             const response = await createUser(server, {
                 username: TEST_USERS.myuser2,
                 name: 'John Smith',
-                address: getTestEmail(TEST_USERS.john),
+                address: getTestEmail(TEST_USERS.myuser2),
                 password: TEST_PASSWORDS.secretvalue
             });
 
@@ -103,7 +101,7 @@ describe('API Users', function () {
                 // Standard mode expects exact match
                 expect(authResponse.body).to.deep.equal({
                     success: true,
-                    address: getTestEmail(TEST_USERS.john),
+                    address: getTestEmail(TEST_USERS.myuser2),
                     id: user,
                     username: TEST_USERS.myuser2,
                     scope: 'master',
@@ -406,7 +404,7 @@ describe('API Users', function () {
             expect(authResponse.body.success).to.be.true;
             expect(authResponse.body).to.deep.equal({
                 success: true,
-                address: `${TEST_USERS.myuser2hash}@${os.hostname().toLowerCase()}`,
+                address: `${TEST_USERS.myuser2hash}@${TEST_DOMAINS.example}`,
                 id: user2,
                 username: TEST_USERS.myuser2hash,
                 scope: 'master',
@@ -868,7 +866,7 @@ describe('API Users', function () {
 
         expect(authResponse.body).to.deep.equal({
             success: true,
-            address: getTestEmail(TEST_USERS.john),
+            address: getTestEmail(TEST_USERS.myuser2),
             id: user,
             username: TEST_USERS.myuser2,
             scope: 'master',
@@ -1006,7 +1004,7 @@ describe('API Users', function () {
         const response = await server.get(`/users/${user}/restore`).expect(200);
         expect(response.body.success).to.be.true;
         expect(response.body.username).to.equal(TEST_USERS.myuser2);
-        const expectedAddress = getTestEmail(TEST_USERS.john);
+        const expectedAddress = getTestEmail(TEST_USERS.myuser2);
         expect(response.body.recoverableAddresses).to.deep.equal([expectedAddress]);
     });
 
@@ -1014,7 +1012,7 @@ describe('API Users', function () {
         const response = await server.post(`/users/${user}/restore`).send({}).expect(200);
         expect(response.body.success).to.be.true;
         expect(response.body.addresses.recovered).to.gte(1);
-        const expectedMainAddress = getTestEmail(TEST_USERS.john);
+        const expectedMainAddress = getTestEmail(TEST_USERS.myuser2);
         expect(response.body.addresses.main).to.equal(expectedMainAddress);
     });
 
