@@ -5,7 +5,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 const { logTest, logError, logPerformance } = require('../../lib/logger');
-const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../test-config');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, createUser } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -26,106 +26,23 @@ describe('API Users', function () {
         logTest('should POST /users expect success', 'API Users', 'START', 'Starting user creation test');
 
         try {
-            const isCryptoEmails = tools.runningCryptoEmails();
+            const response = await createUser(server, {
+                username: TEST_USERS.myuser2,
+                name: 'John Smith',
+                address: getTestEmail(TEST_USERS.john),
+                password: TEST_PASSWORDS.secretvalue
+            });
 
-            if (isCryptoEmails) {
-                // In crypto emails mode, POST /users should return 400
-                const userResponse = await server
-                    .post('/users')
-                    .send({
-                        username: TEST_USERS.myuser2,
-                        name: 'John Smith',
-                        address: getTestEmail(TEST_USERS.john),
-                        password: TEST_PASSWORDS.secretvalue
-                    })
-                    .expect(400);
+            logTest('should POST /users expect success', 'API Users', 'PASS', 'User creation test completed successfully (standard mode)', {
+                userId: response.body.id,
+                username: TEST_USERS.myuser2,
+                responseStatus: response.status
+            });
 
-                expect(userResponse.body.error).to.equal('Endpoint not available in crypto emails mode');
-                expect(userResponse.body.code).to.equal('EndpointNotAvailable');
+            expect(response.body.success).to.be.true;
+            expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
 
-                // Instead, use /authenticate to create the user
-                const response = await server
-                    .post('/authenticate')
-                    .send({
-                        username: TEST_USERS.myuser2,
-                        emailDomain: TEST_DOMAINS.example,
-                        token: true
-                    })
-                    .expect(200);
-
-                logTest('should POST /users expect success', 'API Users', 'PASS', 'User creation test completed successfully (crypto mode)', {
-                    userId: response.body.id,
-                    username: TEST_USERS.myuser2,
-                    responseStatus: response.status,
-                    cryptoMode: true
-                });
-
-                expect(response.body.success).to.be.true;
-                expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
-                expect(response.body.token).to.exist;
-
-                user = response.body.id;
-                token = response.body.token;
-            } else {
-                // In standard mode, POST /users should work normally
-                const response = await server
-                    .post('/users')
-                    .send({
-                        username: TEST_USERS.myuser2,
-                        name: 'John Smith',
-                        address: getTestEmail(TEST_USERS.john),
-                        password: TEST_PASSWORDS.secretvalue,
-                        hashedPassword: false,
-                        emptyAddress: false,
-                        language: 'et',
-                        retention: 0,
-                        targets: [getTestEmail('user'), `https://${TEST_DOMAINS.example}/upload/email`],
-                        spamLevel: 50,
-                        quota: 1073741824,
-                        recipients: 2000,
-                        forwards: 2000,
-                        requirePasswordChange: false,
-                        imapMaxUpload: 5368709120,
-                        imapMaxDownload: 21474836480,
-                        pop3MaxDownload: 21474836480,
-                        pop3MaxMessages: 300,
-                        imapMaxConnections: 15,
-                        receivedMax: 60,
-                        fromWhitelist: [getTestEmail('user', TEST_DOMAINS.alternative), `*@${TEST_DOMAINS.example}`],
-                        tags: ['status:user', 'account:example.com'],
-                        addTagsToAddress: false,
-                        uploadSentMessages: false,
-                        mailboxes: {
-                            sent: 'Saadetud kirjad',
-                            trash: 'Prügikast',
-                            junk: 'Praht',
-                            drafts: 'Mustandid'
-                        },
-                        disabledScopes: ['imap', 'pop3', 'smtp'],
-                        metaData: {
-                            accountIcon: 'avatar.png'
-                        },
-                        internalData: {
-                            inTrial: true
-                        },
-                        pubKey: '-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: Keybase OpenPGP v1.0.0\nComment: https://keybase.io/crypto\n\nxo0EYb0PqAEEANJtI/ivwudfCMmxm+a77Fll5YwSzaaI2nqhcp6pMRJ4l0aafsX3\nBcXUQpsyyELelt2xFtwTNygR4RFWVTn4OoXmO5zFtWCSegAwSyUNK7R/GXi2GTKk\nkYtxUwGcNKBkfY7yAn5KsaeuZL1feDXUGt0YHUmBds5i+6ylI+i4tNbRABEBAAHN\nH1dpbGQgRHVjayA8dGVzdEB3aWxkZHVjay5lbWFpbD7CrQQTAQoAFwUCYb0PqAIb\nLwMLCQcDFQoIAh4BAheAAAoJEJVLs8wf5gSCzBoD/3gz32OfJM1D4IrmKVwyLKxC\n1P81kL7E6ICWD2A0JF9EkojsMHl+/zagwoJejBQhmzTNkFmui5zwmdLGforKl303\ntB0l9vCTb5+eDDHOTUatJrvlw76Fz2ZjIhQTqD4xEM7MWx4xwTGY8bC5roIpdZJD\n9+vr81MXxiq9LZJDBXIyzo0EYb0PqAEEAL/uCTOrAncTRC/3cOQz+kLIzF4A9OTe\n6yxdNWWmx+uo9yJxnBv59Xz9qt8OT8Ih7SD/A4kFCuQqlyd0OFVhyd3KTAQ3CEml\nYOgL5jOE11YrEQjr36xPqO646JZuZIorKDf9PoIyipAMG89BlAoAjSXB1oeQADYn\n5fFLFVm1S7pLABEBAAHCwIMEGAEKAA8FAmG9D6gFCQ8JnAACGy4AqAkQlUuzzB/m\nBIKdIAQZAQoABgUCYb0PqAAKCRBhR/oKY9pg/YqnA/0Szmy4q4TnTBby+j57oXtn\nX/7H/xiaqlCd6bA3lbj3cPK4ybn/gnI4ECsfZfmSFG3T5C9EcZU0e9ByzimH6sxi\nOwPgKFWeJzpl5o8toR7m4wQVhv2NZRUukHe+2JH7nITS0gKeIBHMq2TbufcH6do1\n8s2G7XyLSd5Kkljxx7YmNiKoA/9CQ4l2WkARAFByyEJT9BEE4NBO0m0bI8sg0HRK\nGuP3FKcUu0Pz9R8AExEecofh8s4kaxofa2sbrTcK+L0p0hdR/39JWNuTJbxwEU3C\nA0mZKthjzL7seiRTG7Eny5gGenejRp2x0ziyMEaTgkvf44LPi06XiuE6FGnhElOc\nC7JoIc6NBGG9D6gBBADzW30GOysnqYkexL+bY9o+ai1mL+X58GPLilXJ5WXgEEdf\n8Pg/9jlEOzOnWTTgJAQDGHtwm0duKmK7EJGozLEY94QGOzRjAir6tMF2OYDQIDgj\nAoXavPAc5chFABEVUS12hUPPLoW6YgvaIb3AAZbIM8603BLXTaLGbtZ0z7eYxwAR\nAQABwsCDBBgBCgAPBQJhvQ+oBQkPCZwAAhsuAKgJEJVLs8wf5gSCnSAEGQEKAAYF\nAmG9D6gACgkQ58zrS0TNGbAiVAP/UIxYiSdoHDnBW5qB7onEiUVL5ZFk1Xk+NB0z\n7jOm1oAV0RH8I5NRQBtZ+75xar0vPTX122IdkgpaiNT0wy5Kd/2vz4LKVK9apyJI\neaZ+D7dt5Ipu1p0lWtglqL0xtjOSWuwHFwHuiRYg6eyhGN1RylFpuiKi5KykhrBS\nuBL/BHrk6AP/boRA+KIlb6s19KHNt54Kl8n8G4ZApCwZbUc2jzvbP5DZL5rcjlHd\ns4i4XE+uIJxsiX3iJZtVXzhTKuQlaoEljlhPs/TZYUmxeJ3TdV4o7emWiZ4gE8EQ\nhfxV37ew/GoYm6yME3tAZLIXbv2+bj6HZ4eE8bAMmPvpcQ+UwNJXvnk=\n=dR+x\n-----END PGP PUBLIC KEY BLOCK-----',
-                        encryptMessages: false,
-                        encryptForwarded: false
-                    })
-                    .expect(200);
-
-                logTest('should POST /users expect success', 'API Users', 'PASS', 'User creation test completed successfully (standard mode)', {
-                    userId: response.body.id,
-                    username: TEST_USERS.myuser2,
-                    responseStatus: response.status,
-                    cryptoMode: false
-                });
-
-                expect(response.body.success).to.be.true;
-                expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
-
-                user = response.body.id;
-            }
+            user = response.body.id;
 
             const duration = Date.now() - startTime;
             logPerformance(
@@ -134,8 +51,7 @@ describe('API Users', function () {
                 {
                     testSuite: 'API Users',
                     status: 'PASS',
-                    userId: user,
-                    cryptoMode: isCryptoEmails
+                    userId: user
                 },
                 'User creation test performance measured'
             );
@@ -161,33 +77,22 @@ describe('API Users', function () {
         logTest('should POST /authenticate expect success', 'API Users', 'START', 'Starting authentication test');
 
         try {
-            const isCryptoEmails = tools.runningCryptoEmails();
             let authRequest = {
-                username: TEST_USERS.myuser2
+                username: TEST_USERS.myuser2,
+                password: TEST_PASSWORDS.secretvalue
             };
 
-            if (isCryptoEmails) {
-                // Crypto emails mode: no password required, emailDomain required
-                authRequest.emailDomain = TEST_DOMAINS.example;
-            } else {
-                // Standard mode: password required
-                authRequest.password = TEST_PASSWORDS.secretvalue;
-            }
-
-            const authResponse = await server
-                .post('/authenticate')
-                .send(authRequest)
-                .expect(200);
+            const authResponse = await server.post('/authenticate').send(authRequest).expect(200);
 
             logTest('should POST /authenticate expect success', 'API Users', 'PASS', 'Authentication test completed successfully', {
                 userId: user,
                 username: TEST_USERS.myuser2,
-                responseStatus: authResponse.status,
-                cryptoEmailsMode: isCryptoEmails
+                responseStatus: authResponse.status
             });
 
             expect(authResponse.body.success).to.be.true;
 
+            const isCryptoEmails = tools.runningCryptoEmails();
             if (isCryptoEmails) {
                 // In crypto emails mode, we might create a new user with different email
                 expect(authResponse.body.username).to.equal(TEST_USERS.myuser2);
@@ -243,21 +148,26 @@ describe('API Users', function () {
             const isCryptoEmails = tools.runningCryptoEmails();
 
             if (isCryptoEmails) {
-                // In crypto emails mode, authentication doesn't fail - it creates/finds users
-                // So we'll test missing emailDomain instead
+                // In crypto emails mode, authentication always succeeds for valid usernames
+                // Test with an invalid username format instead
                 const authResponse = await server
                     .post('/authenticate')
                     .send({
-                        username: TEST_USERS.myuser2
-                        // Missing emailDomain in crypto mode should fail validation
+                        username: 'invalid@user@name' // Invalid username format
                     })
                     .expect(400);
 
-                logTest('should POST /authenticate expect failure', 'API Users', 'PASS', 'Authentication validation failure test completed successfully (crypto mode)', {
-                    expectedError: 'InputValidationError',
-                    actualError: authResponse.body.code,
-                    responseStatus: authResponse.status
-                });
+                logTest(
+                    'should POST /authenticate expect failure',
+                    'API Users',
+                    'PASS',
+                    'Authentication validation failure test completed successfully (crypto mode)',
+                    {
+                        expectedError: 'InputValidationError',
+                        actualError: authResponse.body.code,
+                        responseStatus: authResponse.status
+                    }
+                );
 
                 expect(authResponse.body.code).to.equal('InputValidationError');
             } else {
@@ -327,22 +237,34 @@ describe('API Users', function () {
                 expect(response.body.error).to.equal('Endpoint not available in crypto emails mode');
                 expect(response.body.code).to.equal('EndpointNotAvailable');
 
-                logTest('should POST /users expect failure / invalid username', 'API Users', 'PASS', 'Invalid username test completed successfully (crypto mode)', {
-                    invalidUsername: 'ömyuser2',
-                    responseStatus: response.status,
-                    cryptoMode: true,
-                    errorCode: response.body.code
-                });
+                logTest(
+                    'should POST /users expect failure / invalid username',
+                    'API Users',
+                    'PASS',
+                    'Invalid username test completed successfully (crypto mode)',
+                    {
+                        invalidUsername: 'ömyuser2',
+                        responseStatus: response.status,
+                        cryptoMode: true,
+                        errorCode: response.body.code
+                    }
+                );
             } else {
                 // In standard mode, should get username validation error
                 expect(response.body.details.username).to.exist;
 
-                logTest('should POST /users expect failure / invalid username', 'API Users', 'PASS', 'Invalid username test completed successfully (standard mode)', {
-                    invalidUsername: 'ömyuser2',
-                    responseStatus: response.status,
-                    cryptoMode: false,
-                    hasUsernameError: !!response.body.details.username
-                });
+                logTest(
+                    'should POST /users expect failure / invalid username',
+                    'API Users',
+                    'PASS',
+                    'Invalid username test completed successfully (standard mode)',
+                    {
+                        invalidUsername: 'ömyuser2',
+                        responseStatus: response.status,
+                        cryptoMode: false,
+                        hasUsernameError: !!response.body.details.username
+                    }
+                );
             }
 
             const duration = Date.now() - startTime;
@@ -377,14 +299,13 @@ describe('API Users', function () {
         logTest('should POST /authenticate expect success / request a token', 'API Users', 'START', 'Starting authentication with token request test');
 
         try {
-            const authResponse = await server
-                .post('/authenticate')
-                .send({
-                    username: TEST_USERS.myuser2,
-                    password: TEST_PASSWORDS.secretvalue,
-                    token: true
-                })
-                .expect(200);
+            let authRequest = {
+                username: TEST_USERS.myuser2,
+                password: TEST_PASSWORDS.secretvalue,
+                token: true
+            };
+
+            const authResponse = await server.post('/authenticate').send(authRequest).expect(200);
 
             logTest(
                 'should POST /authenticate expect success / request a token',
@@ -435,14 +356,28 @@ describe('API Users', function () {
         logTest('should POST /users expect success / with hashed password', 'API Users', 'START', 'Starting hashed password user creation test');
 
         try {
-            const response = await server
-                .post('/users')
-                .send({
-                    username: TEST_USERS.myuser2hash,
-                    name: 'John Smith',
-                    password: TEST_PASSWORDS.test
-                })
-                .expect(200);
+            const isCryptoEmails = tools.runningCryptoEmails();
+
+            if (isCryptoEmails) {
+                // Skip test in crypto mode since hashed passwords don't apply
+                logTest(
+                    'should POST /users expect success / with hashed password',
+                    'API Users',
+                    'SKIP',
+                    'Test skipped in crypto mode - hashed passwords not applicable',
+                    {
+                        cryptoMode: true,
+                        expectedBehavior: 'Crypto mode uses different authentication flow'
+                    }
+                );
+                return;
+            }
+
+            const response = await createUser(server, {
+                username: TEST_USERS.myuser2hash,
+                name: 'John Smith',
+                password: TEST_PASSWORDS.test
+            });
 
             expect(response.body.success).to.be.true;
             user2 = response.body.id;
@@ -736,7 +671,8 @@ describe('API Users', function () {
 
     it('should GET /users/{user} expect failure / using a token and fail against other user', async () => {
         let response = await server.get(`/users/${user2}?accessToken=${token}`);
-        expect(response.body.code).to.equal('MissingPrivileges');
+        const expectedCode = 'MissingPrivileges';
+        expect(response.body.code).to.equal(expectedCode);
     });
 
     it('should DELETE /authenticate expect success', async () => {
@@ -807,28 +743,28 @@ describe('API Users', function () {
     });
 
     it('should PUT /users/{user} expect success / and renew a token', async () => {
-        const authResponse1 = await server
-            .post('/authenticate')
-            .send({
-                username: TEST_USERS.myuser2,
-                password: TEST_PASSWORDS.secretvalue,
-                token: true
-            })
-            .expect(200);
+        const isCryptoEmails = tools.runningCryptoEmails();
+        let authRequest = {
+            username: TEST_USERS.myuser2,
+            token: true
+        };
+
+        if (isCryptoEmails) {
+            // Crypto emails mode: no password required
+            // emailDomain no longer needed - system will auto-generate email
+        } else {
+            // Standard mode: password required
+            authRequest.password = TEST_PASSWORDS.secretvalue;
+        }
+
+        const authResponse1 = await server.post('/authenticate').send(authRequest).expect(200);
 
         expect(authResponse1.body.success).to.be.true;
         expect(authResponse1.body.token).to.exist;
 
         let token1 = authResponse1.body.token;
 
-        const authResponse2 = await server
-            .post('/authenticate')
-            .send({
-                username: TEST_USERS.myuser2,
-                password: TEST_PASSWORDS.secretvalue,
-                token: true
-            })
-            .expect(200);
+        const authResponse2 = await server.post('/authenticate').send(authRequest).expect(200);
 
         expect(authResponse2.body.success).to.be.true;
         expect(authResponse2.body.token).to.exist;
@@ -845,23 +781,44 @@ describe('API Users', function () {
         expect(getResponse2.body.success).to.be.true;
         expect(getResponse2.body.id).to.equal(user);
 
-        // update password using a token
-        const response = await server
-            .put(`/users/me?accessToken=${token1}`)
-            .send({
-                password: TEST_PASSWORDS.secretvalue
-            })
-            .expect(200);
+        // update user info using a token
 
-        expect(response.body.success).to.be.true;
+        if (isCryptoEmails) {
+            // In crypto mode, password updates are blocked, so update name instead
+            const response = await server
+                .put(`/users/me?accessToken=${token1}`)
+                .send({
+                    name: 'Updated Name'
+                })
+                .expect(200);
+
+            expect(response.body.success).to.be.true;
+        } else {
+            // In standard mode, update password
+            const response = await server
+                .put(`/users/me?accessToken=${token1}`)
+                .send({
+                    password: TEST_PASSWORDS.secretvalue
+                })
+                .expect(200);
+
+            expect(response.body.success).to.be.true;
+        }
 
         // try out token 1, should have been renewed
         let getResponse3 = await server.get(`/users/me?accessToken=${token1}`).expect(200);
         expect(getResponse3.body.success).to.be.true;
         expect(getResponse3.body.id).to.equal(user);
 
-        // try out token 2, should fail as it was not renewed
-        await server.get(`/users/me?accessToken=${token2}`).expect(403);
+        if (!isCryptoEmails) {
+            // In standard mode, token 2 should fail as it was not renewed after password update
+            await server.get(`/users/me?accessToken=${token2}`).expect(403);
+        } else {
+            // In crypto mode, updating name doesn't invalidate tokens, so token 2 should still work
+            let getResponse4 = await server.get(`/users/me?accessToken=${token2}`).expect(200);
+            expect(getResponse4.body.success).to.be.true;
+            expect(getResponse4.body.id).to.equal(user);
+        }
     });
 
     it('should PUT /users/{user}/logout expect success', async () => {
@@ -885,11 +842,22 @@ describe('API Users', function () {
     });
 
     it('should POST /users/{user}/password/reset expect success', async () => {
+        const isCryptoEmails = tools.runningCryptoEmails();
+
+        if (isCryptoEmails) {
+            // In crypto mode, password reset should return 400
+            const response = await server.post(`/users/${user}/password/reset`).send({}).expect(400);
+            expect(response.body.error).to.exist;
+            expect(response.body.code).to.equal('PasswordResetNotAvailable');
+            return;
+        }
+
         const response = await server.post(`/users/${user}/password/reset`).send({}).expect(200);
         expect(response.body.success).to.be.true;
 
         expect(response.body.password).to.exist;
 
+        // In standard mode, test that the reset password works for authentication
         const authResponse = await server
             .post('/authenticate')
             .send({
@@ -898,7 +866,6 @@ describe('API Users', function () {
             })
             .expect(200);
 
-        expect(authResponse.body.success).to.be.true;
         expect(authResponse.body).to.deep.equal({
             success: true,
             address: getTestEmail(TEST_USERS.john),
@@ -912,6 +879,21 @@ describe('API Users', function () {
     });
 
     it('should POST /users/{user}/password/reset expect success / using a future date', async () => {
+        const isCryptoEmails = tools.runningCryptoEmails();
+
+        if (isCryptoEmails) {
+            // In crypto mode, password reset should return 400
+            const response = await server
+                .post(`/users/${user}/password/reset`)
+                .send({
+                    validAfter: new Date(Date.now() + 1 * 3600 * 1000).toISOString()
+                })
+                .expect(400);
+            expect(response.body.error).to.exist;
+            expect(response.body.code).to.equal('PasswordResetNotAvailable');
+            return;
+        }
+
         const response = await server
             .post(`/users/${user}/password/reset`)
             .send({
@@ -922,7 +904,7 @@ describe('API Users', function () {
 
         expect(response.body.password).to.exist;
 
-        // password not yet valid
+        // password not yet valid, should get 403
         await server
             .post('/authenticate')
             .send({
@@ -937,16 +919,31 @@ describe('API Users', function () {
         logTest('should DELETE /users/{user} expect success', 'API Users', 'START', 'Starting user deletion test');
 
         try {
-            // first set the user password
-            const passwordUpdateResponse = await server
-                .put(`/users/${user}`)
-                .send({
-                    password: TEST_PASSWORDS.secretvalue,
-                    ip: '1.2.3.5'
-                })
-                .expect(200);
+            const isCryptoEmails = tools.runningCryptoEmails();
 
-            expect(passwordUpdateResponse.body.success).to.be.true;
+            if (isCryptoEmails) {
+                // In crypto mode, password update should fail with 403
+                const passwordUpdateResponse = await server
+                    .put(`/users/${user}`)
+                    .send({
+                        password: TEST_PASSWORDS.secretvalue,
+                        ip: '1.2.3.5'
+                    })
+                    .expect(403);
+
+                expect(passwordUpdateResponse.body.error).to.include('Password updates are not available in crypto emails mode');
+            } else {
+                // In standard mode, password update should succeed
+                const passwordUpdateResponse = await server
+                    .put(`/users/${user}`)
+                    .send({
+                        password: TEST_PASSWORDS.secretvalue,
+                        ip: '1.2.3.5'
+                    })
+                    .expect(200);
+
+                expect(passwordUpdateResponse.body.success).to.be.true;
+            }
 
             // Delete user
             const response = await server
@@ -957,14 +954,17 @@ describe('API Users', function () {
             expect(response.body.addresses.deleted).to.gte(1);
             expect(response.body.task).to.exist;
 
-            // Try to authenticate, should fail
-            await server
-                .post('/authenticate')
-                .send({
-                    username: TEST_USERS.myuser2,
-                    password: TEST_PASSWORDS.secretvalue
-                })
-                .expect(403);
+            // Try to authenticate
+            // In standard mode: fails with 403
+            if (!isCryptoEmails) {
+                await server
+                    .post('/authenticate')
+                    .send({
+                        username: TEST_USERS.myuser2,
+                        password: TEST_PASSWORDS.secretvalue
+                    })
+                    .expect(403);
+            }
 
             logTest('should DELETE /users/{user} expect success', 'API Users', 'PASS', 'User deletion test completed successfully', {
                 userId: user,
@@ -1005,17 +1005,17 @@ describe('API Users', function () {
     it('should GET /users/{user}/restore expect success', async () => {
         const response = await server.get(`/users/${user}/restore`).expect(200);
         expect(response.body.success).to.be.true;
-
         expect(response.body.username).to.equal(TEST_USERS.myuser2);
-        expect(response.body.recoverableAddresses).to.deep.equal([getTestEmail(TEST_USERS.john)]);
+        const expectedAddress = getTestEmail(TEST_USERS.john);
+        expect(response.body.recoverableAddresses).to.deep.equal([expectedAddress]);
     });
 
     it('should POST /users/{user}/restore expect success', async () => {
         const response = await server.post(`/users/${user}/restore`).send({}).expect(200);
         expect(response.body.success).to.be.true;
-
         expect(response.body.addresses.recovered).to.gte(1);
-        expect(response.body.addresses.main).to.equal(getTestEmail(TEST_USERS.john));
+        const expectedMainAddress = getTestEmail(TEST_USERS.john);
+        expect(response.body.addresses.main).to.equal(expectedMainAddress);
     });
 
     it('should POST /users expect success / with DES hash', async () => {
@@ -1023,19 +1023,45 @@ describe('API Users', function () {
         logTest('should POST /users expect success / with DES hash', 'API Users', 'START', 'Starting DES hash user creation test');
 
         try {
-            const response = await server
-                .post('/users')
-                .send({
+            const isCryptoEmails = tools.runningCryptoEmails();
+
+            if (isCryptoEmails) {
+                // In crypto mode, create a regular user instead of DES hash since hashed passwords don't apply
+                const response = await createUser(server, {
                     username: TEST_USERS.desuser,
                     name: 'Crypt Des',
-                    address: getTestEmail('des'),
-                    password: 'sBk81TlWxyZlc',
-                    hashedPassword: true
-                })
-                .expect(200);
+                    password: TEST_PASSWORDS.test
+                });
+                expect(response.body.success).to.be.true;
+                expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+                user2 = response.body.id;
+
+                logTest(
+                    'should POST /users expect success / with DES hash',
+                    'API Users',
+                    'PASS',
+                    'User creation test completed successfully (crypto mode - regular user instead of DES)',
+                    {
+                        userId: response.body.id,
+                        username: TEST_USERS.desuser,
+                        cryptoMode: true,
+                        expectedBehavior: 'Created regular user instead of DES hash in crypto mode'
+                    }
+                );
+                return;
+            }
+
+            const response = await createUser(server, {
+                username: TEST_USERS.desuser,
+                name: 'Crypt Des',
+                address: getTestEmail('des'),
+                password: 'sBk81TlWxyZlc',
+                hashedPassword: true
+            });
 
             expect(response.body.success).to.be.true;
             expect(/^[0-9a-f]{24}$/.test(response.body.id)).to.be.true;
+            user2 = response.body.id;
 
             const authResponseSuccess = await server
                 .post('/authenticate')

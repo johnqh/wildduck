@@ -54,8 +54,8 @@ class EmlGenerator {
             fs.mkdirSync(this.outputDir, { recursive: true });
         }
 
-        // Read template content
-        let content = fs.readFileSync(templatePath, 'utf8');
+        // Read template content as binary to preserve line endings
+        let content = fs.readFileSync(templatePath, 'binary');
 
         // Merge default and custom placeholders
         const placeholders = { ...this.placeholders, ...customPlaceholders };
@@ -66,11 +66,8 @@ class EmlGenerator {
             content = content.replace(regex, value);
         }
 
-        // Preserve original line ending style - don't force CRLF conversion
-        // The template should already have the correct line endings from the original file
-
-        // Write generated file
-        fs.writeFileSync(outputPath, content, 'utf8');
+        // Write generated file as binary to preserve CRLF line endings
+        fs.writeFileSync(outputPath, content, 'binary');
 
         console.log(`Generated EML: ${outputPath}`);
         return outputPath;

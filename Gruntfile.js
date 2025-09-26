@@ -59,4 +59,6 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['eslint', 'shell:server', 'wait:server', 'mochaTest', 'shell:server:kill']);
     grunt.registerTask('testonly', ['shell:server', 'wait:server', 'mochaTest', 'shell:server:kill']);
     grunt.registerTask('proto', ['mochaTest:imap']);
+    grunt.registerTask('imap-standalone', ['shell:server', 'wait:server', 'mochaTest:imap', 'shell:server:kill']);
+    grunt.registerTask('api-standalone', ['shell:server', 'wait:server', 'mochaTest:api', 'shell:server:kill']);
 };

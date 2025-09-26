@@ -56,6 +56,36 @@ if [ "$EXISTING_USER_ID" != "null" ] && is_valid_objectid "$EXISTING_USER_ID"; t
     sleep 2
 fi
 
+# In crypto mode, also check if the user was previously deleted and exists in deletedusers collection
+if [ "$IS_CRYPTO_MODE" = "true" ]; then
+    echo "Checking for previously deleted user..."
+    # Use Node.js to directly remove from deletedusers collection if exists
+    node -e "
+    const { MongoClient } = require('mongodb');
+    const uri = 'mongodb://127.0.0.1:27017';
+    const dbName = '$DBNAME';
+    const username = '$TEST_USERNAME';
+
+    async function cleanupDeletedUser() {
+        const client = new MongoClient(uri);
+        try {
+            await client.connect();
+            const db = client.db(dbName);
+            const result = await db.collection('deletedusers').deleteOne({ username });
+            if (result.deletedCount > 0) {
+                console.log('Removed user from deletedusers collection');
+            }
+        } catch (error) {
+            console.error('Error cleaning up deleted user:', error.message);
+        } finally {
+            await client.close();
+        }
+    }
+
+    cleanupDeletedUser();
+    " 2>/dev/null || true
+fi
+
 echo "Creating user (crypto mode: $IS_CRYPTO_MODE)"
 
 if [ "$IS_CRYPTO_MODE" = "true" ]; then
@@ -65,7 +95,7 @@ if [ "$IS_CRYPTO_MODE" = "true" ]; then
     -H 'Content-type: application/json' \
     -d "{
       \"username\": \"$TEST_USERNAME\",
-      \"emailDomain\": \"$TEST_DOMAIN\",
+      \"password\": \"$TEST_PASSWORD\",
       \"token\": true
     }")
 
@@ -82,14 +112,6 @@ if [ "$IS_CRYPTO_MODE" = "true" ]; then
     # Get the user ID by searching for the username
     USER_SEARCH=$(curl --silent "http://127.0.0.1:8080/users?query=$TEST_USERNAME")
     USERID=$(extract_json_value "$USER_SEARCH" '.results[0].id')
-
-    # Set the correct password for the user (since crypto mode creates with default password)
-    PASSWORD_UPDATE=$(curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID" \
-    -H 'Content-type: application/json' \
-    -d "{
-      \"password\": \"$TEST_PASSWORD\"
-    }")
-    echo "Password update: $PASSWORD_UPDATE"
 
 else
     echo "Using standard mode - creating user via users endpoint"

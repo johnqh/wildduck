@@ -16,6 +16,12 @@ secure = false
 # http://localhost:8080/users?accessToken=somesecretvalue
 #accessToken="somesecretvalue"
 
+# Base URL for indexer service (environment variable: WILDDUCK_API_INDEXERBASEURL)
+# indexerBaseUrl = "http://localhost:9200"
+
+# Enable crypto email processing (environment variable: WILDDUCK_API_CRYPTOEMAILS)
+# cryptoEmails = true
+
 [accessControl]
 # If true then require a valid access token to perform API calls
 # If a client provides a token then it is validated even if using a token is not required

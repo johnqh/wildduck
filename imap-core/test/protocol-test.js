@@ -1945,6 +1945,10 @@ describe('IMAP Protocol integration tests', function () {
                         const textContent = 'Hello World!\r\n';
                         const textLength = Buffer.byteLength(textContent, 'utf8');
 
+                        // Debug output
+                        console.log('IMAP Response:', JSON.stringify(resp));
+                        console.log('Looking for:', JSON.stringify(`\r\n* 4 FETCH (BODY[TEXT] {${textLength}}\r\n${textContent})\r\n`));
+
                         expect(resp.indexOf(`\r\n* 4 FETCH (BODY[TEXT] {${textLength}}\r\n${textContent})\r\n`) >= 0).to.be.true;
                         expect(/^T3 OK/m.test(resp)).to.be.true;
                         done();

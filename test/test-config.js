@@ -86,10 +86,49 @@ const TEST_DOMAINS = {
 // Helper function to generate email addresses
 const getTestEmail = (username, domain = TEST_DOMAINS.example) => `${username}@${domain}`;
 
+/**
+ * Helper function to create a user - uses /authenticate in crypto mode, /users in standard mode
+ * @param {Object} server - Supertest server instance
+ * @param {Object} userData - User data object
+ * @param {boolean} cryptoEmails - Whether crypto emails mode is enabled (optional, auto-detected if not provided)
+ * @returns {Promise<Object>} Response from user creation
+ */
+async function createUser(server, userData, cryptoEmails = null) {
+    const tools = require('../lib/tools'); // eslint-disable-line global-require
+    const isCryptoMode = cryptoEmails !== null ? cryptoEmails : tools.runningCryptoEmails();
+
+    if (isCryptoMode) {
+        // In crypto mode, use /authenticate endpoint
+        const response = await server
+            .post('/authenticate')
+            .send({
+                username: userData.username,
+                password: userData.password,
+                token: true
+            })
+            .expect(200);
+
+        return response;
+    } else {
+        // In standard mode, use /users endpoint
+        // Remove crypto-specific fields that don't apply to standard mode
+        const standardUserData = { ...userData };
+        delete standardUserData.emailDomain;
+
+        const response = await server
+            .post('/users')
+            .send(standardUserData)
+            .expect(200);
+
+        return response;
+    }
+}
+
 // Export for both CommonJS and ES modules
 module.exports = {
     TEST_USERS,
     TEST_PASSWORDS,
     TEST_DOMAINS,
-    getTestEmail
+    getTestEmail,
+    createUser
 };

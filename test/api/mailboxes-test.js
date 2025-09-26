@@ -7,7 +7,7 @@
 const supertest = require('supertest');
 const chai = require('chai');
 // const { logTest, logError, logPerformance } = require('../../lib/logger');
-const { TEST_USERS, TEST_PASSWORDS, getTestEmail } = require('../test-config');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, createUser } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
@@ -25,15 +25,12 @@ describe('Mailboxes tests', function () {
 
     before(async () => {
         // ensure that we have an existing user account
-        const response = await server
-            .post('/users')
-            .send({
-                username: TEST_USERS.mailboxesuser,
-                password: TEST_PASSWORDS.secretvalue,
-                address: getTestEmail(TEST_USERS.mailboxesuser_addrtest),
-                name: 'mailboxes user'
-            })
-            .expect(200);
+        const response = await createUser(server, {
+            username: TEST_USERS.mailboxesuser,
+            password: TEST_PASSWORDS.secretvalue,
+            address: getTestEmail(TEST_USERS.mailboxesuser_addrtest),
+            name: 'mailboxes user',
+        });
         expect(response.body.success).to.be.true;
         expect(response.body.id).to.exist;
 

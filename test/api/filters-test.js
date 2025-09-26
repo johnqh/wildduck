@@ -7,12 +7,11 @@
 const supertest = require('supertest');
 const chai = require('chai');
 // const { logTest, logError, logPerformance } = require('../../lib/logger');
-const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS } = require('../test-config');
+const { TEST_USERS, TEST_PASSWORDS, getTestEmail, TEST_DOMAINS, createUser } = require('../test-config');
 
 const expect = chai.expect;
 chai.config.includeStack = true;
 const config = require('wild-config');
-const tools = require('../../lib/tools');
 
 const server = supertest.agent(`http://127.0.0.1:${config.api.port}`);
 
@@ -23,29 +22,23 @@ describe('API Filters', function () {
 
     before(async () => {
         // ensure that we have an existing user account
-        const response = await server
-            .post('/users')
-            .send({
-                username: TEST_USERS.filteruser,
-                password: TEST_PASSWORDS.secretvalue,
-                address: getTestEmail(TEST_USERS.filteruser_addrtest, TEST_DOMAINS.example),
-                name: 'Filter User'
-            })
-            .expect(200);
+        const response = await createUser(server, {
+            username: TEST_USERS.filteruser,
+            password: TEST_PASSWORDS.secretvalue,
+            address: getTestEmail(TEST_USERS.filteruser_addrtest, TEST_DOMAINS.example),
+            name: 'Filter User'
+        });
         expect(response.body.success).to.be.true;
         expect(response.body.id).to.exist;
 
         user = response.body.id;
 
-        const response2 = await server
-            .post('/users')
-            .send({
-                username: TEST_USERS.filteruser2,
-                password: TEST_PASSWORDS.secretvalue,
-                address: getTestEmail(TEST_USERS.filteruser2_addrtest, TEST_DOMAINS.example),
-                name: 'Filter User 2'
-            })
-            .expect(200);
+        const response2 = await createUser(server, {
+            username: TEST_USERS.filteruser2,
+            password: TEST_PASSWORDS.secretvalue,
+            address: getTestEmail(TEST_USERS.filteruser2_addrtest, TEST_DOMAINS.example),
+            name: 'Filter User 2'
+        });
         expect(response2.body.success).to.be.true;
         expect(response2.body.id).to.exist;
 
@@ -116,22 +109,13 @@ describe('API Filters', function () {
 
     it('should GET /filters expect success / with a user token', async () => {
         // Move config require to top level to fix linting issue
-        const isCryptoEmails = tools.runningCryptoEmails();
         let authRequest = {
             username: TEST_USERS.filteruser,
+            password: TEST_PASSWORDS.secretvalue,
             token: true
         };
 
-        if (isCryptoEmails) {
-            authRequest.emailDomain = TEST_DOMAINS.example;
-        } else {
-            authRequest.password = TEST_PASSWORDS.secretvalue;
-        }
-
-        const authResponse = await server
-            .post('/authenticate')
-            .send(authRequest)
-            .expect(200);
+        const authResponse = await server.post('/authenticate').send(authRequest).expect(200);
 
         expect(authResponse.body.success).to.be.true;
         expect(authResponse.body.token).to.exist;
