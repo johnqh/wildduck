@@ -356,21 +356,6 @@ describe('API Users', function () {
         try {
             const isCryptoEmails = tools.runningCryptoEmails();
 
-            if (isCryptoEmails) {
-                // Skip test in crypto mode since hashed passwords don't apply
-                logTest(
-                    'should POST /users expect success / with hashed password',
-                    'API Users',
-                    'SKIP',
-                    'Test skipped in crypto mode - hashed passwords not applicable',
-                    {
-                        cryptoMode: true,
-                        expectedBehavior: 'Crypto mode uses different authentication flow'
-                    }
-                );
-                return;
-            }
-
             const response = await createUser(server, {
                 username: TEST_USERS.myuser2hash,
                 name: 'John Smith',
@@ -396,7 +381,7 @@ describe('API Users', function () {
                 {
                     userId: user2,
                     username: TEST_USERS.myuser2hash,
-                    hashedPassword: true,
+                    hashedPassword: !isCryptoEmails,
                     authenticationSuccess: authResponse.body.success
                 }
             );
@@ -668,9 +653,24 @@ describe('API Users', function () {
     });
 
     it('should GET /users/{user} expect failure / using a token and fail against other user', async () => {
-        let response = await server.get(`/users/${user2}?accessToken=${token}`);
-        const expectedCode = 'MissingPrivileges';
-        expect(response.body.code).to.equal(expectedCode);
+        // In crypto mode, user2 might not be set yet because the hashed password test is skipped
+        // We need to create a different user for this test
+        let testUser2 = user2;
+
+        if (!testUser2 && tools.runningCryptoEmails()) {
+            // Create a second user for this test in crypto mode
+            const response = await createUser(server, {
+                username: TEST_USERS.myuser2hash,
+                name: 'Test User 2',
+                password: TEST_PASSWORDS.test
+            });
+            expect(response.body.success).to.be.true;
+            testUser2 = response.body.id;
+        }
+
+        // Now test that we can't access another user's data with our token
+        let response = await server.get(`/users/${testUser2}?accessToken=${token}`);
+        expect(response.body.code).to.equal('MissingPrivileges');
     });
 
     it('should DELETE /authenticate expect success', async () => {
