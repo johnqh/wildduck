@@ -25,7 +25,7 @@ let spawn = require('child_process').spawn;
 let serverProcess = null;
 
 describe('API tests', function () {
-    let userId, asp, address, inbox;
+    let userId, asp, address, inbox, token;
 
     this.timeout(10000); // eslint-disable-line no-invalid-this
 
@@ -115,7 +115,7 @@ describe('API tests', function () {
             return;
         }
 
-        const response = await server.delete(`/users/${userId}`).expect(200);
+        const response = await server.delete(`/users/${userId}?accessToken=${token}`).expect(200);
         expect(response.body.success).to.be.true;
 
         userId = false;
@@ -123,7 +123,7 @@ describe('API tests', function () {
 
     describe('user', () => {
         it('should POST /domainaliases expect success', async () => {
-            const response = await server.post('/domainaliases').send({
+            const response = await server.post(`/domainaliases?accessToken=${token}`).send({
                 alias: TEST_DOMAINS.jogeva,
                 domain: TEST_DOMAINS.example
             });
@@ -139,7 +139,7 @@ describe('API tests', function () {
         });
 
         it('should GET /users/:user expect success', async () => {
-            const response = await server.get(`/users/${userId}`).expect(200);
+            const response = await server.get(`/users/${userId}?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.id).to.equal(userId);
 
@@ -154,7 +154,7 @@ describe('API tests', function () {
 
         it('should PUT /users/:user expect success', async () => {
             const response = await server
-                .put(`/users/${userId}`)
+                .put(`/users/${userId}?accessToken=${token}`)
                 .send({
                     name: 'user test'
                 })
@@ -163,7 +163,7 @@ describe('API tests', function () {
         });
 
         it('should GET /users/:user expect success / (updated name)', async () => {
-            const response = await server.get(`/users/${userId}`).expect(200);
+            const response = await server.get(`/users/${userId}?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.id).to.equal(userId);
             expect(response.body.name).to.equal('user test');
@@ -175,11 +175,14 @@ describe('API tests', function () {
             const authData = {
                 username: getTestEmail(TEST_USERS.testuser),
                 password: TEST_PASSWORDS.secretpass,
-                scope: 'master'
+                scope: 'master',
+                token: true
             };
 
             const response = await server.post(`/authenticate`).send(authData).expect(200);
             expect(response.body.success).to.be.true;
+            expect(response.body.token).to.exist;
+            token = response.body.token;
         });
 
         it('should POST /authenticate expect failure', async () => {
@@ -301,7 +304,7 @@ describe('API tests', function () {
     describe('asp', () => {
         it('should POST /users/:user/asps expect success / to generate ASP', async () => {
             const response = await server
-                .post(`/users/${userId}/asps`)
+                .post(`/users/${userId}/asps?accessToken=${token}`)
                 .send({
                     description: 'test',
                     scopes: ['imap', 'smtp'],
@@ -318,7 +321,7 @@ describe('API tests', function () {
 
         it('should POST /users/:user/asps expect success / to generate ASP with custom password', async () => {
             const response = await server
-                .post(`/users/${userId}/asps`)
+                .post(`/users/${userId}/asps?accessToken=${token}`)
                 .send({
                     description: 'test',
                     scopes: ['imap', 'smtp'],
@@ -334,7 +337,7 @@ describe('API tests', function () {
 
         it('should POST /users/:user/asps expect failure / to generate ASP with custom password', async () => {
             const response = await server
-                .post(`/users/${userId}/asps`)
+                .post(`/users/${userId}/asps?accessToken=${token}`)
                 .send({
                     description: 'test',
                     scopes: ['imap', 'smtp'],
@@ -391,7 +394,7 @@ describe('API tests', function () {
 
     describe('addresses', () => {
         it('should GET /users/:user/addresses expect success', async () => {
-            const response = await server.get(`/users/${userId}/addresses`).expect(200);
+            const response = await server.get(`/users/${userId}/addresses?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.results.length).to.equal(1);
             expect(response.body.results[0].address).to.equal(getTestEmail(TEST_USERS.testuser));
@@ -404,7 +407,7 @@ describe('API tests', function () {
             if (isCryptoEmails) {
                 // In crypto mode, address creation should fail with 400
                 const response1 = await server
-                    .post(`/users/${userId}/addresses`)
+                    .post(`/users/${userId}/addresses?accessToken=${token}`)
                     .send({
                         address: getTestEmail(TEST_USERS.alias1),
                         main: true,
@@ -416,7 +419,7 @@ describe('API tests', function () {
                 expect(response1.body.error).to.exist;
                 expect(response1.body.code).to.equal('EndpointNotAvailable');
                 const response2 = await server
-                    .post(`/users/${userId}/addresses`)
+                    .post(`/users/${userId}/addresses?accessToken=${token}`)
                     .send({
                         address: getTestEmail(TEST_USERS.alias2)
                     })
@@ -425,7 +428,7 @@ describe('API tests', function () {
                 expect(response2.body.code).to.equal('EndpointNotAvailable');
             } else {
                 const response1 = await server
-                    .post(`/users/${userId}/addresses`)
+                    .post(`/users/${userId}/addresses?accessToken=${token}`)
                     .send({
                         address: getTestEmail(TEST_USERS.alias1),
                         main: true,
@@ -437,7 +440,7 @@ describe('API tests', function () {
                 expect(response1.body.success).to.be.true;
 
                 const response2 = await server
-                    .post(`/users/${userId}/addresses`)
+                    .post(`/users/${userId}/addresses?accessToken=${token}`)
                     .send({
                         address: getTestEmail(TEST_USERS.alias2)
                     })
@@ -447,7 +450,7 @@ describe('API tests', function () {
         });
 
         it('should GET /users/:user expect success / (after email update)', async () => {
-            const response = await server.get(`/users/${userId}`).expect(200);
+            const response = await server.get(`/users/${userId}?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.id).to.equal(userId);
 
@@ -457,7 +460,7 @@ describe('API tests', function () {
         });
 
         it('should GET /users/:user/addresses expect success / (updated listing)', async () => {
-            const response = await server.get(`/users/${userId}/addresses`).expect(200);
+            const response = await server.get(`/users/${userId}/addresses?accessToken=${token}`).expect(200);
 
             expect(response.body.success).to.be.true;
 
@@ -496,13 +499,13 @@ describe('API tests', function () {
                 expect(response.body.error).to.exist;
                 expect(response.body.code).to.equal('EndpointNotAvailable');
             } else {
-                const response = await server.delete(`/users/${userId}/addresses/${address.id}`).expect(200);
+                const response = await server.delete(`/users/${userId}/addresses/${address.id}?accessToken=${token}`).expect(200);
                 expect(response.body.success).to.be.true;
             }
         });
 
         it('should GET /users/:user/addresses expect success / (with metaData)', async () => {
-            const response = await server.get(`/users/${userId}/addresses?metaData=true`).expect(200);
+            const response = await server.get(`/users/${userId}/addresses?metaData=true&accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
 
             const isCryptoEmails = tools.runningCryptoEmails();
@@ -523,7 +526,7 @@ describe('API tests', function () {
         });
 
         it('should GET /users/:user/addresses/:address expect success', async () => {
-            const response = await server.get(`/users/${userId}/addresses/${address.id}`).expect(200);
+            const response = await server.get(`/users/${userId}/addresses/${address.id}?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
 
             const isCryptoEmails = tools.runningCryptoEmails();
@@ -534,7 +537,7 @@ describe('API tests', function () {
         });
 
         it('should GET /users/:user/addresses expect success / (after DELETE)', async () => {
-            const response = await server.get(`/users/${userId}/addresses`).expect(200);
+            const response = await server.get(`/users/${userId}/addresses?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
 
             const isCryptoEmails = tools.runningCryptoEmails();
@@ -559,7 +562,7 @@ describe('API tests', function () {
 
             it('should POST /addresses/forwarded expect success', async () => {
                 const response = await server
-                    .post(`/addresses/forwarded`)
+                    .post(`/addresses/forwarded?accessToken=${token}`)
                     .send({
                         address: getTestEmail(TEST_USERS.my_new_address),
                         targets: [getTestEmail(TEST_USERS.my_old_address), `smtp://mx2.${TEST_DOMAINS.zone}:25`],
@@ -575,7 +578,7 @@ describe('API tests', function () {
             });
 
             it('should GET /addresses/forwarded/:address expect success', async () => {
-                const response = await server.get(`/addresses/forwarded/${address}`).expect(200);
+                const response = await server.get(`/addresses/forwarded/${address}?accessToken=${token}`).expect(200);
                 expect(response.body.success).to.be.true;
                 expect(response.body.metaData.tere).to.equal(123);
                 expect(response.body.tags).to.deep.equal(['tere', 'vana']);
@@ -583,7 +586,7 @@ describe('API tests', function () {
 
             it('should PUT /addresses/forwarded/:id expect success', async () => {
                 const response = await server
-                    .put(`/addresses/forwarded/${address}`)
+                    .put(`/addresses/forwarded/${address}?accessToken=${token}`)
                     .send({
                         metaData: {
                             tere: 124
@@ -594,13 +597,13 @@ describe('API tests', function () {
                 expect(response.body.success).to.be.true;
 
                 // check updated data
-                const updatedResponse = await server.get(`/addresses/forwarded/${address}`).expect(200);
+                const updatedResponse = await server.get(`/addresses/forwarded/${address}?accessToken=${token}`).expect(200);
                 expect(updatedResponse.body.success).to.be.true;
                 expect(updatedResponse.body.metaData.tere).to.equal(124);
             });
 
             it('should DELETE /addresses/forwarded/:address expect success', async () => {
-                const response = await server.delete(`/addresses/forwarded/${address}`).expect(200);
+                const response = await server.delete(`/addresses/forwarded/${address}?accessToken=${token}`).expect(200);
                 expect(response.body.success).to.be.true;
             });
         });
@@ -608,7 +611,7 @@ describe('API tests', function () {
 
     describe('mailboxes', () => {
         it('should GET /users/:user/mailboxes expect success', async () => {
-            const response = await server.get(`/users/${userId}/mailboxes`).expect(200);
+            const response = await server.get(`/users/${userId}/mailboxes?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.results.length).to.gte(4);
 
@@ -621,7 +624,7 @@ describe('API tests', function () {
         it('should PUT /users/:user/autoreply expect success', async () => {
             let r;
 
-            r = await server.get(`/users/${userId}/autoreply`).expect(200);
+            r = await server.get(`/users/${userId}/autoreply?accessToken=${token}`).expect(200);
             expect(r.body).to.deep.equal({
                 success: true,
                 status: false,
@@ -632,7 +635,7 @@ describe('API tests', function () {
             });
 
             r = await server
-                .put(`/users/${userId}/autoreply`)
+                .put(`/users/${userId}/autoreply?accessToken=${token}`)
                 .send({
                     status: true,
                     name: 'AR name',
@@ -646,7 +649,7 @@ describe('API tests', function () {
 
             const autoreplyId = new ObjectId(r.body._id);
 
-            r = await server.get(`/users/${userId}/autoreply`).expect(200);
+            r = await server.get(`/users/${userId}/autoreply?accessToken=${token}`).expect(200);
             expect(r.body.success).to.be.true;
             expect(r.body.status).to.be.true;
             expect(r.body.name).to.equal('AR name');
@@ -661,7 +664,7 @@ describe('API tests', function () {
             expect(Math.abs(actualTime - expectedTime)).to.be.below(2000);
 
             r = await server
-                .put(`/users/${userId}/autoreply`)
+                .put(`/users/${userId}/autoreply?accessToken=${token}`)
                 .send({
                     name: 'AR name v2',
                     subject: '',
@@ -670,7 +673,7 @@ describe('API tests', function () {
                 .expect(200);
             expect(r.body.success).to.be.true;
 
-            r = await server.get(`/users/${userId}/autoreply`).expect(200);
+            r = await server.get(`/users/${userId}/autoreply?accessToken=${token}`).expect(200);
             expect(r.body).to.deep.equal({
                 success: true,
                 status: true,
@@ -682,8 +685,8 @@ describe('API tests', function () {
                 created: r.body.created // created might have been changed to new date
             });
 
-            await server.delete(`/users/${userId}/autoreply`).expect(200);
-            r = await server.get(`/users/${userId}/autoreply`).expect(200);
+            await server.delete(`/users/${userId}/autoreply?accessToken=${token}`).expect(200);
+            r = await server.get(`/users/${userId}/autoreply?accessToken=${token}`).expect(200);
             expect(r.body).to.deep.equal({
                 success: true,
                 status: false,
@@ -701,7 +704,7 @@ describe('API tests', function () {
 
         it('should POST /domainaccess/:tag/:action expect success / action: block', async () => {
             const response1 = await server
-                .post(`/domainaccess/${tag}/block`)
+                .post(`/domainaccess/${tag}/block?accessToken=${token}`)
                 .send({
                     domain: TEST_DOMAINS.example
                 })
@@ -709,7 +712,7 @@ describe('API tests', function () {
             expect(response1.body.success).to.be.true;
 
             const response2 = await server
-                .post(`/domainaccess/${tag}/block`)
+                .post(`/domainaccess/${tag}/block?accessToken=${token}`)
                 .send({
                     domain: TEST_DOMAINS.jogeva
                 })
@@ -718,7 +721,7 @@ describe('API tests', function () {
         });
 
         it('should GET /domainaccess/:tag/:action expect success / action: block', async () => {
-            const response = await server.get(`/domainaccess/${tag}/block`).expect(200);
+            const response = await server.get(`/domainaccess/${tag}/block?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.results.length).to.equal(2);
 
@@ -729,14 +732,14 @@ describe('API tests', function () {
         });
 
         it('should DELETE /domainaccess/:domain expect success', async () => {
-            const response = await server.delete(`/domainaccess/${domain.id}`).expect(200);
+            const response = await server.delete(`/domainaccess/${domain.id}?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
         });
     });
 
     describe('message', () => {
         before(async () => {
-            const response = await server.get(`/users/${userId}/mailboxes`).expect(200);
+            const response = await server.get(`/users/${userId}/mailboxes?accessToken=${token}`).expect(200);
             expect(response.body.success).to.be.true;
             inbox = response.body.results.find(result => result.path === 'INBOX');
             expect(inbox).to.exist;
@@ -759,7 +762,7 @@ describe('API tests', function () {
                 text: 'Hello hello world!',
                 html: '<p>Hello hello world!</p>'
             };
-            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages`).send(message).expect(200);
+            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages?accessToken=${token}`).send(message).expect(200);
 
             expect(response.body.success).to.be.true;
             expect(response.body.message.id).to.be.gt(0);
@@ -783,7 +786,7 @@ describe('API tests', function () {
                 text: 'Hello hello world!',
                 html: '<p>Hello hello world! <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" alt="Red dot" /></p>'
             };
-            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages`).send(message);
+            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages?accessToken=${token}`).send(message);
 
             expect(response.body.success).to.be.true;
             expect(response.body.message.id).to.be.gt(0);
@@ -836,7 +839,7 @@ describe('API tests', function () {
                 html: '<p>Hello hello world!</p>'
             };
 
-            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages`).send(message).expect(200);
+            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages?accessToken=${token}`).send(message).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.message.id).to.be.gt(0);
 
@@ -845,7 +848,7 @@ describe('API tests', function () {
 
             if (isCryptoEmails) {
                 // In crypto mode, message submission might be restricted
-                const submitResponse = await server.post(`/users/${userId}/mailboxes/${inbox}/messages/${response.body.message.id}/submit`).send({ sendTime });
+                const submitResponse = await server.post(`/users/${userId}/mailboxes/${inbox}/messages/${response.body.message.id}/submit?accessToken=${token}`).send({ sendTime });
 
                 if (submitResponse.status === 403) {
                     // Message submission is restricted in crypto mode, test passes
@@ -858,18 +861,18 @@ describe('API tests', function () {
                 }
             } else {
                 const submitResponse = await server
-                    .post(`/users/${userId}/mailboxes/${inbox}/messages/${response.body.message.id}/submit`)
+                    .post(`/users/${userId}/mailboxes/${inbox}/messages/${response.body.message.id}/submit?accessToken=${token}`)
                     .send({ sendTime })
                     .expect(200);
                 expect(submitResponse.body.queueId).to.exist;
 
                 const sentMessageDataResponse = await server.get(
-                    `/users/${userId}/mailboxes/${submitResponse.body.message.mailbox}/messages/${submitResponse.body.message.id}`
+                    `/users/${userId}/mailboxes/${submitResponse.body.message.mailbox}/messages/${submitResponse.body.message.id}?accessToken=${token}`
                 );
 
                 expect(sentMessageDataResponse.body.outbound[0].queueId).to.equal(submitResponse.body.queueId);
 
-                const deleteResponse = await server.delete(`/users/${userId}/outbound/${submitResponse.body.queueId}`).expect(200);
+                const deleteResponse = await server.delete(`/users/${userId}/outbound/${submitResponse.body.queueId}?accessToken=${token}`).expect(200);
                 expect(deleteResponse.body.deleted).to.equal(6);
             }
         });
@@ -894,16 +897,16 @@ describe('API tests', function () {
                 html: '<p>Hello hello world!</p>'
             };
 
-            const settingsResponse = await server.post(`/settings/const:max:rcpt_to`).send({ value: 3 }).expect(200);
+            const settingsResponse = await server.post(`/settings/const:max:rcpt_to?accessToken=${token}`).send({ value: 3 }).expect(200);
             expect(settingsResponse.body.success).to.be.true;
 
-            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages`).send(message).expect(200);
+            const response = await server.post(`/users/${userId}/mailboxes/${inbox}/messages?accessToken=${token}`).send(message).expect(200);
             expect(response.body.success).to.be.true;
             expect(response.body.message.id).to.be.gt(0);
 
             let sendTime = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
             const submitResponse = await server
-                .post(`/users/${userId}/mailboxes/${inbox}/messages/${response.body.message.id}/submit`)
+                .post(`/users/${userId}/mailboxes/${inbox}/messages/${response.body.message.id}/submit?accessToken=${token}`)
                 .send({ sendTime })
                 .expect(403);
 
@@ -919,7 +922,7 @@ describe('API tests', function () {
     describe('certs', () => {
         it('should POST /certs expect success', async () => {
             const response1 = await server
-                .post(`/certs`)
+                .post(`/certs?accessToken=${token}`)
                 .send({
                     privateKey:
                         '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDKC9G9BJlpJdKI\nMNsjLTgCthKBrtQy3TI4AC5FooqyMIxcpNllI5Mu63IPHRaBGE9+O07oHtYhPq/E\nq3SVBk0+lK346nHofZqVDWeWuiHFL2ilfhP1bFKbr5GtTWr3ctg5K1VVn/CTTPvv\nhvDlIEEaqa125jRVGabdQ53Wu6scY4IgrgFC6qnMZLuYTrmjnVCAehWxtQhPXH+R\n3nszHhUMcgKnDSv331p4AnPDZinv5SixbhizdOoFPFBDAdX4CXmwi3MiBz9FwMgA\nz6fGboW0DDxmm3AxjpMtVu7I8BcsGIe4sYbHtacNt0y7IKMEdlH38ME1vnHfcVad\nwSRQCuOHAgMBAAECggEBALNCnUnY5Mu3tP0Ea8jf+8vcArtwg/DE9CNfda5usiO6\nky43THJBh/qfBsmGA0tyaEUVFcM4aL+CQKx7eqolty8I9vnb+EhP+HC6PegrKH8s\nuunp3IdpHjnnIZbjEz6MdG70lXesuePW78fqr5x6a4jednsBb/j5E2VI8qdsRjqe\nM2H3SHzvPIO8zIWtAin6jmZjp3bBqR+UQfPW0pN6qXpis4mCqG+0mcGuGe5n/koZ\nDXZeFPPtyEd1Ty/2wXnszzPyRdOlWWlhUSgdFqhUQ9pKiGlJ3PkS5QGK3UFmzQqA\niCwA35RcBm+G59ETJiFTy6eu63xVrrP5ALfEZ3MbmAECgYEA5nVi1WNn0aon0T4C\niI58JiLcK9fuSJxKVggyc2d+pkQTiMVc+/MyLi+80k74aKqsYOigQU9Ju/Wx1n+U\nPuU2CAbHWTt9IxjdhXj5zIrvjUQgRkhy5oaSqQGo/Inb0iab/88beLHsYrhcBmmC\nsesrNHTpfrwG6uJ907/eRlK+wgECgYEA4HBP3xkAvyGAVmAjP0pGoYH3I7NTsp40\nb11FitYaxl2X/lKv9XgsL0rjSN66ZO+02ckEdKEv307xF1bvzqH7tMrXa9gaK7+5\nRfVbKsP51yr5PKQmNANxolED2TPeoALLOxUx3mg5awbDIzPwPaIoCfmSvb7uYWh3\neZmc4paIlYcCgYBbh7HKSKHaPvdzfmppLBYY222QqEFGa3SGuNi4xxkhFhagEqr8\nkjmS6HjZGm5Eu8yc7KeBaOlDErEgHSmW1VhhVbflM+BeiSiqM0MbPu8nrzAWWf3w\nmvAy2arxKhu5WoZI0kv54sic6NX74fn7ight3CVEpY8lyPDqoeC5E3IaAQKBgHWE\n2Y2r/eQWmqiftlURg2JWNx4ObCj/Bd26LQvBiEuN/mRAz7nsrtYklFY3qcnoaf4P\nb7HSJMr8/uiFsRO1ZaMJAzuI8EswHMcw7ge6jjvIWLEUEpzxoLKpUSaOLmgCjn/l\nXTNjx4zvAYaRT542JljywY9xRkji9oxJjwhmYiZJAoGAHwW0UuiU46zm5pBhiEpl\nH3tgTx7ZKx6TNHKSEpa4WX5G0UF77N6Ps7wuMBWof033YhxQwt056rL5B4KELLJ0\nSqwWp8dfuDf90MOjm20ySdK+cQtA8zs9MsNX3oliAMfRbb7GVcdFPMJn3axMQyDx\nvAxj1TCva9wAviNDaGbaIJo=\n-----END PRIVATE KEY-----',

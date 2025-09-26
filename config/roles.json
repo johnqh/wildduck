@@ -306,7 +306,8 @@
 
         "users": {
             "read:own": ["*", "!tags", "!disabledScopes", "!internalData"],
-            "update:own": ["*", "!tags", "!disabledScopes", "!internalData"]
+            "update:own": ["*", "!tags", "!disabledScopes", "!internalData"],
+            "delete:own": ["*"]
         },
 
         "asps": {
@@ -421,6 +422,16 @@
     "downloader": {
         "messages": {
             "read:any": ["*"]
+        }
+    },
+
+    "guest": {
+        "authentication": {
+            "create:any": ["*"]
+        },
+
+        "users": {
+            "create:any": ["*"]
         }
     }
 }

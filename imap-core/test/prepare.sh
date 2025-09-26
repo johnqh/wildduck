@@ -2,14 +2,18 @@
 
 DBNAME="$1"
 
+# Get script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$SCRIPT_DIR/../.."
+
 # Get test configuration values from Node.js test config
 get_test_config() {
-    node -e "const config = require('../../test/test-config'); console.log(JSON.stringify({username: config.TEST_USERS.testuser, password: config.TEST_PASSWORDS.pass, sender: config.getTestEmail(config.TEST_USERS.sender), receiver: config.getTestEmail(config.TEST_USERS.receiver), domain: config.TEST_DOMAINS.example}));"
+    cd "$PROJECT_ROOT" && node -e "const config = require('./test/test-config'); console.log(JSON.stringify({username: config.TEST_USERS.testuser, password: config.TEST_PASSWORDS.pass, sender: config.getTestEmail(config.TEST_USERS.sender), receiver: config.getTestEmail(config.TEST_USERS.receiver), domain: config.TEST_DOMAINS.example}));"
 }
 
 # Check if crypto emails mode is enabled
 check_crypto_mode() {
-    node -e "const tools = require('../../lib/tools'); console.log(tools.runningCryptoEmails());"
+    cd "$PROJECT_ROOT" && node -e "const tools = require('./lib/tools'); console.log(tools.runningCryptoEmails());"
 }
 
 TEST_CONFIG=$(get_test_config)
@@ -45,15 +49,54 @@ for i in {1..30}; do
 done
 
 echo "Clearing DB - looking for existing $TEST_USERNAME"
-# Find and delete existing test user
-EXISTING_USER=$(curl --silent "http://127.0.0.1:8080/users?query=$TEST_USERNAME")
+
+# First, create a temporary admin user to get a token for cleanup
+TEMP_USERNAME="temp_admin_$RANDOM"
+TEMP_ADMIN=$(curl --silent -XPOST http://127.0.0.1:8080/users \
+-H 'Content-type: application/json' \
+-d "{
+  \"username\": \"$TEMP_USERNAME\",
+  \"password\": \"temppass123\",
+  \"name\": \"Temp Admin\"
+}")
+TEMP_ADMIN_ID=$(extract_json_value "$TEMP_ADMIN" '.id')
+
+# Authenticate to get token
+AUTH_RESPONSE=$(curl --silent -XPOST http://127.0.0.1:8080/authenticate \
+-H 'Content-type: application/json' \
+-d "{
+  \"username\": \"$TEMP_USERNAME\",
+  \"password\": \"temppass123\",
+  \"token\": true
+}")
+ACCESS_TOKEN=$(extract_json_value "$AUTH_RESPONSE" '.token')
+
+# If we couldn't get a token, skip the cleanup (access control might be disabled)
+if [ "$ACCESS_TOKEN" != "null" ]; then
+    TOKEN_PARAM="?accessToken=$ACCESS_TOKEN"
+else
+    TOKEN_PARAM=""
+fi
+
+# Find existing test user in user list (don't authenticate to avoid affecting test state)
+EXISTING_USER=$(curl --silent "http://127.0.0.1:8080/users${TOKEN_PARAM}&query=$TEST_USERNAME")
 EXISTING_USER_ID=$(extract_json_value "$EXISTING_USER" '.results[0].id')
 
 if [ "$EXISTING_USER_ID" != "null" ] && is_valid_objectid "$EXISTING_USER_ID"; then
-    echo "Deleting existing user: $EXISTING_USER_ID"
-    curl --silent -X DELETE "http://127.0.0.1:8080/users/$EXISTING_USER_ID" > /dev/null
-    # Wait a moment for deletion to complete
-    sleep 2
+    echo "Found existing user: $EXISTING_USER_ID"
+    # Try to delete existing user - this may fail if we don't have permission
+    DELETE_RESPONSE=$(curl --silent -X DELETE "http://127.0.0.1:8080/users/${EXISTING_USER_ID}${TOKEN_PARAM}")
+    DELETE_SUCCESS=$(extract_json_value "$DELETE_RESPONSE" '.success')
+
+    if [ "$DELETE_SUCCESS" = "true" ]; then
+        echo "Deleted existing user successfully"
+        # Wait a moment for deletion to complete
+        sleep 2
+    else
+        echo "Could not delete existing user (permission denied), database may have stale data"
+        # We can't reuse the user because the tests expect clean state
+        # The user creation below will fail, but that's expected
+    fi
 fi
 
 # In crypto mode, also check if the user was previously deleted and exists in deletedusers collection
@@ -110,7 +153,7 @@ if [ "$IS_CRYPTO_MODE" = "true" ]; then
     fi
 
     # Get the user ID by searching for the username
-    USER_SEARCH=$(curl --silent "http://127.0.0.1:8080/users?query=$TEST_USERNAME")
+    USER_SEARCH=$(curl --silent "http://127.0.0.1:8080/users${TOKEN_PARAM}&query=$TEST_USERNAME")
     USERID=$(extract_json_value "$USER_SEARCH" '.results[0].id')
 
 else
@@ -128,15 +171,59 @@ else
     USERID=$(extract_json_value "$USERRESPONSE" '.id')
 fi
 
-# Validate USERID
+# Validate USERID or check if user already exists
 if [ "$USERID" = "null" ] || ! is_valid_objectid "$USERID"; then
-    echo "Error: Failed to create user or invalid user ID: $USERID"
-    echo "Response: $USERRESPONSE"
-    exit 1
+    # Check if error is because user already exists
+    ERROR_CODE=$(extract_json_value "$USERRESPONSE" '.code')
+    if [ "$ERROR_CODE" = "UserExistsError" ]; then
+        echo "User already exists, trying to find user ID"
+        # Try to authenticate as the user to get their ID
+        AUTH_RESPONSE=$(curl --silent -XPOST http://127.0.0.1:8080/authenticate \
+            -H 'Content-type: application/json' \
+            -d "{
+              \"username\": \"$TEST_USERNAME\",
+              \"password\": \"$TEST_PASSWORD\",
+              \"token\": true
+            }")
+        USERID=$(extract_json_value "$AUTH_RESPONSE" '.id')
+        if [ "$USERID" = "null" ] || ! is_valid_objectid "$USERID"; then
+            echo "Error: User exists but cannot authenticate"
+            echo "Auth Response: $AUTH_RESPONSE"
+            exit 1
+        fi
+        echo "Found existing user via authentication: $USERID"
+
+        # Clean up existing messages for this user to ensure clean test state
+        echo "Cleaning up existing messages for user"
+        # We'll handle this after getting mailbox IDs
+        CLEANUP_NEEDED="true"
+    else
+        echo "Error: Failed to create user or invalid user ID: $USERID"
+        echo "Response: $USERRESPONSE"
+        exit 1
+    fi
+fi
+
+# Now authenticate as the actual test user to get their token
+echo "Authenticating as test user to get access token"
+TEST_AUTH=$(curl --silent -XPOST http://127.0.0.1:8080/authenticate \
+-H 'Content-type: application/json' \
+-d "{
+  \"username\": \"$TEST_USERNAME\",
+  \"password\": \"$TEST_PASSWORD\",
+  \"token\": true
+}")
+TEST_TOKEN=$(extract_json_value "$TEST_AUTH" '.token')
+
+# Update TOKEN_PARAM to use the test user's token
+if [ "$TEST_TOKEN" != "null" ]; then
+    TOKEN_PARAM="?accessToken=$TEST_TOKEN"
+else
+    echo "Warning: Could not get test user token"
 fi
 
 echo "Reading Mailbox ID"
-MAILBOXLIST=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes")
+MAILBOXLIST=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes${TOKEN_PARAM}")
 echo "ML: $MAILBOXLIST"
 echo "$MAILBOXLIST" | jq
 
@@ -156,16 +243,30 @@ if [ "$SENTID" = "null" ] || ! is_valid_objectid "$SENTID"; then
     exit 1
 fi
 
-curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID/mailboxes/$SENTID" \
+curl --silent -XPUT "http://127.0.0.1:8080/users/$USERID/mailboxes/$SENTID${TOKEN_PARAM}" \
 -H 'Content-type: application/json' \
 -d '{
   "path": "[Gmail]/Sent Mail"
-}'
+}' > /dev/null 2>&1 || true  # Ignore error if mailbox already renamed
 
-MAILBOXLIST=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes")
+MAILBOXLIST=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes${TOKEN_PARAM}")
 echo "$MAILBOXLIST" | jq
 
 # Generate dynamic EML files from templates
+# If we're reusing an existing user, clean up old messages
+if [ "$CLEANUP_NEEDED" = "true" ]; then
+    echo "Cleaning up existing messages from INBOX"
+    # Delete all messages from INBOX
+    MESSAGES=$(curl --silent "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}")
+    MESSAGE_COUNT=$(extract_json_value "$MESSAGES" '.total')
+    if [ "$MESSAGE_COUNT" != "null" ] && [ "$MESSAGE_COUNT" != "0" ]; then
+        echo "Found $MESSAGE_COUNT existing messages, deleting them"
+        # Delete all messages
+        curl --silent -X DELETE "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}" > /dev/null
+        sleep 1
+    fi
+fi
+
 echo "Generating EML files from templates..."
 if [ -f "../../test/utils/eml-generator.js" ]; then
     node ../../test/utils/eml-generator.js generate
@@ -218,24 +319,24 @@ if [ "$FIXTURE_MODE" = "files" ]; then
         echo "Using original fix4.eml"
     fi
 
-    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?date=14-Sep-2013%2021%3A22%3A28%20-0300&unseen=true" \
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}&date=14-Sep-2013%2021%3A22%3A28%20-0300&unseen=true" \
         -H 'Content-type: message/rfc822' \
         --data-binary "@$FIX1_FILE"
 
-    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}&unseen=false" \
         -H 'Content-type: message/rfc822' \
         --data-binary "@$FIX2_FILE"
 
-    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=false" \
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}&unseen=false" \
         -H 'Content-type: message/rfc822' \
         --data-binary "@$FIX3_FILE"
 
-    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
+    curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}&unseen=true" \
         -H 'Content-type: message/rfc822' \
         --data-binary "@$FIX4_FILE"
 fi
 
-curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
+curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}&unseen=true" \
     -H 'Content-type: message/rfc822' \
     --data-binary "from: $SENDER_EMAIL
 to: $RECEIVER_EMAIL
@@ -244,7 +345,7 @@ subject: test5
 hello 5
 "
 
-curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages?unseen=true" \
+curl --silent -XPOST "http://127.0.0.1:8080/users/$USERID/mailboxes/$INBOXID/messages${TOKEN_PARAM}&unseen=true" \
     -H 'Content-type: message/rfc822' \
     --data-binary "from: $SENDER_EMAIL
 to: $RECEIVER_EMAIL

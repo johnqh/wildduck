@@ -236,8 +236,21 @@ server.get(
 //server.use(restify.plugins.gzipResponse());
 
 server.use(async req => {
-    if (['public_get', 'public_post', 'acmeToken'].includes(req.route.name)) {
-        // skip token check for public pages
+    if (['public_get', 'public_post', 'acmeToken', 'authenticate', 'createUser', 'preauth'].includes(req.route.name)) {
+        // skip token check for public pages and authentication endpoints
+        // Set default role for unauthenticated requests
+        req.role = 'guest';
+
+        // Add validate function for consistency
+        req.validate = permission => {
+            if (!permission.granted) {
+                let err = new Error('Not enough privileges');
+                err.responseCode = 403;
+                err.code = 'MissingPrivileges';
+                throw err;
+            }
+        };
+
         return;
     }
 

@@ -430,7 +430,7 @@ describe('API Users', function () {
         logTest('should GET /users/resolve/{username} expect success', 'API Users', 'START', 'Starting user resolve test');
 
         try {
-            const response = await server.get(`/users/resolve/${TEST_USERS.myuser2}`).expect(200);
+            const response = await server.get(`/users/resolve/${TEST_USERS.myuser2}?accessToken=${token}`).expect(200);
 
             logTest('should GET /users/resolve/{username} expect success', 'API Users', 'PASS', 'User resolve test completed successfully', {
                 username: TEST_USERS.myuser2,
@@ -518,7 +518,7 @@ describe('API Users', function () {
         logTest('should GET /users expect success', 'API Users', 'START', 'Starting users list test');
 
         try {
-            const response = await server.get(`/users?query=${TEST_USERS.myuser2}`).expect(200);
+            const response = await server.get(`/users?query=${TEST_USERS.myuser2}&accessToken=${token}`).expect(200);
 
             logTest('should GET /users expect success', 'API Users', 'PASS', 'Users list test completed successfully', {
                 query: TEST_USERS.myuser2,
@@ -563,7 +563,7 @@ describe('API Users', function () {
         logTest('should GET /users/{user} expect success', 'API Users', 'START', 'Starting user details test');
 
         try {
-            let response = await server.get(`/users/${user}`).expect(200);
+            let response = await server.get(`/users/${user}?accessToken=${token}`).expect(200);
 
             logTest('should GET /users/{user} expect success', 'API Users', 'PASS', 'User details test completed successfully', {
                 userId: user,
@@ -692,7 +692,7 @@ describe('API Users', function () {
 
             // update user data
             const response = await server
-                .put(`/users/${user}`)
+                .put(`/users/${user}?accessToken=${token}`)
                 .send({
                     name
                 })
@@ -701,7 +701,7 @@ describe('API Users', function () {
             expect(response.body.success).to.be.true;
 
             // request and verify
-            let getResponse = await server.get(`/users/${user}`);
+            let getResponse = await server.get(`/users/${user}?accessToken=${token}`);
             expect(getResponse.body.success).to.be.true;
             expect(getResponse.body.id).to.equal(user);
             expect(getResponse.body.name).to.equal(name);
@@ -821,12 +821,12 @@ describe('API Users', function () {
 
     it('should PUT /users/{user}/logout expect success', async () => {
         // request logout
-        const response = await server.put(`/users/${user}/logout`).send({ reason: 'Just because' }).expect(200);
+        const response = await server.put(`/users/${user}/logout?accessToken=${token}`).send({ reason: 'Just because' }).expect(200);
         expect(response.body.success).to.be.true;
     });
 
     it('should POST /users/{user}/quota/reset expect success', async () => {
-        const response = await server.post(`/users/${user}/quota/reset`).send({}).expect(200);
+        const response = await server.post(`/users/${user}/quota/reset?accessToken=${token}`).send({}).expect(200);
         expect(response.body.success).to.be.true;
 
         expect(response.body.storageUsed).to.exist;
@@ -834,7 +834,7 @@ describe('API Users', function () {
     });
 
     it('should POST /quota/reset expect success', async () => {
-        const response = await server.post(`/quota/reset`).send({}).expect(200);
+        const response = await server.post(`/quota/reset?accessToken=${token}`).send({}).expect(200);
         expect(response.body.success).to.be.true;
         expect(response.body.task).to.exist;
     });
@@ -844,13 +844,13 @@ describe('API Users', function () {
 
         if (isCryptoEmails) {
             // In crypto mode, password reset should return 400
-            const response = await server.post(`/users/${user}/password/reset`).send({}).expect(400);
+            const response = await server.post(`/users/${user}/password/reset?accessToken=${token}`).send({}).expect(400);
             expect(response.body.error).to.exist;
             expect(response.body.code).to.equal('PasswordResetNotAvailable');
             return;
         }
 
-        const response = await server.post(`/users/${user}/password/reset`).send({}).expect(200);
+        const response = await server.post(`/users/${user}/password/reset?accessToken=${token}`).send({}).expect(200);
         expect(response.body.success).to.be.true;
 
         expect(response.body.password).to.exist;
@@ -893,7 +893,7 @@ describe('API Users', function () {
         }
 
         const response = await server
-            .post(`/users/${user}/password/reset`)
+            .post(`/users/${user}/password/reset?accessToken=${token}`)
             .send({
                 validAfter: new Date(Date.now() + 1 * 3600 * 1000).toISOString()
             })
@@ -922,7 +922,7 @@ describe('API Users', function () {
             if (isCryptoEmails) {
                 // In crypto mode, password update should fail with 403
                 const passwordUpdateResponse = await server
-                    .put(`/users/${user}`)
+                    .put(`/users/${user}?accessToken=${token}`)
                     .send({
                         password: TEST_PASSWORDS.secretvalue,
                         ip: '1.2.3.5'
@@ -933,7 +933,7 @@ describe('API Users', function () {
             } else {
                 // In standard mode, password update should succeed
                 const passwordUpdateResponse = await server
-                    .put(`/users/${user}`)
+                    .put(`/users/${user}?accessToken=${token}`)
                     .send({
                         password: TEST_PASSWORDS.secretvalue,
                         ip: '1.2.3.5'
@@ -945,7 +945,7 @@ describe('API Users', function () {
 
             // Delete user
             const response = await server
-                .delete(`/users/${user}?deleteAfter=${encodeURIComponent(new Date(Date.now() + 3600 * 1000).toISOString())}`)
+                .delete(`/users/${user}?deleteAfter=${encodeURIComponent(new Date(Date.now() + 3600 * 1000).toISOString())}&accessToken=${token}`)
                 .expect(200);
             expect(response.body.success).to.be.true;
 
@@ -1001,7 +1001,7 @@ describe('API Users', function () {
     });
 
     it('should GET /users/{user}/restore expect success', async () => {
-        const response = await server.get(`/users/${user}/restore`).expect(200);
+        const response = await server.get(`/users/${user}/restore?accessToken=${token}`).expect(200);
         expect(response.body.success).to.be.true;
         expect(response.body.username).to.equal(TEST_USERS.myuser2);
         const expectedAddress = getTestEmail(TEST_USERS.myuser2);
@@ -1009,7 +1009,7 @@ describe('API Users', function () {
     });
 
     it('should POST /users/{user}/restore expect success', async () => {
-        const response = await server.post(`/users/${user}/restore`).send({}).expect(200);
+        const response = await server.post(`/users/${user}/restore?accessToken=${token}`).send({}).expect(200);
         expect(response.body.success).to.be.true;
         expect(response.body.addresses.recovered).to.gte(1);
         const expectedMainAddress = getTestEmail(TEST_USERS.myuser2);
