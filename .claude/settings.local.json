@@ -4,7 +4,12 @@
       "Bash(APPCONF_api_cryptoEmails=false NODE_ENV=test node server.js)",
       "Bash(node:*)",
       "Bash(NODE_ENV=test node test/drop-test-db.js)",
-      "Bash(redis-cli:*)"
+      "Bash(redis-cli:*)",
+      "Bash(git add:*)",
+      "Bash(npx eslint:*)",
+      "Read(//Users/johnhuang/0xmail/mail_box_indexer/**)",
+      "Bash(APPCONF_api_cryptoEmails=false NODE_ENV=test npm test)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []
