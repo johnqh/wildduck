@@ -9,7 +9,9 @@
       "Bash(npx eslint:*)",
       "Read(//Users/johnhuang/0xmail/mail_box_indexer/**)",
       "Bash(APPCONF_api_cryptoEmails=false NODE_ENV=test npm test)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(APPCONF_api_cryptoEmails=true NODE_ENV=test npm test)",
+      "Bash(lsof:*)"
     ],
     "deny": [],
     "ask": []
