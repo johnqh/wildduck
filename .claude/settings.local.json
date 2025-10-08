@@ -1,17 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(APPCONF_api_cryptoEmails=false NODE_ENV=test node server.js)",
-      "Bash(node:*)",
-      "Bash(NODE_ENV=test node test/drop-test-db.js)",
-      "Bash(redis-cli:*)",
-      "Bash(git add:*)",
-      "Bash(npx eslint:*)",
-      "Read(//Users/johnhuang/0xmail/mail_box_indexer/**)",
-      "Bash(APPCONF_api_cryptoEmails=false NODE_ENV=test npm test)",
-      "Bash(tee:*)",
-      "Bash(APPCONF_api_cryptoEmails=true NODE_ENV=test npm test)",
-      "Bash(lsof:*)"
+      "Bash(curl -s -X POST http://localhost:42069/authenticate -H \"Content-Type: application/json\" -d '{\n    \"\"\"\"username\"\"\"\": \"\"\"\"0xd1da25b1f4fd0eca200aaa63f12e884d461adaa7\"\"\"\",\n    \"\"\"\"signature\"\"\"\": \"\"\"\"N/ITncM+Bsf7Z3eO+iTfANHfq9B1fTYvJwIEXwscIc16n9ZyB0mUXkUheyjvcNDTLZFiHBmm8PdYXyR+97bI+Bw=\"\"\"\",\n    \"\"\"\"message\"\"\"\": \"\"\"\"0xmail.box wants you to sign in with your Ethereum account:\\n0xD1dA25B1F4Fd0ecA200AaA63f12E884D461aDaA7\\n\\nSign in with Ethereum to the app.\\n\\nURI: https://0xmail.box\\nVersion: 1\\nChain ID: 1\\nNonce: b4f61d3bd67a02ebcd1bc570cbfffd93\\nIssued At: 2025-10-07T20:00:29.897Z\"\"\"\",\n    \"\"\"\"signer\"\"\"\": \"\"\"\"0xD1dA25B1F4Fd0ecA200AaA63f12E884D461aDaA7\"\"\"\"\n}')",
+      "Bash(curl -s -X POST http://127.0.0.1:8080/authenticate -H \"Content-Type: application/json\" -d '{\n    \"\"\"\"username\"\"\"\": \"\"\"\"0xd1da25b1f4fd0eca200aaa63f12e884d461adaa7\"\"\"\",\n    \"\"\"\"signature\"\"\"\": \"\"\"\"N/ITncM+Bsf7Z3eO+iTfANHfq9B1fTYvJwIEXwscIc16n9ZyB0mUXkUheyjvcNDTLZFiHBmm8PdYXyR+97bI+Bw=\"\"\"\",\n    \"\"\"\"nonce\"\"\"\": \"\"\"\"1759867292932\"\"\"\",\n    \"\"\"\"message\"\"\"\": \"\"\"\"0xmail.box wants you to sign in with your Ethereum account:\\n0xD1dA25B1F4Fd0ecA200AaA63f12E884D461aDaA7\\n\\nSign in with Ethereum to the app.\\n\\nURI: https://0xmail.box\\nVersion: 1\\nChain ID: 1\\nNonce: b4f61d3bd67a02ebcd1bc570cbfffd93\\nIssued At: 2025-10-07T20:00:29.897Z\"\"\"\",\n    \"\"\"\"protocol\"\"\"\": \"\"\"\"HTTP\"\"\"\",\n    \"\"\"\"scope\"\"\"\": \"\"\"\"master\"\"\"\",\n    \"\"\"\"appId\"\"\"\": \"\"\"\"https://0xmail.box\"\"\"\",\n    \"\"\"\"token\"\"\"\": true,\n    \"\"\"\"sess\"\"\"\": \"\"\"\"api-session\"\"\"\",\n    \"\"\"\"ip\"\"\"\": \"\"\"\"127.0.0.1\"\"\"\",\n    \"\"\"\"signer\"\"\"\": \"\"\"\"0xD1dA25B1F4Fd0ecA200AaA63f12E884D461aDaA7\"\"\"\"\n}')",
+      "Bash(time curl:*)"
     ],
     "deny": [],
     "ask": []

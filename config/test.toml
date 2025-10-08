@@ -15,12 +15,12 @@ level = "silly"
 
 [dbs]
 # mongodb connection string for the main database
-mongo = "mongodb://127.0.0.1:27017/wildduck-test"
+mongo = "mongodb://wildduck:peNtiq-zikdan-7perge@50.118.250.186:27017/wildduck?authSource=wildduck"
 
 # redis connection string
 redis = "redis://127.0.0.1:6379/13"
 
-dbname = "wildduck-test"
+dbname = "wildduck"
 
 [imap]
 port = 9993
