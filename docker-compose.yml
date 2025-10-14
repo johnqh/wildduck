@@ -2,7 +2,12 @@ version: '3.7'
 services:
     wildduck:
         restart: always
-        image: nodemailer/wildduck
+        # Use local build:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        # Or use published image:
+        # image: sudobility/wildduck:latest
         ports:
             - '8080:8080'
             - '143:143'
