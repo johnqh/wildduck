@@ -6,6 +6,8 @@ emailDomain = "xexample.com"
 port = 8080
 host = "127.0.0.1"
 secure = false
+# Disable indexer for tests
+indexerBaseUrl = ""
 
 [accessControl]
 enabled = false
@@ -15,12 +17,12 @@ level = "silly"
 
 [dbs]
 # mongodb connection string for the main database
-mongo = "mongodb://wildduck:peNtiq-zikdan-7perge@50.118.250.186:27017/wildduck?authSource=wildduck"
+mongo = "mongodb://127.0.0.1:27017/wildduck-test"
 
 # redis connection string
 redis = "redis://127.0.0.1:6379/13"
 
-dbname = "wildduck"
+dbname = "wildduck-test"
 
 [imap]
 port = 9993
