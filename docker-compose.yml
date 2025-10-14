@@ -7,7 +7,7 @@ services:
             context: .
             dockerfile: Dockerfile
         # Or use published image:
-        # image: sudobility/wildduck:latest
+        # image: johnqh/wildduck:latest
         ports:
             - '8080:8080'
             - '143:143'
