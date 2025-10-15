@@ -107,7 +107,7 @@ jobs:
                   body: |
                       Release v${{needs.get_version.outputs.version}}
 
-                      Published to npm: https://www.npmjs.com/package/@sudobility/wildduck/v/${{needs.get_version.outputs.version}}
+                      Published to npm: https://www.npmjs.com/package/@johnqh/wildduck/v/${{needs.get_version.outputs.version}}
                   draft: false
                   prerelease: false
               env:

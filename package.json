@@ -1,5 +1,5 @@
 {
-    "name": "@sudobility/wildduck",
+    "name": "@johnqh/wildduck",
     "version": "7.0.0",
     "description": "IMAP/POP3 server built with Node.js and MongoDB",
     "main": "server.js",
@@ -120,7 +120,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/sudobility/wildduck.git"
+        "url": "https://github.com/johnqh/wildduck.git"
     },
     "engines": {
         "node": ">=16.0.0"
