@@ -3,12 +3,6 @@ port = 8080
 # by default bind to network
 host = "0.0.0.0"
 
-# Custom log level: "none", "console", or "file"
-# - "none": No logging
-# - "console": Log to console (default)
-# - "file": Log to file logs/log_yyyy_MM_dd.txt
-logLevel = "none"
-
 # Use `true` (HTTPS) for port 443 and `false` (HTTP) for 80
 secure = false
 

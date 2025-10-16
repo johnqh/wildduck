@@ -1,5 +1,5 @@
-# Email domain for auto-generated addresses in tests (removed for standard mode compatibility)
-
+# Email domain for auto-generated addresses in tests
+# Used by lib/user-handler.js when creating users without explicit domain
 emailDomain = "xexample.com"
 
 [api]
